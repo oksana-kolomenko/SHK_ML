@@ -1,20 +1,27 @@
 import numpy as np
-from new_file import load_labels, load_features, load_summaries, lg_reg, lg_reg_emb, lg_re_txt_emb, embedding_with_cls_token,embedding_with_cls_and_sep_tokens, embedding_without_cls_and_sep_tokens
+from new_file import (load_labels, load_features, load_summaries, lg_reg, lg_reg_emb,
+                      lg_re_txt_emb, embedding_with_cls_token, embedding_with_cls_and_sep_tokens,
+                      embedding_without_cls_and_sep_tokens, lg_reg_emb_new_pp, lg_reg_new_pp)
 from bar_plotting import plot_bar_chart
 
 
 def run_all_models():
-    #X = load_features()
+    X = load_features()
     y = load_labels()
     patient_summaries = load_summaries()
-    emb_with_cls_token = embedding_with_cls_token(patient_summaries)
+    #emb_with_cls_token = embedding_with_cls_token(patient_summaries)
     #emb_with_cls_and_sep_tokens = embedding_with_cls_and_sep_tokens(patient_summaries)
     #emb_without_cls_and_sep_tokens = embedding_without_cls_and_sep_tokens(patient_summaries)
 
-    #lr_model_train_score, lr_model_test_scores = lg_reg(X=X, y=y)
-    #rt_model_train_score, rt_model_test_scores = lg_reg_emb(X=X, y=y)
+    #lr_model_train_score, lr_model_test_scores =
+    lg_reg(X=X, y=y)
+    lg_reg_new_pp(X=X, y=y)
+    # rt_model_train_score, rt_model_test_scores = (
+    # lg_reg_emb_new_pp(X=X, y=y)
+    # lg_reg_emb(X=X, y=y)
+
     #lr_txt_model_train_score_1, lr_txt_model_test_scores_1 =
-    lg_re_txt_emb(embeddings=emb_with_cls_token, y=y)
+    #lg_re_txt_emb(embeddings=emb_with_cls_token, y=y)
     #lr_txt_model_train_score_2, lr_txt_model_test_scores_2 = lg_re_txt_emb(embeddings=emb_with_cls_and_sep_tokens, y=y)
     #lr_txt_model_train_score_3, lr_txt_model_test_scores_3 = lg_re_txt_emb(embeddings=emb_without_cls_and_sep_tokens, y=y)
 

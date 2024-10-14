@@ -1,6 +1,18 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+from csv_parser import patient_summaries
+
+
+def create_summaries():
+    file_path = 'Summaries.txt'
+
+    # Open the file in write mode (this will create the file if it does not exist)
+    with open(file_path, 'w') as file:
+        for s in patient_summaries():
+            file.write(s + "\n")
+
+
 def plot_bar_chart(labels, train_scores, test_means, test_stds, title='Scores by Model and Dataset', ylabel='Scores'):
     """
     Plots a bar chart comparing train scores and test scores with error bars.

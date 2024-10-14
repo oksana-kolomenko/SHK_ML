@@ -1,11 +1,14 @@
 import torch
-from sklearn.impute import KNNImputer
-from sklearn.preprocessing import MinMaxScaler
-from transformers import AutoTokenizer, AutoModel, pipeline  # AutoModelForMaskedLM
-from sklearn.model_selection import train_test_split, StratifiedKFold
+from sklearn.compose import ColumnTransformer
+from sklearn.impute import KNNImputer, SimpleImputer
+from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
+from sklearn.experimental import enable_iterative_imputer
+from sklearn.impute import IterativeImputer
+from transformers import AutoTokenizer, AutoModel, pipeline, AutoModelForMaskedLM
+from sklearn.model_selection import train_test_split, StratifiedKFold, GridSearchCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomTreesEmbedding
-from sklearn.pipeline import make_pipeline
+from sklearn.pipeline import make_pipeline, Pipeline
 import numpy as np
 import pandas as pd
 from sklearn.metrics import roc_auc_score
@@ -30,12 +33,13 @@ def load_features(file_path = "X.csv", delimiter=','):
 def load_summaries():
     with open("Summaries.txt", "r") as file:
         summaries_list = [line.strip() for line in file.readlines()]
+    print(f"Summaries length: {len(summaries_list)}")
     return summaries_list
 
 
 # Create embeddings for the text-summaries
 def embedding_with_cls_token(patient_summaries):
-    embeddings = feature_extractor(patient_summaries)
+    embeddings = feature_extractor(patient_summaries) # erster Wert zu groß
     #for summary in patient_summaries:
     #    embeddings.append(feature_extractor(summary))
 
@@ -44,21 +48,18 @@ def embedding_with_cls_token(patient_summaries):
 
 
 def embedding_with_cls_and_sep_tokens(patient_summaries):
-    embeddings = []
-    for summary in patient_summaries:
-        embeddings.append(feature_extractor(summary))
+    embeddings = feature_extractor(patient_summaries)
 
     embedding_mean_with_cls_and_sep_tokens = np.mean(embeddings[0][:], axis=0)
     return embedding_mean_with_cls_and_sep_tokens
 
 
 def embedding_without_cls_and_sep_tokens(patient_summaries):
-    embeddings = []
-    for summary in patient_summaries:
-        embeddings.append(feature_extractor(summary))
+    embeddings = feature_extractor(patient_summaries)
 
     embedding_mean_without_cls_and_sep_tokens = np.mean(embeddings[0][1:-1], axis=0)
     return embedding_mean_without_cls_and_sep_tokens
+
 
 """    model.eval()
     embeddings = []
@@ -74,7 +75,7 @@ def embedding_without_cls_and_sep_tokens(patient_summaries):
             embeddings.append(embedding.cpu().numpy())
     return np.array(embeddings)"""
 
-# Load labels
+
 def load_labels(file_path = "y.csv", delimiter=','):
     data = pd.read_csv(file_path, delimiter=delimiter)
     return np.array(data.values.ravel())
@@ -137,6 +138,74 @@ def lg_reg(X, y, n_splits=3):
     return lr_model_train_score, lr_model_test_scores
 
 
+def lg_reg_new_pp(X, y, n_splits=3):
+    X = pd.DataFrame(X)
+
+    nominal_columns = X.select_dtypes(include=['object', 'category']).columns
+    numerical_columns = X.select_dtypes(include=[np.number]).columns
+
+    # n_splits kleiner -> größere AUC?
+    skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
+    skf.get_n_splits(X, y)
+    print(skf)
+
+    lr_model_test_scores = []
+
+    for train_index, test_index in skf.split(X, y):
+        # split data
+        X_train, X_test = X.iloc[train_index], X.iloc[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+
+        # No Embedding
+        lr_model = GridSearchCV(
+            Pipeline([
+                ("transformer", ColumnTransformer([
+                    ("nominal", Pipeline([
+                        ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
+                        ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
+                    ]), nominal_columns),
+                    ("numerical", Pipeline([
+                        ("numerical_imputer", IterativeImputer(max_iter=30)),
+                        ("numerical_scaler", MinMaxScaler())
+                    ]), numerical_columns),
+                ])),
+                ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=10000)),
+            ]),
+            {"classifier__C": [2, 10, 50, 250]},
+            scoring="neg_log_loss",
+            cv=3)
+        lr_model.fit(X_train, y_train)
+
+        lr_model_test_scores.append(roc_auc_score(y_test, lr_model.predict_proba(X_test)[:, 1]))
+
+    lr_model = GridSearchCV(
+            Pipeline([
+                ("transformer", ColumnTransformer([
+                    ("nominal", Pipeline([
+                        ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
+                        ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
+                    ]), nominal_columns),
+                    ("numerical", Pipeline([
+                        ("numerical_imputer", IterativeImputer(max_iter=30)),
+                        ("numerical_scaler", MinMaxScaler())
+                    ]), numerical_columns),
+                ])),
+                ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=10000)),
+            ]),
+            {"classifier__C": [2, 10, 50, 250]},
+            scoring="neg_log_loss",
+            cv=3)
+    lr_model.fit(X, y)
+
+    # Get results
+    lr_model_train_score = roc_auc_score(y, lr_model.predict_proba(X)[:, 1])
+
+    print(f"LR_model_new_pp train Scores: {lr_model_train_score}")
+    print(f"LR_model_new_pp test Scores: {lr_model_test_scores}")
+
+    return lr_model_train_score, lr_model_test_scores
+
+
 """
 2. Logistische Regression mit RandomTree-Embedding (OHNE TEXT)
 """
@@ -165,10 +234,13 @@ def lg_reg_emb(X, y, n_splits=3, n_estimators=10, max_depth=3):
         X_train = scaler.fit_transform(X_train)
         X_test = scaler.transform(X_test)
 
+
         # Embedding
         random_tree_embedding = RandomTreesEmbedding(
             n_estimators=n_estimators, random_state=42, max_depth=max_depth)  # FIND USEFULL PARAMS
+
         rt_model = make_pipeline(random_tree_embedding, LogisticRegression(max_iter=1000))
+
         rt_model.fit(X_train, y_train)
 
         rt_model_test_scores.append(roc_auc_score(y_test, rt_model.predict_proba(X_test)[:, 1]))
@@ -190,6 +262,79 @@ def lg_reg_emb(X, y, n_splits=3, n_estimators=10, max_depth=3):
 
     return rt_model_train_score, rt_model_test_scores
 
+
+def lg_reg_emb_new_pp(X, y, n_splits=3, n_estimators=10, max_depth=3):
+    X = pd.DataFrame(X)
+
+    nominal_columns = X.select_dtypes(include=['object', 'category']).columns
+    numerical_columns = X.select_dtypes(include=[np.number]).columns
+
+    # n_splits kleiner -> größere AUC?
+    skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
+    skf.get_n_splits(X, y)
+    print(skf)
+
+    rt_model_test_scores = []
+
+    for train_index, test_index in skf.split(X, y):
+        X_train, X_test = X.iloc[train_index], X.iloc[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+
+        rt_model = GridSearchCV(
+            Pipeline([
+                ("transformer", ColumnTransformer([
+                    ("nominal", Pipeline([
+                        ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
+                        ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
+                    ]), nominal_columns),
+                    ("numerical", Pipeline([
+                        ("numerical_imputer", IterativeImputer(max_iter=30)),
+                        ("numerical_scaler", MinMaxScaler())
+                    ]), numerical_columns),
+                ])),
+                ("embedding", RandomTreesEmbedding(n_estimators=n_estimators, random_state=42, max_depth=max_depth)),
+                ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=10000)),
+            ]),
+            {"classifier__C": [2, 10, 50, 250]},
+            scoring="neg_log_loss",
+            cv=3)
+
+        rt_model.fit(X_train, y_train)
+
+        rt_model_test_scores.append(roc_auc_score(y_test, rt_model.predict_proba(X_test)[:, 1]))
+
+    imputer = KNNImputer()
+    X = imputer.fit_transform(X)
+    scaler = MinMaxScaler()
+    X = scaler.fit_transform(X)
+
+    rt_model = GridSearchCV(
+        Pipeline([
+            ("transformer", ColumnTransformer([
+                ("nominal", Pipeline([
+                    ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
+                    ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
+                ]), nominal_columns),
+                ("numerical", Pipeline([
+                    ("numerical_imputer", IterativeImputer(max_iter=30)),
+                    ("numerical_scaler", MinMaxScaler())
+                ]), numerical_columns),
+            ])),
+            ("embedding", RandomTreesEmbedding(n_estimators=n_estimators, random_state=42, max_depth=max_depth)),
+            ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=10000)),
+        ]),
+        {"classifier__C": [2, 10, 50, 250]},
+        scoring="neg_log_loss",
+        cv=3)
+
+    rt_model.fit(X, y)
+
+    rt_model_train_score = roc_auc_score(y, rt_model.predict_proba(X)[:, 1])
+
+    print(f"RT_model_new_pp train Scores: {rt_model_train_score}")
+    print(f"RT_model_new_pp test Scores: {rt_model_test_scores}")
+
+    return rt_model_train_score, rt_model_test_scores
 
 """
 3. Logistische Regression mit ClinicalLongformer-Embedding (MIT TEXT)

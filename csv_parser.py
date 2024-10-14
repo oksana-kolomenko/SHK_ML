@@ -25,7 +25,7 @@ def patient_summaries():
     for _, row in df.iterrows():
         patient_number += 1
         patient_info_n_values = row.to_dict()
-        summary = (f"The following is the data for this patient: " +  # patient number {patient_number}." +
+        summary = (f"The following is the data for patient number {patient_number}." +
                    patient_info(patient_info_n_values))
         summaries.append(summary)
     # print(len(summaries))
