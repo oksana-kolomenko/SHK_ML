@@ -5,7 +5,6 @@ from bar_plotting import plot_bar_chart
 
 
 def run_all_models():
-
     # load features and labels
     X = load_features()
     y = load_labels()
