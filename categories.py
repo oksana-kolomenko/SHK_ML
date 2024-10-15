@@ -20,17 +20,9 @@ class GenderBirth(Enum):
 
 
 class Ethnicity(Enum):
-    """
     NON_WHITE = ("non-white", 0)
     WHITE = ("white", 1)
-    # or
-    """
-    WHITE_ = ("white", 1)
-    ASIAN = ("Asian or Asian British", 2)
-    BLACK_ = ("black or black British", 3)
-    CHINESE = ("Chinese", 4)
-    OTHER = ("other ethnic group", 5)
-    NULL = ("", 6)
+    NULL = ("", 2)
 
     def __init__(self, name, value):
         self._name = name
@@ -85,8 +77,8 @@ class Education(Enum):
 
 class Smoker(Enum):
     NON_SMOKER = ("non-smoker", 0)
-    SMOKER = ("smoker", 1)
-    EX_SMOKER = ("ex-smoker", 2)
+    EX_SMOKER = ("ex-smoker", 1)
+    SMOKER = ("smoker", 2)
 
     def __init__(self, name, value):
         self._name = name

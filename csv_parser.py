@@ -1,19 +1,19 @@
-import os
 import pandas as pd
 
-from categories import GenderBirth, Education, Ethnicity, EmploymentStatus, Smoker, InjurySeverityScoreCategory, \
-    PenetratingInjury
-from values import values_and_translations, patient_info_categories, categories, numerical_values, Classification
+from categories import GenderBirth, Education, Ethnicity, EmploymentStatus, Smoker, \
+    InjurySeverityScoreCategory, PenetratingInjury
+from values import values_and_translations, patient_info_categories, categories, numerical_values, \
+    Classification
+
 
 # Get the current working directory
 # current_directory = os.getcwd()
 # upper_dir = os.path.dirname(os.getcwd())
-file_path = 'X.csv'
 # file_path = os.path.join(os.path.dirname(os.getcwd()), 'X.csv')
 # print(file_path)
+file_path = 'X.csv'
 
 
-# file = 'X.csv'
 tab_data = pd.read_csv(file_path)
 values_and_translations_dict = dict(values_and_translations)
 
@@ -25,18 +25,14 @@ def patient_summaries():
     for _, row in df.iterrows():
         patient_number += 1
         patient_info_n_values = row.to_dict()
-        summary = (f"The following is the data for this patient: " +  # patient number {patient_number}." +
+        summary = (f"The following is the data for patient number {patient_number}." +
                    patient_info(patient_info_n_values))
         summaries.append(summary)
-    # print(len(summaries))
     return summaries
 
 
 def patient_info(patient_info_n_values):
     patient_info_row = dict(patient_info_n_values)
-
-    # print(f"Pat. info row  {patient_info_n_values}")
-
     patient_info_text = ""
 
     for patient_info_category, category_values in patient_info_categories.items():
@@ -49,33 +45,23 @@ def patient_info(patient_info_n_values):
                 cat_value, "Dieser Eigenschaft wurde im Code noch keine Kategorie zugewiesen.")
 
             value = patient_info_row.get(cat_value, "Not provided")
-            # print(f"\nCategory & Value: {cat_value} & {value}")
-            # print(cat_value)
             if value == "Not provided" or value is None or value == "":
-                # print(f"No value in the table found. Value: {value}")
                 continue
 
             translated_value = ""
 
             if cat_value in categories:
-                # print("Is category")
                 if isinstance(value, (int, float)) and not pd.isna(value):
                     translated_value = category_to_word(value=value, category_name=cat_value)
                 else:
-                    # print("Invalid category value")
                     translated_value = ""
-
             elif cat_value in numerical_values:
-                # print("Is number")
                 if isinstance(value, (int, float)) and not pd.isna(value):
                     average = calculate_average(tab_data, cat_value)
                     std_dev = calculate_standard_deviation(tab_data, cat_value)
                     translated_value = number_to_word(value=value, average=average, std_deviation=std_dev)
                 else:
-                    # print("Invalid numerical value")
                     translated_value = ""
-
-            # print(f"\nCategory & TValue: {cat_value} & {translated_value}")
 
             if translated_value != "":
                 category_text.append(f"{translation} is {translated_value}")
@@ -83,6 +69,7 @@ def patient_info(patient_info_n_values):
         if category_text:
             patient_info_text += feature_category_title
             patient_info_text += "; ".join(category_text) + "; "
+    
     """
         for index, row in tab_data.iterrows():
         structured_text += f"{row['Parameter']} of {row['Value']} "
@@ -166,3 +153,7 @@ def category_to_word(category_name, value):
                 return item.name
     # This should never happen
     return "Category not found"
+
+
+with open('Summaries.txt', 'w') as file:
+    file.write("\n".join(patient_summaries()))

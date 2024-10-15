@@ -1,4 +1,8 @@
+__pycache__/
+.idea/
+
 X.csv
 y.csv
 Summaries.txt
-X_excel.xsl
+X_excel.xls
+X_excel.xlsx
