@@ -1,7 +1,7 @@
 import numpy as np
-from helpers import load_labels, load_features, load_summaries, lg_reg, lg_reg_rt_emb, lg_reg_txt_emb, \
-    embedding_cls, embedding_mean_with_cls_and_sep, embedding_mean_without_cls_and_sep, lg_reg_hgbc, \
-    lg_reg_hgbc_txt_emb, lr_agg_txt_emb, lr_agg_hgbc_txt_emb
+from helpers import load_labels, load_features, load_summaries, lg_reg, lr_ran_tree_emb, lr_txt_emb, \
+    embedding_cls, embedding_mean_with_cls_and_sep, embedding_mean_without_cls_and_sep, lr_hgbc, \
+    hgbc_txt_emb, lr_agg_txt_emb, lr_agg_hgbc_txt_emb
 from bar_plotting import plot_bar_chart
 
 
@@ -29,37 +29,37 @@ def run_all_models():
 
     # no embedding + hgbc
     lg_reg_hgbc_train_score, lg_reg_hgbc_test_scores = \
-        lg_reg_hgbc(X=X, y=y, nominal_features=nominal_features)
+        lr_hgbc(X=X, y=y, nominal_features=nominal_features)
 
     # random trees embedding
     lg_reg_rt_emb_train_score, lg_reg_rt_emb_test_scores = \
-        lg_reg_rt_emb(X=X, y=y, nominal_features=nominal_features)
+        lr_ran_tree_emb(X=X, y=y, nominal_features=nominal_features)
 
     # random trees embedding + hgbc
     lg_reg_hgbc_rt_emb_train_score, lg_reg_hgbc_rt_emb_test_scores = \
-        lg_reg_rt_emb(X=X, y=y, nominal_features=nominal_features)
+        lr_ran_tree_emb(X=X, y=y, nominal_features=nominal_features)
 
     # embedding based on [CLS] token
     lg_reg_emb_cls_train_score, lg_reg_emb_cls_test_scores = \
-        lg_reg_txt_emb(embeddings=embedding_cls(patient_summaries), y=y)
+        lr_txt_emb(embeddings=embedding_cls(patient_summaries), y=y)
     # mean embedding including [CLS] and [SEP] tokens
     lg_reg_emb_mean_with_cls_and_sep_train_score, lg_reg_emb_mean_with_cls_and_sep_test_scores = \
-        lg_reg_txt_emb(embeddings=embedding_mean_with_cls_and_sep(patient_summaries), y=y)
+        lr_txt_emb(embeddings=embedding_mean_with_cls_and_sep(patient_summaries), y=y)
     # mean embedding excluding [CLS] and [SEP] tokens
     lg_reg_emb_mean_without_cls_and_sep_train_score, lg_reg_emb_mean_without_cls_and_sep_test_scores = \
-        lg_reg_txt_emb(embeddings=embedding_mean_without_cls_and_sep(patient_summaries), y=y)
+        lr_txt_emb(embeddings=embedding_mean_without_cls_and_sep(patient_summaries), y=y)
 
     # embedding based on [CLS] token + hgbc
     lg_reg_emb_hgbc_cls_train_score, lg_reg_emb_hgbc_cls_test_scores = \
-        lg_reg_hgbc_txt_emb(embeddings=embedding_cls(patient_summaries), nominal_features=nominal_features, y=y)
+        hgbc_txt_emb(embeddings=embedding_cls(patient_summaries), nominal_features=nominal_features, y=y)
     # mean embedding including [CLS] and [SEP] tokens
     lg_reg_emb_hgbc_mean_with_cls_and_sep_train_score, lg_reg_emb_hgbc_mean_with_cls_and_sep_test_scores = \
-        lg_reg_hgbc_txt_emb(embeddings=embedding_mean_with_cls_and_sep(patient_summaries),
-                            nominal_features=nominal_features, y=y)
+        hgbc_txt_emb(embeddings=embedding_mean_with_cls_and_sep(patient_summaries),
+                     nominal_features=nominal_features, y=y)
     # mean embedding excluding [CLS] and [SEP] tokens
     lg_reg_emb_hgbc_mean_without_cls_and_sep_train_score, lg_reg_emb_hgbc_mean_without_cls_and_sep_test_scores = \
-        lg_reg_hgbc_txt_emb(embeddings=embedding_mean_without_cls_and_sep(patient_summaries),
-                            nominal_features=nominal_features, y=y)
+        hgbc_txt_emb(embeddings=embedding_mean_without_cls_and_sep(patient_summaries),
+                     nominal_features=nominal_features, y=y)
 
     # embedding based on [CLS] token + aggregation
     lr_txt_emb_agg_cls_train_score, lr_txt_emb_agg_cls_test_scores = \
