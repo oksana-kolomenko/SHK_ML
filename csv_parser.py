@@ -18,7 +18,7 @@ tab_data = pd.read_csv(file_path)
 values_and_translations_dict = dict(values_and_translations)
 
 
-def patient_summaries():
+def create_patient_summaries():
     df = tab_data
     summaries = []  # "We want to predict health risks. "
     patient_number = 0
@@ -156,4 +156,4 @@ def category_to_word(category_name, value):
 
 
 with open('Summaries.txt', 'w') as file:
-    file.write("\n".join(patient_summaries()))
+    file.write("\n".join(create_patient_summaries()))

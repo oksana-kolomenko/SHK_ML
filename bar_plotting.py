@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def plot_bar_chart(labels, train_scores, test_score_medians, test_score_mins, test_score_maxs,
+def plot_bar_chart(filename, labels, train_scores, test_score_medians, test_score_mins, test_score_maxs,
                    ylabel='AUC'):
     """
     Saves a bar chart comparing train scores and test scores with error bars.
@@ -46,4 +46,4 @@ def plot_bar_chart(labels, train_scores, test_score_medians, test_score_mins, te
     autolabel(rects2)
 
     fig.tight_layout()
-    plt.savefig("bar_chart.pdf")
+    plt.savefig(f"{filename}.pdf")
