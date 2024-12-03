@@ -12,7 +12,7 @@ def create_feature_extractor(model_name):
 
 # Clinical Longformer
 feature_extractor_clinical = create_feature_extractor("yikuan8/Clinical-Longformer")
-
+"""
 # BERT
 feature_extractor_bert = create_feature_extractor("google-bert/bert-base-cased")
 
@@ -102,3 +102,4 @@ feature_extractor_gte_large_en_v1_5 = create_feature_extractor("gte-large-en-v1.
 
 # stella_en_400M_v5 (SotA)
 feature_extractor_stella_en_400M_v5 = create_feature_extractor("stella_en_400M_v5")
+"""
