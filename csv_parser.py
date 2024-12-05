@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pandas as pd
 
 from categories import GenderBirth, Education, Ethnicity, EmploymentStatus, Smoker, \
@@ -28,7 +30,16 @@ def create_patient_summaries():
         summary = (f"The following is the data for patient number {patient_number}." +
                    patient_info(patient_info_n_values))
         summaries.append(summary)
-    return summaries
+    # Write summaries to a file
+    summaries_file_path = Path("../Summaries.txt")  # Path for file output
+
+    try:
+        with open(summaries_file_path, "w") as file:
+            for summary in summaries:
+                file.write(summary + "\n")
+        print(f"Summaries successfully written to {summaries_file_path}")
+    except IOError as e:
+        print(f"Error writing to the file {summaries_file_path}: {e}")
 
 
 def patient_info(patient_info_n_values):

@@ -21,23 +21,23 @@ from text_emb_aggregator import EmbeddingAggregator
 
 
 # Load features
-def load_features(file_path="X.csv", delimiter=','):
+def load_features(file_path="../X.csv", delimiter=','):
     data = pd.read_csv(file_path, delimiter=delimiter)
     print(f"features: {data}")
     return data
 
 
 # Load labels
-def load_labels(file_path="y.csv", delimiter=','):
+def load_labels(file_path="../y.csv", delimiter=','):
     data = pd.read_csv(file_path, delimiter=delimiter)
     return np.array(data.values.ravel())
 
 
 # Load features as text summaries (create if doesn't exist)
 def load_summaries():
-    if not os.path.exists("Summaries.txt"):
-        return create_patient_summaries()
-    with open("Summaries.txt", "r") as file:
+    if not os.path.exists("../Summaries.txt"):
+        create_patient_summaries()
+    with open("../Summaries.txt", "r") as file:
         summaries_list = [line.strip() for line in file.readlines()]
     return summaries_list
 
