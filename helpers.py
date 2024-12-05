@@ -307,7 +307,7 @@ def hgbc_ran_tree_emb(X, y, nominal_features, n_splits=3):  # todo
                     ]), list(set(X_train.columns.values) - set(nominal_features))),
                 ])),
                 ("embedding", RandomTreesEmbedding()),
-                ("hist_gb", HistGradientBoostingClassifier(categorical_features=nominal_features))
+                ("hist_gb", HistGradientBoostingClassifier())
             ]),
             param_grid={
                 # extended hyperparameter search for better embedding
@@ -339,7 +339,7 @@ def hgbc_ran_tree_emb(X, y, nominal_features, n_splits=3):  # todo
                 ]), list(set(X_train.columns.values) - set(nominal_features))),
             ])),
             ("embedding", RandomTreesEmbedding()),
-            ("hist_gb", HistGradientBoostingClassifier(categorical_features=nominal_features))
+            ("hist_gb", HistGradientBoostingClassifier())
         ]),
         param_grid={
             # extended hyperparameter search for better embedding
@@ -382,7 +382,7 @@ def hgbc_txt_emb(feature_extractor, summaries, nominal_features, y, n_splits=3):
             estimator=Pipeline([
                 ("aggregator", EmbeddingAggregator(feature_extractor)),
                 ("numerical_scaler", MinMaxScaler()),
-                ("hist_gb", HistGradientBoostingClassifier(categorical_features=nominal_features)),
+                ("hist_gb", HistGradientBoostingClassifier()),
             ]),
             param_grid={
                 "hist_gb__min_samples_leaf": [5, 10, 15, 20],
@@ -405,7 +405,7 @@ def hgbc_txt_emb(feature_extractor, summaries, nominal_features, y, n_splits=3):
             # todo: 1) mit der transf. Funktion versuchen,
             # todo: 2) test if numerical value comes out
             ("numerical_scaler", MinMaxScaler()),
-            ("hist_gb", HistGradientBoostingClassifier(categorical_features=nominal_features)),
+            ("hist_gb", HistGradientBoostingClassifier()),
 
         ]),
         param_grid={
