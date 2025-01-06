@@ -11,17 +11,21 @@ def create_feature_extractor(model_name):
     # tokens = to
     model = AutoModel.from_pretrained(model_name)
     # kann sein, dass man die Pipeline gar nicht benutzen kann. Dann Embeddings anders erstellen
-    return pipeline("feature-extraction", model=model, tokenizer=tokenizer)
+    return pipeline("feature-extraction", model=model, tokenizer=tokenizer, device=0)
 
 
 def create_gte_feature_extractor(model_name):
     """
     Creates a feature extractor for a given model,
-    Compatible with: some GTE(Alibaba), tbc
+    Compatible with: some GTE (Alibaba), tbc.
     """
     # Load tokenizer and model
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModel.from_pretrained(model_name, trust_remote_code=True)
+
+    # Move model to GPU if available
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = model.to(device)
 
     def extract_features(texts):
         """
@@ -32,7 +36,16 @@ def create_gte_feature_extractor(model_name):
             Each list has shape (seq_length, hidden_dim).
         """
         # Tokenize input texts
-        batch_dict = tokenizer(texts, max_length=8192, padding=True, truncation=True, return_tensors="pt")
+        batch_dict = tokenizer(
+            texts,
+            max_length=8192,
+            padding=True,
+            truncation=True,
+            return_tensors="pt"
+        )
+
+        # Move input tensors to the same device as the model
+        batch_dict = {key: val.to(device) for key, val in batch_dict.items()}
 
         # Compute embeddings
         with torch.no_grad():
@@ -40,18 +53,19 @@ def create_gte_feature_extractor(model_name):
 
         # The format of create_feature_extractor expects the embeddings as a list of lists,
         # where each list is the sequence of token embeddings for a single input text.
-        # return embeddings for each text as a list of token embeddings
-        return outputs.last_hidden_state.detach().cpu().numpy().tolist()
+        # Return embeddings for each text as a list of token embeddings
+        return outputs.last_hidden_state.cpu().numpy().tolist()
 
     return extract_features
 
 
-"""
+
+
 # Clinical Longformer
-feature_extractor_clinical = create_feature_extractor("yikuan8/Clinical-Longformer")
+#feature_extractor_clinical = create_feature_extractor("yikuan8/Clinical-Longformer")
 
 # BERT
-feature_extractor_bert = create_feature_extractor("google-bert/bert-base-cased")
+# feature_extractor_bert = create_feature_extractor("google-bert/bert-base-cased")
 
 # ELECTRA small discriminator
 feature_extractor_electra_small = create_feature_extractor("google/electra-small-discriminator")
@@ -62,7 +76,7 @@ feature_extractor_electra_base = create_feature_extractor("google/electra-base-d
 # ELECTRA large discriminator
 feature_extractor_electra_large = create_feature_extractor("google/electra-large-discriminator")
 
-# SimSCE sup
+"""# SimSCE sup
 feature_extractor_simsce_sup = create_feature_extractor("princeton-nlp/sup-simcse-bert-base-uncased")
 
 # SimSCE unsup
@@ -76,8 +90,8 @@ feature_extractor_e5_small_v2 = create_feature_extractor("intfloat/e5-small-v2")
 feature_extractor_e5_base_v2 = create_feature_extractor("intfloat/e5-base-v2")
 
 # E5-LARGE-V2
-feature_extractor_e5_large_v2 = create_feature_extractor("intfloat/e5-large-v2")
-"""
+feature_extractor_e5_large_v2 = create_feature_extractor("intfloat/e5-large-v2")"""
+
 
 #############
 #### BGE ####

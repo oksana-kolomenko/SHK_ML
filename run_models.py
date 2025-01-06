@@ -3,7 +3,9 @@ from helpers import (load_labels, load_features, load_summaries, logistic_regres
                      lr_ran_tree_emb, lr_txt_emb, hgbc, hgbc_txt_emb)
 from bar_plotting import plot_bar_chart
 from models import feature_extractor_gte_small, feature_extractor_gte_base, feature_extractor_gte_large, \
-    feature_extractor_gte_base_en_v1_5, feature_extractor_gte_large_en_v1_5
+    feature_extractor_gte_base_en_v1_5, feature_extractor_gte_large_en_v1_5, feature_extractor_bert, \
+    feature_extractor_electra_small, feature_extractor_electra_large, feature_extractor_electra_base
+
 
 # from models import feature_extractor_clinical
 
@@ -27,13 +29,13 @@ def run_all_models():
         # Clinical Longformer (done)
         # "Clinical-Longformer": feature_extractor_clinical,
 
-        # BERT (done)
+        # BERT (half done)
         # "BERT": feature_extractor_bert,
 
-        # ELECTRA (done)
-        # "ELECTRA-Small": feature_extractor_electra_small,
-        # "ELECTRA-Base": feature_extractor_electra_base,
-        # "ELECTRA-Large": feature_extractor_electra_large,
+        # ELECTRA (half done)
+        "ELECTRA-Small": feature_extractor_electra_small,
+        "ELECTRA-Base": feature_extractor_electra_base,
+        "ELECTRA-Large": feature_extractor_electra_large,
 
         # SimSCE (done)
         # "SimSCE-Sup": feature_extractor_simsce_sup,
@@ -67,9 +69,9 @@ def run_all_models():
         # GTE Models
         # "GTE-Small": feature_extractor_gte_small,  # (done)
         # "GTE-Base": feature_extractor_gte_base,  # (done)
-        "GTE-Base-EN-v1.5": feature_extractor_gte_base_en_v1_5, #(ready)
-       # "GTE-Large": feature_extractor_gte_large,  # (done)
-        "GTE-Large-EN-v1.5": feature_extractor_gte_large_en_v1_5, # (ready)
+        # "GTE-Base-EN-v1.5": feature_extractor_gte_base_en_v1_5, #(ready)
+        # "GTE-Large": feature_extractor_gte_large,  # (done)
+        # "GTE-Large-EN-v1.5": feature_extractor_gte_large_en_v1_5, # (ready)
 
         # Stella Model
         # "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5 # (not ready)
@@ -145,7 +147,7 @@ def run_all_models():
     test_score_maxs = np.array(test_score_maxs)
 
     plot_bar_chart(
-        filename="gte_alibaba",
+        filename="electra_new",
         labels=labels,
         train_scores=train_scores,
         test_score_medians=test_score_medians,
