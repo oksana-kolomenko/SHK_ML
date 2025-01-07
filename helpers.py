@@ -14,9 +14,6 @@ from sklearn.preprocessing import OneHotEncoder, MinMaxScaler, OrdinalEncoder
 from sklearn.base import TransformerMixin, BaseEstimator
 
 from csv_parser import create_patient_summaries
-
-from transformers import AutoTokenizer, AutoModel, pipeline
-
 from text_emb_aggregator import EmbeddingAggregator
 
 
