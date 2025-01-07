@@ -2,9 +2,7 @@ import numpy as np
 from helpers import (load_labels, load_features, load_summaries, logistic_regression,
                      lr_ran_tree_emb, lr_txt_emb, hgbc, hgbc_txt_emb)
 from bar_plotting import plot_bar_chart
-from models import feature_extractor_gte_small, feature_extractor_gte_base, feature_extractor_gte_large, \
-    feature_extractor_gte_base_en_v1_5, feature_extractor_gte_large_en_v1_5, feature_extractor_bert, \
-    feature_extractor_electra_small, feature_extractor_electra_large, feature_extractor_electra_base
+from models import feature_extractor_electra_small, feature_extractor_electra_large, feature_extractor_electra_base
 
 
 # from models import feature_extractor_clinical
