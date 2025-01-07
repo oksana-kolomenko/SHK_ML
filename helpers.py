@@ -396,10 +396,8 @@ def hgbc_txt_emb(feature_extractor, summaries, y, n_splits=3):
     )
 
     hgbc_txt_emb_train_score = roc_auc_score(y, search.predict_proba(np.array(summaries))[:, 1])
-    # Retrieve the 'aggregator' step from the pipeline
     aggregator = search.best_estimator_.named_steps['aggregator']
 
-    # Safely attempt to retrieve information about the aggregator
     try:
         # Print the selected method
         print(f"best aggregator method: {search.best_params_['aggregator__method']}")
@@ -419,7 +417,7 @@ def hgbc_txt_emb(feature_extractor, summaries, y, n_splits=3):
     return hgbc_txt_emb_train_score, hgbc_txt_emb_test_scores
 
 
-def lr_combine_tab_and_emb(X_tabular, summaries, feature_extractor, nominal_features, y, n_splits=3):
+def combine_lr_tab_emb(X_tabular, summaries, feature_extractor, nominal_features, y, n_splits=3):
     combined_test_scores = []
     skf = StratifiedKFold(n_splits=n_splits)
 
@@ -441,7 +439,7 @@ def lr_combine_tab_and_emb(X_tabular, summaries, feature_extractor, nominal_feat
             # Verarbeitung der Embeddings
             ("embeddings", Pipeline([
                 ("aggregator", EmbeddingAggregator(feature_extractor)),
-                ("scaler", MinMaxScaler())
+                ("numerical_scaler", MinMaxScaler())
             ]), summaries)
         ])),
         ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=10000))
@@ -449,7 +447,7 @@ def lr_combine_tab_and_emb(X_tabular, summaries, feature_extractor, nominal_feat
 
     param_grid = {
         "classifier__C": [2, 10, 50, 250],
-        "feature_combiner__embeddings__aggregator__method": [
+        "aggregator__method": [
             "embedding_cls",
             "embedding_mean_with_cls_and_sep",
             "embedding_mean_without_cls_and_sep"
