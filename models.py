@@ -11,7 +11,16 @@ def create_feature_extractor(model_name):
     # tokens = to
     model = AutoModel.from_pretrained(model_name)
     # kann sein, dass man die Pipeline gar nicht benutzen kann. Dann Embeddings anders erstellen
-    return pipeline("feature-extraction", model=model, tokenizer=tokenizer, device=0)
+    # Dynamically choose device
+    device = 0 if torch.cuda.is_available() else -1
+
+    try:
+        # Initialize the pipeline with dynamic device
+        return pipeline("feature-extraction", model=model, tokenizer=tokenizer, device=device)
+    except Exception as e:
+        print(f"Error initializing pipeline with GPU. Falling back to CPU. Error: {e}")
+        # Fallback to CPU if GPU fails
+        return pipeline("feature-extraction", model=model, tokenizer=tokenizer, device=-1)
 
 
 def create_gte_feature_extractor(model_name):
