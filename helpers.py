@@ -396,7 +396,22 @@ def hgbc_txt_emb(feature_extractor, summaries, y, n_splits=3):
     )
 
     hgbc_txt_emb_train_score = roc_auc_score(y, search.predict_proba(np.array(summaries))[:, 1])
-    print(f"best aggregator: {len(search.best_estimator_.named_steps['aggregator'].coef_[0])}")
+    # Retrieve the 'aggregator' step from the pipeline
+    aggregator = search.best_estimator_.named_steps['aggregator']
+
+    # Safely attempt to retrieve information about the aggregator
+    try:
+        # Print the selected method
+        print(f"best aggregator method: {search.best_params_['aggregator__method']}")
+
+        # Include any additional details about the aggregator, if available
+        if hasattr(aggregator, 'aggregation_info'):
+            print(f"Aggregator info: {aggregator.aggregation_info}")
+        else:
+            print("Aggregator does not expose additional info.")
+    except Exception as e:
+        print(f"Could not retrieve aggregator details: {e}")
+
     print(f"best hyperparameters: {search.best_params_}")
     print(f"hgbc_txt_emb_train_score: {hgbc_txt_emb_train_score}")
     print(f"hgbc_txt_emb_test_scores: {hgbc_txt_emb_test_scores}")
