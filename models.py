@@ -65,7 +65,8 @@ def create_gte_feature_extractor(model_name):
 #feature_extractor_clinical = create_feature_extractor("yikuan8/Clinical-Longformer")
 
 # BERT
-feature_extractor_bert = create_feature_extractor("google-bert/bert-base-cased")
+# feature_extractor_bert = create_feature_extractor("google-bert/bert-base-cased")
+feature_extractor_bert = create_feature_extractor("google-bert/distilbert-base-cased")
 
 # ELECTRA small discriminator
 feature_extractor_electra_small = create_feature_extractor("google/electra-small-discriminator")
