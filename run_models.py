@@ -1,8 +1,8 @@
 import numpy as np
 from helpers import (load_labels, load_features, load_summaries, logistic_regression,
-                     lr_ran_tree_emb, lr_txt_emb, hgbc, hgbc_txt_emb)
+                     lr_ran_tree_emb, lr_txt_emb, hgbc, hgbc_txt_emb, combine_lr_tab_emb)
 from bar_plotting import plot_bar_chart
-from models import feature_extractor_electra_small, feature_extractor_electra_large, feature_extractor_electra_base, \
+from models import feature_extractor_clinical, feature_extractor_electra_small, feature_extractor_electra_large, feature_extractor_electra_base, \
     feature_extractor_bert
 
 
@@ -26,10 +26,10 @@ def run_all_models():
 
     feature_extractors = {
         # Clinical Longformer (done)
-        # "Clinical-Longformer": feature_extractor_clinical,
+        "Clinical-Longformer": feature_extractor_clinical,
 
         # BERT (half done)
-        "BERT": feature_extractor_bert,
+        #"BERT": feature_extractor_bert,
 
         # ELECTRA (half done)
         # "ELECTRA-Small": feature_extractor_electra_small,
@@ -111,32 +111,37 @@ def run_all_models():
     # Calculate results for each model
     for model_name, feature_extractor in feature_extractors.items():
         # Logistic Regression
-        lr_train_score, lr_test_scores = lr_txt_emb(
+        #lr_train_score, lr_test_scores = lr_txt_emb(
+        #    feature_extractor=feature_extractor, summaries=patient_summaries, y=y
+        #)
+
+        # Log. Reg. Concatenated
+        lr_train_score, lr_test_scores = combine_lr_tab_emb(X_tabular=X, nominal_features=nominal_features,
             feature_extractor=feature_extractor, summaries=patient_summaries, y=y
         )
 
         # HGBC
-        hgbc_train_score, hgbc_test_scores = hgbc_txt_emb(
-            feature_extractor=feature_extractor, summaries=patient_summaries, y=y
-        )
+        #hgbc_train_score, hgbc_test_scores = hgbc_txt_emb(
+        #    feature_extractor=feature_extractor, summaries=patient_summaries, y=y
+        #)
 
         # Gather results
         labels.extend([
             f"{model_name} \n+ Logistic Regression",
-            f"{model_name} \n+ HGBC"
+        #    f"{model_name} \n+ HGBC"
         ])
-        train_scores.extend([lr_train_score, hgbc_train_score])
+        train_scores.extend([lr_train_score])#, hgbc_train_score])
         test_score_medians.extend([
             np.median(lr_test_scores),
-            np.median(hgbc_test_scores)
+            #np.median(hgbc_test_scores)
         ])
         test_score_mins.extend([
             np.min(lr_test_scores),
-            np.min(hgbc_test_scores)
+            #np.min(hgbc_test_scores)
         ])
         test_score_maxs.extend([
             np.max(lr_test_scores),
-            np.max(hgbc_test_scores)
+            #np.max(hgbc_test_scores)
         ])
 
     # Convert to arrays
@@ -146,7 +151,7 @@ def run_all_models():
     test_score_maxs = np.array(test_score_maxs)
 
     plot_bar_chart(
-        filename="bert_new",
+        filename="cl_concatenated",
         labels=labels,
         train_scores=train_scores,
         test_score_medians=test_score_medians,

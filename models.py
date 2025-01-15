@@ -26,6 +26,7 @@ def create_feature_extractor(model_name):
         return pipeline("feature-extraction", model=model, tokenizer=tokenizer, device="cpu")
 """
 
+
 def create_gte_feature_extractor(model_name):
     """
     Creates a feature extractor for a given model,
@@ -71,10 +72,8 @@ def create_gte_feature_extractor(model_name):
     return extract_features
 
 
-
-
 # Clinical Longformer
-#feature_extractor_clinical = create_feature_extractor("yikuan8/Clinical-Longformer")
+feature_extractor_clinical = create_feature_extractor("yikuan8/Clinical-Longformer")
 
 # BERT
 feature_extractor_bert = create_feature_extractor("google-bert/bert-base-cased")

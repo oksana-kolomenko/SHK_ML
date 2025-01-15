@@ -6,7 +6,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomTreesEmbedding, HistGradientBoostingClassifier
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.metrics import roc_auc_score
-from sklearn.model_selection import GridSearchCV, StratifiedKFold
+from sklearn.model_selection import GridSearchCV, StratifiedKFold, RepeatedStratifiedKFold
 from sklearn.impute import IterativeImputer, SimpleImputer
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
@@ -59,7 +59,7 @@ def logistic_regression(X, y, nominal_features, n_splits=3):
         ]),
         param_grid={"classifier__C": [2, 10, 50, 250]},
         scoring="neg_log_loss",
-        cv=3
+        cv=RepeatedStratifiedKFold(n_splits=3)
     )
 
     for train_index, test_index in skf.split(X, y):
@@ -117,7 +117,7 @@ def lr_ran_tree_emb(X, y, nominal_features, n_splits=3):
                 "classifier__C": [2, 10, 50, 250]
             },
             scoring="neg_log_loss",
-            cv=3
+            cv=RepeatedStratifiedKFold(n_splits=3)
         )
 
         search.fit(
@@ -149,7 +149,7 @@ def lr_ran_tree_emb(X, y, nominal_features, n_splits=3):
             "classifier__C": [2, 10, 50, 250]
         },
         scoring="neg_log_loss",
-        cv=3
+        cv=RepeatedStratifiedKFold(n_splits=3)
     )
 
     search.fit(
@@ -185,7 +185,7 @@ def lr_txt_emb(feature_extractor, summaries, y, n_splits=3):
             ]
         },
         scoring="neg_log_loss",
-        cv=3
+        cv=RepeatedStratifiedKFold(n_splits=3)
     )
     for train_index, test_index in skf.split(summaries, y):
         X_train, X_test = [summaries[i] for i in train_index], [summaries[i] for i in test_index]
@@ -226,7 +226,7 @@ def hgbc(X, y, nominal_features, n_splits=3):
             param_grid={"hist_gb__min_samples_leaf": [5, 10, 15, 20]
                         },
             scoring="neg_log_loss",
-            cv=3
+            cv=RepeatedStratifiedKFold(n_splits=3)
         )
 
         search.fit(
@@ -243,7 +243,7 @@ def hgbc(X, y, nominal_features, n_splits=3):
         param_grid={"hist_gb__min_samples_leaf": [5, 10, 15, 20]
                     },
         scoring="neg_log_loss",
-        cv=3
+        cv=RepeatedStratifiedKFold(n_splits=3)
     )
     search.fit(
         X,
@@ -288,7 +288,7 @@ def hgbc_ran_tree_emb(X, y, nominal_features, n_splits=3):  # todo
                 "hist_gb__min_samples_leaf": [5, 10, 15, 20]
             },
             scoring="neg_log_loss",
-            cv=3
+            cv=RepeatedStratifiedKFold(n_splits=3)
         )
 
         search.fit(
@@ -321,7 +321,7 @@ def hgbc_ran_tree_emb(X, y, nominal_features, n_splits=3):  # todo
             "hist_gb__min_samples_leaf": [5, 10, 15, 20]
         },
         scoring="neg_log_loss",
-        cv=3
+        cv=RepeatedStratifiedKFold(n_splits=3)
     )
 
     search.fit(
@@ -361,7 +361,8 @@ def hgbc_txt_emb(feature_extractor, summaries, y, n_splits=3):
                                        "embedding_mean_without_cls_and_sep"]
             },
             scoring="neg_log_loss",
-            cv=3  # cv=RepeatedStratifiedKFold(n_splits=3) überall ersetzen
+            cv=RepeatedStratifiedKFold(n_splits=3)  # todo: macht es Unterschied? Bzw. wird jetzt die beste Aggrerg. ausgewält
+            # todo später: Resultäte in csv speichern
         )
         search.fit(
             np.array(X_train),
@@ -384,7 +385,7 @@ def hgbc_txt_emb(feature_extractor, summaries, y, n_splits=3):
                                    "embedding_mean_without_cls_and_sep"]
         },
         scoring="neg_log_loss",
-        cv=3
+        cv=RepeatedStratifiedKFold(n_splits=3)
     )
 
     search.fit(
@@ -422,10 +423,11 @@ def combine_lr_tab_emb(X_tabular, summaries, feature_extractor, nominal_features
 
     pipeline = Pipeline([
         ("feature_combiner", ColumnTransformer([
+
             # Verarbeitung der tabellarischen Daten
             ("tabular", ColumnTransformer([
                 ("nominal", Pipeline([
-                    ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
+                    ("nominal_imputer", SimpleImputer(strategy="most_frequent")),  # try other?
                     ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
                 ]), nominal_features),
                 ("numerical", Pipeline([
@@ -433,6 +435,7 @@ def combine_lr_tab_emb(X_tabular, summaries, feature_extractor, nominal_features
                     ("numerical_scaler", MinMaxScaler())
                 ]), numerical_features),
             ]), X_tabular.columns),
+
             # Verarbeitung der Embeddings
             ("embeddings", Pipeline([
                 ("aggregator", EmbeddingAggregator(feature_extractor)),
@@ -455,7 +458,81 @@ def combine_lr_tab_emb(X_tabular, summaries, feature_extractor, nominal_features
         estimator=pipeline,
         param_grid=param_grid,
         scoring="neg_log_loss",
-        cv=3
+        cv=RepeatedStratifiedKFold(n_splits=3)
+    )
+
+    # Cross-Validation
+    for train_index, test_index in skf.split(X_tabular, y):
+        # Aufteilen der tabellarischen Daten und Embeddings
+        X_tab_train, X_tab_test = X_tabular.iloc[train_index], X_tabular.iloc[test_index]
+        summaries_train = [summaries[i] for i in train_index]
+        summaries_test = [summaries[i] for i in test_index]
+        y_train, y_test = y[train_index], y[test_index]
+
+        # Fit und Test
+        search.fit({"tabular": X_tab_train, "embeddings": summaries_train}, y_train)
+        y_pred_proba = search.predict_proba({"tabular": X_tab_test, "embeddings": summaries_test})[:, 1]
+        combined_test_scores.append(roc_auc_score(y_test, y_pred_proba))
+
+    search.fit({"tabular": X_tabular, "embeddings": summaries}, y)
+    combined_train_score = roc_auc_score(y, search.predict_proba({"tabular": X_tabular, "embeddings": summaries})[:, 1])
+
+    print(f"Feature set size: {len(search.best_estimator_.named_steps['classifier'].coef_[0])}")
+    print(f"Best hyperparameters: {search.best_params_}")
+    print(f"Combined train score: {combined_train_score}")
+    print(f"Combined test scores: {combined_test_scores}")
+
+    return combined_train_score, combined_test_scores
+
+
+def concat_lr_tab_rt_emb(X_tabular, summaries, feature_extractor, nominal_features, y, n_splits=3):
+    combined_test_scores = []
+    skf = StratifiedKFold(n_splits=n_splits)
+
+    numerical_features = list(set(X_tabular.columns) - set(nominal_features))
+
+    pipeline = Pipeline([
+        ("feature_combiner", ColumnTransformer([
+            # Verarbeitung der tabellarischen Daten
+            ("tabular", ColumnTransformer([
+                ("nominal", Pipeline([
+                    ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
+                    ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
+                ]), nominal_features),
+                ("numerical", Pipeline([
+                    ("numerical_imputer", IterativeImputer(max_iter=30)),
+                    ("numerical_scaler", MinMaxScaler())
+                ]), numerical_features),
+            ]), X_tabular.columns),
+
+            # Verarbeitung der RT Embeddings
+            ("embeddings", Pipeline([
+                ("transformer", ColumnTransformer([
+                    ("nominal", Pipeline([
+                        ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
+                        ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
+                    ]), nominal_features),
+                    ("numerical", Pipeline([
+                        ("numerical_imputer", IterativeImputer(max_iter=30))
+                    ]), numerical_features),
+                ])),
+                ("embedding", RandomTreesEmbedding())
+            ]), summaries)
+        ])),
+        ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=10000))
+    ])
+
+    param_grid = {
+        "classifier__C": [2, 10, 50, 250],
+        "embedding__n_estimators": [10, 100, 1000],
+        "embedding__max_depth": [2, 5, 10, 15],
+    }
+
+    search = GridSearchCV(
+        estimator=pipeline,
+        param_grid=param_grid,
+        scoring="neg_log_loss",
+        cv=RepeatedStratifiedKFold(n_splits=3)
     )
 
     # Cross-Validation
@@ -512,7 +589,7 @@ def combine_txt_tab_hgbc(X_tabular, y, nominal_features, feature_extractor, summ
         X_embeddings_test = embedding_pipeline.transform(summaries_test)
 
         # Kombination von tabellarischen Daten und Embeddings
-        X_train_combined = np.hstack([X_tab_train, X_embeddings_train])
+        X_train_combined = np.hstack([X_tab_train, X_embeddings_train])  # todo: Dimension ausgeben und checken
         X_test_combined = np.hstack([X_tab_test, X_embeddings_test])
 
         # Modelltraining und Bewertung
@@ -520,7 +597,7 @@ def combine_txt_tab_hgbc(X_tabular, y, nominal_features, feature_extractor, summ
             estimator=HistGradientBoostingClassifier(categorical_features=nominal_features),
             param_grid=param_grid,
             scoring="neg_log_loss",
-            cv=3
+            cv=RepeatedStratifiedKFold(n_splits=3)
         )
         search.fit(X_train_combined, y_train)
         y_pred_proba = search.predict_proba(X_test_combined)[:, 1]
@@ -531,6 +608,7 @@ def combine_txt_tab_hgbc(X_tabular, y, nominal_features, feature_extractor, summ
     X_combined = np.hstack([X_tabular, X_embeddings_processed])
 
     search.fit(X_combined, y)
+
     combined_train_score = roc_auc_score(y, search.predict_proba(X_combined)[:, 1])
 
     print(f"Best hyperparameters: {search.best_params_}")
@@ -538,3 +616,89 @@ def combine_txt_tab_hgbc(X_tabular, y, nominal_features, feature_extractor, summ
     print(f"Combined test scores: {hgbc_comb_test_scores}")
 
     return combined_train_score, hgbc_comb_test_scores
+
+
+def combine_tab_rte_hgbc(X_tabular, y, nominal_features, feature_extractor, summaries, n_splits=3):
+    hgbc_comb_test_scores = []
+    skf = StratifiedKFold(n_splits=n_splits)
+
+    embedding_pipeline = Pipeline([
+        ("aggregator", EmbeddingAggregator(feature_extractor)),
+        ("scaler", MinMaxScaler())
+    ])
+
+    param_grid = {
+            "hist_gb__min_samples_leaf": [5, 10, 15, 20],
+            "embedding__aggregator__method": [
+                "embedding_cls",
+                "embedding_mean_with_cls_and_sep",
+                "embedding_mean_without_cls_and_sep"
+        ]
+    }
+
+    for train_index, test_index in skf.split(X_tabular, y):
+        # Train-Test-Split für tabellarische und Embedding-Daten
+        X_tab_train, X_tab_test = X_tabular.iloc[train_index], X_tabular.iloc[test_index]
+        summaries_train = [summaries[i] for i in train_index]
+        summaries_test = [summaries[i] for i in test_index]
+        y_train, y_test = y[train_index], y[test_index]
+
+        X_embeddings_train = embedding_pipeline.fit_transform(summaries_train)
+        X_embeddings_test = embedding_pipeline.transform(summaries_test)
+
+        # Kombination von tabellarischen Daten und Embeddings
+        X_train_combined = np.hstack([X_tab_train, X_embeddings_train])  # todo: Dimension ausgeben und checken
+        X_test_combined = np.hstack([X_tab_test, X_embeddings_test])
+
+        # Modelltraining und Bewertung
+        search = GridSearchCV(
+            estimator=HistGradientBoostingClassifier(categorical_features=nominal_features),
+            param_grid=param_grid,
+            scoring="neg_log_loss",
+            cv=RepeatedStratifiedKFold(n_splits=3)
+        )
+        search.fit(X_train_combined, y_train)
+        y_pred_proba = search.predict_proba(X_test_combined)[:, 1]
+        hgbc_comb_test_scores.append(roc_auc_score(y_test, y_pred_proba))
+
+    # Gesamtes Training auf allen Daten
+    X_embeddings_processed = embedding_pipeline.fit_transform(summaries)
+    X_combined = np.hstack([X_tabular, X_embeddings_processed])
+
+    search.fit(X_combined, y)
+
+    combined_train_score = roc_auc_score(y, search.predict_proba(X_combined)[:, 1])
+
+    print(f"Best hyperparameters: {search.best_params_}")
+    print(f"Combined train score: {combined_train_score}")
+    print(f"Combined test scores: {hgbc_comb_test_scores}")
+
+    return combined_train_score, hgbc_comb_test_scores
+
+    # Todo: Comb. mit RTE
+    # Todo! Wird der beste Aggregierung ausgegeben?
+    # Todo! Dimension Reduktion: Anzahl den Parameter reduzieren; die Daten skalieren (standardscaler),
+    #       PCA, minmax scaler
+    # Todo: -> Ziel: Overfitting reduzieren
+    # Todo: Zweite Dimension - Anzahl der Features ausgeben lassen (muss 40 sein)
+    # Todo: Ergebnisse als Dataframe speichern (to_csv) -> dann einfacher in csv speichern
+    # Todo: die Ergebnisse als csv speichern
+    # Todo: Ausser AUC auch andere Metriken berechnen (Slack) und als Spalten hinzufügen
+
+    # Todo: Datei n.1: Test Results no Embedding
+    # Spalten für csv-Datei: Dataset, ml_method, emb_method(none), fold(0, 1 oder 2 (alle speichern)), AUC
+    # Todo: Datei n.2: Train Results no Embedding
+    # Spalten für csv-Datei: Dataset, ml_method, emb_method(none), AUC
+    # Todo: Datei n.3: Test Results RT Embedding
+    # Spalten für csv-Datei: Dataset, ml_method, emb_method(rt), Concatenation(yes/no),
+    # fold(0, 1 oder 2 (alle speichern)), AUC
+    # Todo: Datei n.4: Train Results RT Embedding
+    # Spalten für csv-Datei: Dataset, ml_method, emb_method, Concatenation(yes/no), AUC
+
+    # Todo: Datei n.5: Test Results Text Embedding
+    # Spalten für csv-Datei: Dataset, ml_method(lr/hgbc), emb_method(model(Bert etc)),
+    # Concatenation(yes/no), fold(0, 1 oder 2 (alle speichern)), AUC
+    # Todo: Datei n.6: Train Results Text Embedding
+    # Spalten für csv-Datei: Dataset, ml_method, emb_method, Concatenation(yes/no), AUC
+
+    # Todo: Mario fragen wegen Pycharm
