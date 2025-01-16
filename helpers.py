@@ -200,7 +200,7 @@ def lr_ran_tree_emb(dataset_name, X, y, nominal_features, n_splits=3):
     return dataset, ml_method, emb_method, concatenation, train_metrics, metrics_per_fold
 
 
-def lr_txt_emb(dataset_name, emb_method,  feature_extractor, summaries, y, n_splits=3):  # Todo! Wird die beste Aggregierung ausgegeben?
+def lr_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y, n_splits=3):  # Todo! Wird die beste Aggregierung ausgegeben?
     dataset = dataset_name
     ml_method = "logistic regression"
     concatenation = "no"
