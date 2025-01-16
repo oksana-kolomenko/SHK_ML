@@ -1,6 +1,10 @@
 from enum import Enum
 
 
+class Dataset(Enum):
+    POSTTRAUMA = "posttrauma"
+
+
 class Classification(Enum):
     VERY_LOW = "very low"
     LOW = "low"

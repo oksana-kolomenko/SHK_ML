@@ -5,13 +5,16 @@ import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomTreesEmbedding, HistGradientBoostingClassifier
 from sklearn.experimental import enable_iterative_imputer
-from sklearn.metrics import roc_auc_score
-from sklearn.model_selection import GridSearchCV, StratifiedKFold, RepeatedStratifiedKFold
 from sklearn.impute import IterativeImputer, SimpleImputer
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, MinMaxScaler, OrdinalEncoder
 from sklearn.base import TransformerMixin, BaseEstimator
+from sklearn.model_selection import StratifiedKFold, GridSearchCV, RepeatedStratifiedKFold
+from sklearn.metrics import (
+    roc_auc_score, recall_score, precision_score, f1_score, balanced_accuracy_score, confusion_matrix,
+    average_precision_score
+)
 
 from csv_parser import create_patient_summaries
 from text_emb_aggregator import EmbeddingAggregator
@@ -39,8 +42,13 @@ def load_summaries():
     return summaries_list
 
 
-def logistic_regression(X, y, nominal_features, n_splits=3):
-    lg_reg_test_scores = []
+def logistic_regression(dataset_name, X, y, nominal_features, n_splits=3):
+    # for csv format
+    # dataset und fold(index von test scores) in der anderen Datei
+    dataset = dataset_name
+    ml_method = "logistic regression"
+    emb_method = "none"
+    metrics_per_fold = []
     skf = StratifiedKFold(n_splits=n_splits)
 
     search = GridSearchCV(
@@ -66,68 +74,59 @@ def logistic_regression(X, y, nominal_features, n_splits=3):
         X_train, X_test = X.iloc[train_index], X.iloc[test_index]
         y_train, y_test = y[train_index], y[test_index]
 
-        search.fit(
-            X_train,
-            y_train
-        )
+        search.fit(X_train, y_train)
 
-        lg_reg_test_scores.append(roc_auc_score(y_test, search.predict_proba(X_test)[:, 1]))
+        y_test_pred = search.predict(X_test)
+        y_test_pred_proba = search.predict_proba(X_test)[:, 1]
 
-    search.fit(
-        X,
-        y
-    )
+        # Calculate metrics
+        tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
+        specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
 
-    lg_reg_train_score = roc_auc_score(y, search.predict_proba(X)[:, 1])
-    print(f"feature set size: {len(search.best_estimator_.named_steps['classifier'].coef_[0])}")
-    print(f"best hyperparameters: {search.best_params_}")
-    print(f"lg_reg_train_score: {lg_reg_train_score}")
-    print(f"lg_reg_test_scores: {lg_reg_test_scores}")
+        metrics_per_fold.append({
+            "Fold": len(metrics_per_fold),
+            "AUC": roc_auc_score(y_test, y_test_pred_proba),
+            "AP": average_precision_score(y_test, y_test_pred_proba),
+            "Sensitivity": recall_score(y_test, y_test_pred, pos_label=1),
+            "Specificity": specificity,
+            "Precision": precision_score(y_test, y_test_pred, zero_division=0),
+            "F1": f1_score(y_test, y_test_pred, average='macro'),
+            "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
+        })
 
-    return lg_reg_train_score, lg_reg_test_scores
+    search.fit(X, y)
+    y_train_pred = search.predict(X)
+    y_train_pred_proba = search.predict_proba(X)[:, 1]
+
+    # Training metrics
+    train_metrics = {
+        "AUC": roc_auc_score(y, y_train_pred_proba),
+        "AP": average_precision_score(y, y_train_pred_proba),
+        "Sensitivity": recall_score(y, y_train_pred, pos_label=1),
+        "Specificity": confusion_matrix(y, y_train_pred).ravel()[0] / (
+                    confusion_matrix(y, y_train_pred).ravel()[0] + confusion_matrix(y, y_train_pred).ravel()[1]),
+        "Precision": precision_score(y, y_train_pred, zero_division=0),
+        "F1": f1_score(y, y_train_pred, average='macro'),
+        "Balanced Accuracy": balanced_accuracy_score(y, y_train_pred)
+    }
+
+    print(f"Feature set size: {len(search.best_estimator_.named_steps['classifier'].coef_[0])}")
+    print(f"Best hyperparameters: {search.best_params_}")
+    print(f"Train metrics: {train_metrics}")
+    print(f"Test metrics per fold: {metrics_per_fold}")
+
+    return dataset, ml_method, emb_method, train_metrics, metrics_per_fold
 
 
-def lr_ran_tree_emb(X, y, nominal_features, n_splits=3):
-    lg_reg_rt_emb_test_scores = []
+def lr_ran_tree_emb(dataset_name, X, y, nominal_features, n_splits=3):
+    dataset = dataset_name
+    ml_method = "logistic regression"
+    emb_method = "random tree embedding"
+    concatenation = "no"
+    metrics_per_fold = []
     skf = StratifiedKFold(n_splits=n_splits)
 
-    for train_index, test_index in skf.split(X, y):
-        X_train, X_test = X.iloc[train_index], X.iloc[test_index]
-        y_train, y_test = y[train_index], y[test_index]
-
-        # search for test scores
-        search = GridSearchCV(
-            estimator=Pipeline([
-                ("transformer", ColumnTransformer([
-                    ("nominal", Pipeline([
-                        ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
-                        ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
-                    ]), nominal_features),
-                    ("numerical", Pipeline([
-                        ("numerical_imputer", IterativeImputer(max_iter=30))
-                    ]), list(set(X_train.columns.values) - set(nominal_features))),
-                ])),
-                ("embedding", RandomTreesEmbedding()),
-                ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=10000))
-            ]),
-            param_grid={
-                # extended hyperparameter search for better embedding
-                "embedding__n_estimators": [10, 100, 1000],
-                "embedding__max_depth": [2, 5, 10, 15],
-                "classifier__C": [2, 10, 50, 250]
-            },
-            scoring="neg_log_loss",
-            cv=RepeatedStratifiedKFold(n_splits=3)
-        )
-
-        search.fit(
-            X_train,
-            y_train
-        )
-
-        lg_reg_rt_emb_test_scores.append(roc_auc_score(y_test, search.predict_proba(X_test)[:, 1]))
-
-    # search for train scores
+    # GridSearchCV vor der Schleife definieren
     search = GridSearchCV(
         estimator=Pipeline([
             ("transformer", ColumnTransformer([
@@ -137,13 +136,12 @@ def lr_ran_tree_emb(X, y, nominal_features, n_splits=3):
                 ]), nominal_features),
                 ("numerical", Pipeline([
                     ("numerical_imputer", IterativeImputer(max_iter=30))
-                ]), list(set(X_train.columns.values) - set(nominal_features))),
+                ]), list(set(X.columns.values) - set(nominal_features))),
             ])),
             ("embedding", RandomTreesEmbedding()),
             ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=10000))
         ]),
         param_grid={
-            # extended hyperparameter search for better embedding
             "embedding__n_estimators": [10, 100, 1000],
             "embedding__max_depth": [2, 5, 10, 15],
             "classifier__C": [2, 10, 50, 250]
@@ -152,22 +150,61 @@ def lr_ran_tree_emb(X, y, nominal_features, n_splits=3):
         cv=RepeatedStratifiedKFold(n_splits=3)
     )
 
-    search.fit(
-        X,
-        y
-    )
+    for train_index, test_index in skf.split(X, y):
+        X_train, X_test = X.iloc[train_index], X.iloc[test_index]
+        y_train, y_test = y[train_index], y[test_index]
 
-    lg_reg_rt_emb_train_score = roc_auc_score(y, search.predict_proba(X)[:, 1])
-    print(f"embedding size: {len(search.best_estimator_.named_steps['classifier'].coef_[0])}")
-    print(f"best hyperparameters: {search.best_params_}")
-    print(f"lg_reg_rt_emb_train_score: {lg_reg_rt_emb_train_score}")
-    print(f"lg_reg_rt_emb_test_scores: {lg_reg_rt_emb_test_scores}")
+        # Fit the model for each fold
+        search.fit(X_train, y_train)
 
-    return lg_reg_rt_emb_train_score, lg_reg_rt_emb_test_scores
+        y_test_pred = search.predict(X_test)
+        y_test_pred_proba = search.predict_proba(X_test)[:, 1]
+
+        # Calculate metrics
+        tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
+        specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
+
+        metrics_per_fold.append({
+            "Fold": len(metrics_per_fold),
+            "AUC": roc_auc_score(y_test, y_test_pred_proba),
+            "AP": average_precision_score(y_test, y_test_pred_proba),
+            "Sensitivity": recall_score(y_test, y_test_pred, pos_label=1),
+            "Specificity": specificity,
+            "Precision": precision_score(y_test, y_test_pred, zero_division=0),
+            "F1": f1_score(y_test, y_test_pred, average='macro'),
+            "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
+        })
+
+    # Train the final model on the full dataset
+    search.fit(X, y)
+    y_train_pred = search.predict(X)
+    y_train_pred_proba = search.predict_proba(X)[:, 1]
+
+    # Training metrics
+    train_metrics = {
+        "AUC": roc_auc_score(y, y_train_pred_proba),
+        "AP": average_precision_score(y, y_train_pred_proba),
+        "Sensitivity": recall_score(y, y_train_pred, pos_label=1),
+        "Specificity": confusion_matrix(y, y_train_pred).ravel()[0] / (
+                    confusion_matrix(y, y_train_pred).ravel()[0] + confusion_matrix(y, y_train_pred).ravel()[1]),
+        "Precision": precision_score(y, y_train_pred, zero_division=0),
+        "F1": f1_score(y, y_train_pred, average='macro'),
+        "Balanced Accuracy": balanced_accuracy_score(y, y_train_pred)
+    }
+
+    print(f"Embedding size: {len(search.best_estimator_.named_steps['classifier'].coef_[0])}")
+    print(f"Best hyperparameters: {search.best_params_}")
+    print(f"Train metrics: {train_metrics}")
+    print(f"Test metrics per fold: {metrics_per_fold}")
+
+    return dataset, ml_method, emb_method, concatenation, train_metrics, metrics_per_fold
 
 
-def lr_txt_emb(feature_extractor, summaries, y, n_splits=3):
-    lr_txt_emb_test_scores = []
+def lr_txt_emb(dataset_name, emb_method,  feature_extractor, summaries, y, n_splits=3):  # Todo! Wird die beste Aggregierung ausgegeben?
+    dataset = dataset_name
+    ml_method = "logistic regression"
+    concatenation = "no"
+    metrics_per_fold = []
     skf = StratifiedKFold(n_splits=n_splits)
 
     search = GridSearchCV(
@@ -193,112 +230,128 @@ def lr_txt_emb(feature_extractor, summaries, y, n_splits=3):
 
         # Fit and evaluate
         search.fit(X_train, y_train)
-        y_pred_proba = search.predict_proba(X_test)[:, 1]
-        lr_txt_emb_test_scores.append(roc_auc_score(y_test, y_pred_proba))
+
+        y_test_pred = search.predict(X_test)
+        y_test_pred_proba = search.predict_proba(X_test)[:, 1]
+
+        # Calculate metrics
+        tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
+        specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
+
+        metrics_per_fold.append({
+            "Fold": len(metrics_per_fold),
+            "AUC": roc_auc_score(y_test, y_test_pred_proba),
+            "AP": average_precision_score(y_test, y_test_pred_proba),
+            "Sensitivity": recall_score(y_test, y_test_pred, pos_label=1),
+            "Specificity": specificity,
+            "Precision": precision_score(y_test, y_test_pred, zero_division=0),
+            "F1": f1_score(y_test, y_test_pred, average='macro'),
+            "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
+        })
 
     search.fit(
         summaries,
         y
     )
 
-    lr_txt_emb_train_score = roc_auc_score(y, search.predict_proba(summaries)[:, 1])
+    y_train_pred = search.predict(summaries)
+    y_train_pred_proba = search.predict_proba(summaries)[:, 1]
+
+    # Training metrics
+    train_metrics = {
+        "AUC": roc_auc_score(y, y_train_pred_proba),
+        "AP": average_precision_score(y, y_train_pred_proba),
+        "Sensitivity": recall_score(y, y_train_pred, pos_label=1),
+        "Specificity": confusion_matrix(y, y_train_pred).ravel()[0] / (
+                confusion_matrix(y, y_train_pred).ravel()[0] + confusion_matrix(y, y_train_pred).ravel()[1]),
+        "Precision": precision_score(y, y_train_pred, zero_division=0),
+        "F1": f1_score(y, y_train_pred, average='macro'),
+        "Balanced Accuracy": balanced_accuracy_score(y, y_train_pred)
+    }
     print(f"embedding size: {len(search.best_estimator_.named_steps['classifier'].coef_[0])}")
-    print(f"best hyperparameters: {search.best_params_}")
-    print(f"lg_reg_txt_emb_train_score: {lr_txt_emb_train_score}")
-    print(f"lg_reg_txt_emb_test_scores: {lr_txt_emb_test_scores}")
+    print(f"Best hyperparameters: {search.best_params_}")
+    print(f"Train metrics: {train_metrics}")
+    print(f"Test metrics per fold: {metrics_per_fold}")
 
-    return lr_txt_emb_train_score, lr_txt_emb_test_scores
+    return dataset, ml_method, emb_method, concatenation, train_metrics, metrics_per_fold
 
 
-def hgbc(X, y, nominal_features, n_splits=3):
-    hgbc_test_scores = []
+def hgbc(dataset_name, X, y, nominal_features, n_splits=3):
+    dataset = dataset_name
+    ml_method = "HistGradientBoosting"
+    emb_method = "none"
+    concatenation = "no"
+    metrics_per_fold = []
     skf = StratifiedKFold(n_splits=n_splits)
 
-    for train_index, test_index in skf.split(X, y):
-        X_train, X_test = X.iloc[train_index], X.iloc[test_index]
-        y_train, y_test = y[train_index], y[test_index]
-
-        # search for test scores
-        search = GridSearchCV(
-            estimator=Pipeline([
-                ("hist_gb", HistGradientBoostingClassifier(categorical_features=nominal_features))
-            ]),
-            param_grid={"hist_gb__min_samples_leaf": [5, 10, 15, 20]
-                        },
-            scoring="neg_log_loss",
-            cv=RepeatedStratifiedKFold(n_splits=3)
-        )
-
-        search.fit(
-            X_train,
-            y_train
-        )
-        hgbc_test_scores.append(roc_auc_score(y_test, search.predict_proba(X_test)[:, 1]))
-
-    # HGB on whole data (test)
+    # Define GridSearchCV once before the loop
     search = GridSearchCV(
         estimator=Pipeline([
             ("hist_gb", HistGradientBoostingClassifier(categorical_features=nominal_features))
         ]),
-        param_grid={"hist_gb__min_samples_leaf": [5, 10, 15, 20]
-                    },
+        param_grid={"hist_gb__min_samples_leaf": [5, 10, 15, 20]},
         scoring="neg_log_loss",
         cv=RepeatedStratifiedKFold(n_splits=3)
     )
-    search.fit(
-        X,
-        y
-    )
-    hgbc_train_score = roc_auc_score(y, search.predict_proba(X)[:, 1])
 
-    print(f"best hyperparameters: {search.best_params_}")
-    print(f"hgbc_train_score: {hgbc_train_score}")
-    print(f"hgbc_test_scores: {hgbc_test_scores}")
-
-    return hgbc_train_score, hgbc_test_scores
-
-
-def hgbc_ran_tree_emb(X, y, nominal_features, n_splits=3):  # todo
-    hgbc_rt_emb_test_scores = []
-    skf = StratifiedKFold(n_splits=n_splits)
-
+    # Calculate metrics for each fold
     for train_index, test_index in skf.split(X, y):
         X_train, X_test = X.iloc[train_index], X.iloc[test_index]
         y_train, y_test = y[train_index], y[test_index]
 
-        # search for test scores
-        search = GridSearchCV(
-            estimator=Pipeline([
-                ("transformer", ColumnTransformer([
-                    ("nominal", Pipeline([
-                        ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
-                        ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
-                    ]), nominal_features),
-                    ("numerical", Pipeline([
-                        ("numerical_imputer", IterativeImputer(max_iter=30))
-                    ]), list(set(X_train.columns.values) - set(nominal_features))),
-                ])),
-                ("embedding", RandomTreesEmbedding()),
-                ("hist_gb", HistGradientBoostingClassifier())
-            ]),
-            param_grid={
-                # extended hyperparameter search for better embedding
-                "embedding__n_estimators": [10, 100, 1000],
-                "embedding__max_depth": [2, 5, 10, 15],
-                "hist_gb__min_samples_leaf": [5, 10, 15, 20]
-            },
-            scoring="neg_log_loss",
-            cv=RepeatedStratifiedKFold(n_splits=3)
-        )
+        # Fit the model for each fold
+        search.fit(X_train, y_train)
 
-        search.fit(
-            X_train,
-            y_train
-        )
+        y_test_pred = search.predict(X_test)
+        y_test_pred_proba = search.predict_proba(X_test)[:, 1]
 
-        hgbc_rt_emb_test_scores.append(roc_auc_score(y_test, search.predict_proba(X_test)[:, 1]))
+        # Calculate metrics
+        tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
+        specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
 
-    # search for train scores
+        metrics_per_fold.append({
+            "Fold": len(metrics_per_fold),
+            "AUC": roc_auc_score(y_test, y_test_pred_proba),
+            "AP": average_precision_score(y_test, y_test_pred_proba),
+            "Sensitivity": recall_score(y_test, y_test_pred, pos_label=1),
+            "Specificity": specificity,
+            "Precision": precision_score(y_test, y_test_pred, zero_division=0),
+            "F1": f1_score(y_test, y_test_pred, average='macro'),
+            "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
+        })
+
+    # Train the final model on the full dataset
+    search.fit(X, y)
+    y_train_pred = search.predict(X)
+    y_train_pred_proba = search.predict_proba(X)[:, 1]
+
+    # Training metrics
+    train_metrics = {
+        "AUC": roc_auc_score(y, y_train_pred_proba),
+        "AP": average_precision_score(y, y_train_pred_proba),
+        "Sensitivity": recall_score(y, y_train_pred, pos_label=1),
+        "Specificity": confusion_matrix(y, y_train_pred).ravel()[0] / (
+                    confusion_matrix(y, y_train_pred).ravel()[0] + confusion_matrix(y, y_train_pred).ravel()[1]),
+        "Precision": precision_score(y, y_train_pred, zero_division=0),
+        "F1": f1_score(y, y_train_pred, average='macro'),
+        "Balanced Accuracy": balanced_accuracy_score(y, y_train_pred)
+    }
+
+    print(f"Best hyperparameters: {search.best_params_}")
+    print(f"Train metrics: {train_metrics}")
+    print(f"Test metrics per fold: {metrics_per_fold}")
+
+    return dataset, ml_method, emb_method, concatenation, train_metrics, metrics_per_fold
+
+
+def hgbc_ran_tree_emb(dataset_name, X, y, nominal_features, n_splits=3):
+    dataset = dataset_name
+    ml_method = "HistGradientBoosting"
+    emb_method = "random tree embedding"
+    concatenation = "no"
+    metrics_per_fold = []
+    skf = StratifiedKFold(n_splits=n_splits)
+
     search = GridSearchCV(
         estimator=Pipeline([
             ("transformer", ColumnTransformer([
@@ -308,15 +361,13 @@ def hgbc_ran_tree_emb(X, y, nominal_features, n_splits=3):  # todo
                 ]), nominal_features),
                 ("numerical", Pipeline([
                     ("numerical_imputer", IterativeImputer(max_iter=30))
-                ]), list(set(X_train.columns.values) - set(nominal_features))),
+                ]), list(set(X.columns.values) - set(nominal_features))),
             ])),
             ("embedding", RandomTreesEmbedding()),
             ("hist_gb", HistGradientBoostingClassifier())
         ]),
         param_grid={
-            # extended hyperparameter search for better embedding
             "embedding__n_estimators": [10, 100, 1000],
-            # best token output with name of the hyperparameter
             "embedding__max_depth": [2, 5, 10, 15],
             "hist_gb__min_samples_leaf": [5, 10, 15, 20]
         },
@@ -324,60 +375,69 @@ def hgbc_ran_tree_emb(X, y, nominal_features, n_splits=3):  # todo
         cv=RepeatedStratifiedKFold(n_splits=3)
     )
 
-    search.fit(
-        X,
-        y
-    )
-
-    hgbc_rt_emb_train_score = roc_auc_score(y, search.predict_proba(X)[:, 1])
-    print(f"embedding size: {len(search.best_estimator_.named_steps['classifier'].coef_[0])}")
-    print(f"best hyperparameters: {search.best_params_}")
-    print(f"lr_ran_tree_emb_train_score: {hgbc_rt_emb_train_score}")
-    print(f"lr_ran_tree_emb_test_scores: {hgbc_rt_emb_test_scores}")
-
-    return hgbc_rt_emb_train_score, hgbc_rt_emb_test_scores
-
-
-def hgbc_txt_emb(feature_extractor, summaries, y, n_splits=3):
-    hgbc_txt_emb_test_scores = []
-    skf = StratifiedKFold(n_splits=n_splits)
-
-    for train_index, test_index in skf.split(summaries, y):
-        X_train, X_test = [summaries[i] for i in train_index], [summaries[i] for i in test_index]
+    # Metrics for each fold
+    for train_index, test_index in skf.split(X, y):
+        X_train, X_test = X.iloc[train_index], X.iloc[test_index]
         y_train, y_test = y[train_index], y[test_index]
 
-        X_train, X_test = np.array(X_train), np.array(X_test)
+        # Fit the model for each fold
+        search.fit(X_train, y_train)
 
-        # search for test scores
-        search = GridSearchCV(
-            estimator=Pipeline([
-                ("aggregator", EmbeddingAggregator(feature_extractor)),
-                ("numerical_scaler", MinMaxScaler()),
-                ("hist_gb", HistGradientBoostingClassifier()),
-            ]),
-            param_grid={
-                "hist_gb__min_samples_leaf": [5, 10, 15, 20],
-                "aggregator__method": ["embedding_cls", "embedding_mean_with_cls_and_sep",
-                                       "embedding_mean_without_cls_and_sep"]
-            },
-            scoring="neg_log_loss",
-            cv=RepeatedStratifiedKFold(n_splits=3)  # todo: macht es Unterschied? Bzw. wird jetzt die beste Aggrerg. ausgewält
-            # todo später: Resultäte in csv speichern
-        )
-        search.fit(
-            np.array(X_train),
-            y_train
-        )
-        hgbc_txt_emb_test_scores.append(roc_auc_score(y_test, search.predict_proba(X_test)[:, 1]))
+        y_test_pred = search.predict(X_test)
+        y_test_pred_proba = search.predict_proba(X_test)[:, 1]
 
-    # search for train scores
+        # Calculate metrics
+        tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
+        specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
+
+        metrics_per_fold.append({
+            "Fold": len(metrics_per_fold),
+            "AUC": roc_auc_score(y_test, y_test_pred_proba),
+            "AP": average_precision_score(y_test, y_test_pred_proba),
+            "Sensitivity": recall_score(y_test, y_test_pred, pos_label=1),
+            "Specificity": specificity,
+            "Precision": precision_score(y_test, y_test_pred, zero_division=0),
+            "F1": f1_score(y_test, y_test_pred, average='macro'),
+            "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
+        })
+
+    # Train on the full dataset
+    search.fit(X, y)
+    y_train_pred = search.predict(X)
+    y_train_pred_proba = search.predict_proba(X)[:, 1]
+
+    # Training metrics
+    train_metrics = {
+        "AUC": roc_auc_score(y, y_train_pred_proba),
+        "AP": average_precision_score(y, y_train_pred_proba),
+        "Sensitivity": recall_score(y, y_train_pred, pos_label=1),
+        "Specificity": confusion_matrix(y, y_train_pred).ravel()[0] / (
+                    confusion_matrix(y, y_train_pred).ravel()[0] + confusion_matrix(y, y_train_pred).ravel()[1]),
+        "Precision": precision_score(y, y_train_pred, zero_division=0),
+        "F1": f1_score(y, y_train_pred, average='macro'),
+        "Balanced Accuracy": balanced_accuracy_score(y, y_train_pred)
+    }
+
+    print(f"Best hyperparameters: {search.best_params_}")
+    print(f"Train metrics: {train_metrics}")
+    print(f"Test metrics per fold: {metrics_per_fold}")
+
+    return dataset, ml_method, emb_method, concatenation, train_metrics, metrics_per_fold
+
+
+def hgbc_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y, n_splits=3): # Todo! Wird die beste Aggregierung ausgegeben?
+    dataset = dataset_name
+    ml_method = "HistGradientBoosting"
+    emb_method = emb_method
+    concatenation = "no"
+    metrics_per_fold = []
+    skf = StratifiedKFold(n_splits=n_splits)
+
     search = GridSearchCV(
         estimator=Pipeline([
             ("aggregator", EmbeddingAggregator(feature_extractor)),
-            # todo: 2) test if numerical value comes out
             ("numerical_scaler", MinMaxScaler()),
             ("hist_gb", HistGradientBoostingClassifier()),
-
         ]),
         param_grid={
             "hist_gb__min_samples_leaf": [5, 10, 15, 20],
@@ -386,14 +446,57 @@ def hgbc_txt_emb(feature_extractor, summaries, y, n_splits=3):
         },
         scoring="neg_log_loss",
         cv=RepeatedStratifiedKFold(n_splits=3)
+        # todo: macht es Unterschied? Bzw. wird jetzt die beste Aggrerg. ausgewält
     )
 
+    for train_index, test_index in skf.split(summaries, y):
+        X_train, X_test = [summaries[i] for i in train_index], [summaries[i] for i in test_index]
+        y_train, y_test = y[train_index], y[test_index]
+
+        X_train, X_test = np.array(X_train), np.array(X_test)
+
+        search.fit(
+            np.array(X_train),
+            y_train
+        )
+        y_test_pred = search.predict(X_test)
+        y_test_pred_proba = search.predict_proba(X_test)[:, 1]
+
+        # Calculate metrics
+        tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
+        specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
+
+        metrics_per_fold.append({
+            "Fold": len(metrics_per_fold),
+            "AUC": roc_auc_score(y_test, y_test_pred_proba),
+            "AP": average_precision_score(y_test, y_test_pred_proba),
+            "Sensitivity": recall_score(y_test, y_test_pred, pos_label=1),
+            "Specificity": specificity,
+            "Precision": precision_score(y_test, y_test_pred, zero_division=0),
+            "F1": f1_score(y_test, y_test_pred, average='macro'),
+            "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
+        })
+
+    # train on the full dataset
     search.fit(
         np.array(summaries),
         y
     )
 
-    hgbc_txt_emb_train_score = roc_auc_score(y, search.predict_proba(np.array(summaries))[:, 1])
+    y_train_pred = search.predict(np.array(summaries))
+    y_train_pred_proba = search.predict_proba(np.array(summaries))[:, 1]
+
+    # Training metrics
+    train_metrics = {
+        "AUC": roc_auc_score(y, y_train_pred_proba),
+        "AP": average_precision_score(y, y_train_pred_proba),
+        "Sensitivity": recall_score(y, y_train_pred, pos_label=1),
+        "Specificity": confusion_matrix(y, y_train_pred).ravel()[0] / (
+                confusion_matrix(y, y_train_pred).ravel()[0] + confusion_matrix(y, y_train_pred).ravel()[1]),
+        "Precision": precision_score(y, y_train_pred, zero_division=0),
+        "F1": f1_score(y, y_train_pred, average='macro'),
+        "Balanced Accuracy": balanced_accuracy_score(y, y_train_pred)
+    }
     aggregator = search.best_estimator_.named_steps['aggregator']
 
     try:
@@ -408,15 +511,19 @@ def hgbc_txt_emb(feature_extractor, summaries, y, n_splits=3):
     except Exception as e:
         print(f"Could not retrieve aggregator details: {e}")
 
-    print(f"best hyperparameters: {search.best_params_}")
-    print(f"hgbc_txt_emb_train_score: {hgbc_txt_emb_train_score}")
-    print(f"hgbc_txt_emb_test_scores: {hgbc_txt_emb_test_scores}")
+    print(f"Best hyperparameters: {search.best_params_}")
+    print(f"Train metrics: {train_metrics}")
+    print(f"Test metrics per fold: {metrics_per_fold}")
 
-    return hgbc_txt_emb_train_score, hgbc_txt_emb_test_scores
+    return dataset, ml_method, emb_method, concatenation, train_metrics, metrics_per_fold
 
 
-def combine_lr_tab_emb(X_tabular, summaries, feature_extractor, nominal_features, y, n_splits=3):
-    combined_test_scores = []
+def concat_lr_tab_txtemb(dataset_name, emb_method, X_tabular, summaries, feature_extractor, nominal_features, y,
+                         n_splits=3):
+    dataset = dataset_name
+    ml_method = "Logistic Regression"
+    concatenation = "yes"
+    metrics_per_fold = []
     skf = StratifiedKFold(n_splits=n_splits)
 
     numerical_features = list(set(X_tabular.columns) - set(nominal_features))
@@ -469,24 +576,56 @@ def combine_lr_tab_emb(X_tabular, summaries, feature_extractor, nominal_features
         summaries_test = [summaries[i] for i in test_index]
         y_train, y_test = y[train_index], y[test_index]
 
-        # Fit und Test
         search.fit({"tabular": X_tab_train, "embeddings": summaries_train}, y_train)
-        y_pred_proba = search.predict_proba({"tabular": X_tab_test, "embeddings": summaries_test})[:, 1]
-        combined_test_scores.append(roc_auc_score(y_test, y_pred_proba))
+
+        y_test_pred = search.predict({"tabular": X_tab_test, "embeddings": summaries_test})
+        y_test_pred_proba = search.predict_proba({"tabular": X_tab_test, "embeddings": summaries_test})[:, 1]
+
+        # Calculate metrics
+        tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
+        specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
+
+        metrics_per_fold.append({
+            "Fold": len(metrics_per_fold),
+            "AUC": roc_auc_score(y_test, y_test_pred_proba),
+            "AP": average_precision_score(y_test, y_test_pred_proba),
+            "Sensitivity": recall_score(y_test, y_test_pred, pos_label=1),
+            "Specificity": specificity,
+            "Precision": precision_score(y_test, y_test_pred, zero_division=0),
+            "F1": f1_score(y_test, y_test_pred, average='macro'),
+            "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
+        })
 
     search.fit({"tabular": X_tabular, "embeddings": summaries}, y)
-    combined_train_score = roc_auc_score(y, search.predict_proba({"tabular": X_tabular, "embeddings": summaries})[:, 1])
+    y_train_pred = search.predict({"tabular": X_tabular, "embeddings": summaries})
+    y_train_pred_proba = search.predict_proba({"tabular": X_tabular, "embeddings": summaries})[:, 1]
+
+    # Calculate training metrics
+    train_metrics = {
+        "AUC": roc_auc_score(y, y_train_pred_proba),
+        "AP": average_precision_score(y, y_train_pred_proba),
+        "Sensitivity": recall_score(y, y_train_pred, pos_label=1),
+        "Specificity": confusion_matrix(y, y_train_pred).ravel()[0] / (
+                confusion_matrix(y, y_train_pred).ravel()[0] + confusion_matrix(y, y_train_pred).ravel()[1]),
+        "Precision": precision_score(y, y_train_pred, zero_division=0),
+        "F1": f1_score(y, y_train_pred, average='macro'),
+        "Balanced Accuracy": balanced_accuracy_score(y, y_train_pred)
+    }
 
     print(f"Feature set size: {len(search.best_estimator_.named_steps['classifier'].coef_[0])}")
     print(f"Best hyperparameters: {search.best_params_}")
-    print(f"Combined train score: {combined_train_score}")
-    print(f"Combined test scores: {combined_test_scores}")
+    print(f"Train metrics: {train_metrics}")
+    print(f"Test metrics per fold: {metrics_per_fold}")
 
-    return combined_train_score, combined_test_scores
+    return dataset, ml_method, emb_method, concatenation, train_metrics, metrics_per_fold
 
 
-def concat_lr_tab_rt_emb(X_tabular, summaries, feature_extractor, nominal_features, y, n_splits=3):
-    combined_test_scores = []
+def concat_lr_tab_rt_emb(dataset_name, X_tabular, summaries, nominal_features, y, n_splits=3):
+    dataset = dataset_name
+    ml_method = "Logistic Regression"
+    emb_method = "Random Trees Embedding"
+    concatenation = "yes"
+    metrics_per_fold = []
     skf = StratifiedKFold(n_splits=n_splits)
 
     numerical_features = list(set(X_tabular.columns) - set(nominal_features))
@@ -543,25 +682,61 @@ def concat_lr_tab_rt_emb(X_tabular, summaries, feature_extractor, nominal_featur
         summaries_test = [summaries[i] for i in test_index]
         y_train, y_test = y[train_index], y[test_index]
 
-        # Fit und Test
+        # Fit the model
         search.fit({"tabular": X_tab_train, "embeddings": summaries_train}, y_train)
-        y_pred_proba = search.predict_proba({"tabular": X_tab_test, "embeddings": summaries_test})[:, 1]
-        combined_test_scores.append(roc_auc_score(y_test, y_pred_proba))
 
+        # Predictions and probabilities
+        y_test_pred = search.predict({"tabular": X_tab_test, "embeddings": summaries_test})
+        y_test_pred_proba = search.predict_proba({"tabular": X_tab_test, "embeddings": summaries_test})[:, 1]
+
+        # Calculate metrics
+        tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
+        specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
+
+        metrics_per_fold.append({
+            "Fold": len(metrics_per_fold),
+            "AUC": roc_auc_score(y_test, y_test_pred_proba),
+            "AP": average_precision_score(y_test, y_test_pred_proba),
+            "Sensitivity": recall_score(y_test, y_test_pred, pos_label=1),
+            "Specificity": specificity,
+            "Precision": precision_score(y_test, y_test_pred, zero_division=0),
+            "F1": f1_score(y_test, y_test_pred, average='macro'),
+            "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
+        })
+
+        # Train on the full dataset
     search.fit({"tabular": X_tabular, "embeddings": summaries}, y)
-    combined_train_score = roc_auc_score(y, search.predict_proba({"tabular": X_tabular, "embeddings": summaries})[:, 1])
+    y_train_pred = search.predict({"tabular": X_tabular, "embeddings": summaries})
+    y_train_pred_proba = search.predict_proba({"tabular": X_tabular, "embeddings": summaries})[:, 1]
+
+    # Calculate training metrics
+    train_metrics = {
+        "AUC": roc_auc_score(y, y_train_pred_proba),
+        "AP": average_precision_score(y, y_train_pred_proba),
+        "Sensitivity": recall_score(y, y_train_pred, pos_label=1),
+        "Specificity": confusion_matrix(y, y_train_pred).ravel()[0] / (
+                confusion_matrix(y, y_train_pred).ravel()[0] + confusion_matrix(y, y_train_pred).ravel()[1]),
+        "Precision": precision_score(y, y_train_pred, zero_division=0),
+        "F1": f1_score(y, y_train_pred, average='macro'),
+        "Balanced Accuracy": balanced_accuracy_score(y, y_train_pred)
+    }
 
     print(f"Feature set size: {len(search.best_estimator_.named_steps['classifier'].coef_[0])}")
     print(f"Best hyperparameters: {search.best_params_}")
-    print(f"Combined train score: {combined_train_score}")
-    print(f"Combined test scores: {combined_test_scores}")
+    print(f"Train metrics: {train_metrics}")
+    print(f"Test metrics per fold: {metrics_per_fold}")
 
-    return combined_train_score, combined_test_scores
+    # Return results
+    return dataset, ml_method, emb_method, concatenation, train_metrics, metrics_per_fold
 
 
 # TODO! Anpassen
-def combine_txt_tab_hgbc(X_tabular, y, nominal_features, feature_extractor, summaries, n_splits=3):
-    hgbc_comb_test_scores = []
+def concat_txt_tab_hgbc(dataset_name, emb_method, X_tabular, y, nominal_features, feature_extractor, summaries, n_splits=3):
+    dataset = dataset_name
+    ml_method = "HistGradientBoosting"
+    emb_method = emb_method
+    concatenation = "yes"
+    metrics_per_fold = []
     skf = StratifiedKFold(n_splits=n_splits)
 
     embedding_pipeline = Pipeline([
@@ -601,104 +776,272 @@ def combine_txt_tab_hgbc(X_tabular, y, nominal_features, feature_extractor, summ
         )
         search.fit(X_train_combined, y_train)
         y_pred_proba = search.predict_proba(X_test_combined)[:, 1]
-        hgbc_comb_test_scores.append(roc_auc_score(y_test, y_pred_proba))
+
+        # Calculate metrics
+        tn, fp, fn, tp = confusion_matrix(y_test, search.predict(X_test_combined)).ravel()
+        specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
+
+        metrics_per_fold.append({
+            "Fold": len(metrics_per_fold),
+            "AUC": roc_auc_score(y_test, y_pred_proba),
+            "AP": average_precision_score(y_test, y_pred_proba),
+            "Sensitivity": recall_score(y_test, search.predict(X_test_combined), pos_label=1),
+            "Specificity": specificity,
+            "Precision": precision_score(y_test, search.predict(X_test_combined), zero_division=0),
+            "F1": f1_score(y_test, search.predict(X_test_combined), average='macro'),
+            "Balanced Accuracy": balanced_accuracy_score(y_test, search.predict(X_test_combined))
+        })
 
     # Gesamtes Training auf allen Daten
     X_embeddings_processed = embedding_pipeline.fit_transform(summaries)
     X_combined = np.hstack([X_tabular, X_embeddings_processed])
 
     search.fit(X_combined, y)
+    y_train_pred = search.predict(X_combined),
+    y_train_pred_proba = search.predict_proba(X_combined)[:, 1]
 
-    combined_train_score = roc_auc_score(y, search.predict_proba(X_combined)[:, 1])
+    # Calculate training metrics
+    train_metrics = {
+        "AUC": roc_auc_score(y, y_train_pred_proba),
+        "AP": average_precision_score(y, y_train_pred_proba),
+        "Sensitivity": recall_score(y, y_train_pred, pos_label=1),
+        "Specificity": confusion_matrix(y, y_train_pred).ravel()[0] / (
+                confusion_matrix(y, y_train_pred).ravel()[0] +
+                confusion_matrix(y, y_train_pred).ravel()[1]),
+        "Precision": precision_score(y, y_train_pred, zero_division=0),
+        "F1": f1_score(y, y_train_pred, average='macro'),
+        "Balanced Accuracy": balanced_accuracy_score(y, y_train_pred)
+    }
 
     print(f"Best hyperparameters: {search.best_params_}")
-    print(f"Combined train score: {combined_train_score}")
-    print(f"Combined test scores: {hgbc_comb_test_scores}")
+    print(f"Train metrics: {train_metrics}")
+    print(f"Test metrics per fold: {metrics_per_fold}")
 
-    return combined_train_score, hgbc_comb_test_scores
+    return dataset, ml_method, emb_method, concatenation, train_metrics, metrics_per_fold
 
 
-def combine_tab_rte_hgbc(X_tabular, y, nominal_features, feature_extractor, summaries, n_splits=3):
-    hgbc_comb_test_scores = []
+def concat_tab_rte_hgbc(dataset_name, X_tabular, y, nominal_features, summaries, n_splits=3):
+    dataset = dataset_name
+    ml_method = "HistGradientBoosting"
+    emb_method = "Random Trees Embedding"
+    concatenation = "yes"
+    metrics_per_fold = []
     skf = StratifiedKFold(n_splits=n_splits)
 
     embedding_pipeline = Pipeline([
-        ("aggregator", EmbeddingAggregator(feature_extractor)),
+        ("embedding", RandomTreesEmbedding()),
         ("scaler", MinMaxScaler())
     ])
-
     param_grid = {
             "hist_gb__min_samples_leaf": [5, 10, 15, 20],
-            "embedding__aggregator__method": [
-                "embedding_cls",
-                "embedding_mean_with_cls_and_sep",
-                "embedding_mean_without_cls_and_sep"
-        ]
+            "embedding__n_estimators": [10, 100, 1000],
+            "embedding__max_depth": [2, 5, 10, 15],
     }
+    search = GridSearchCV(
+        estimator=HistGradientBoostingClassifier(categorical_features=nominal_features),
+        param_grid=param_grid,
+        scoring="neg_log_loss",
+        cv=RepeatedStratifiedKFold(n_splits=3)
+    )
 
     for train_index, test_index in skf.split(X_tabular, y):
         # Train-Test-Split für tabellarische und Embedding-Daten
         X_tab_train, X_tab_test = X_tabular.iloc[train_index], X_tabular.iloc[test_index]
-        summaries_train = [summaries[i] for i in train_index]
-        summaries_test = [summaries[i] for i in test_index]
+        embeddings_train = [summaries[i] for i in train_index]
+        embeddings_test = [summaries[i] for i in test_index]
         y_train, y_test = y[train_index], y[test_index]
 
-        X_embeddings_train = embedding_pipeline.fit_transform(summaries_train)
-        X_embeddings_test = embedding_pipeline.transform(summaries_test)
+        X_embeddings_train = embedding_pipeline.fit_transform(embeddings_train)
+        X_embeddings_test = embedding_pipeline.transform(embeddings_test)
 
         # Kombination von tabellarischen Daten und Embeddings
         X_train_combined = np.hstack([X_tab_train, X_embeddings_train])  # todo: Dimension ausgeben und checken
         X_test_combined = np.hstack([X_tab_test, X_embeddings_test])
 
-        # Modelltraining und Bewertung
-        search = GridSearchCV(
-            estimator=HistGradientBoostingClassifier(categorical_features=nominal_features),
-            param_grid=param_grid,
-            scoring="neg_log_loss",
-            cv=RepeatedStratifiedKFold(n_splits=3)
-        )
+
         search.fit(X_train_combined, y_train)
+        y_pred = search.predict(X_test_combined)
         y_pred_proba = search.predict_proba(X_test_combined)[:, 1]
-        hgbc_comb_test_scores.append(roc_auc_score(y_test, y_pred_proba))
+
+        # Calculate metrics
+        tn, fp, fn, tp = confusion_matrix(y_test, search.predict(X_test_combined)).ravel()
+        specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
+
+        metrics_per_fold.append({
+            "Fold": len(metrics_per_fold),
+            "AUC": roc_auc_score(y_test, y_pred_proba),
+            "AP": average_precision_score(y_test, y_pred_proba),
+            "Sensitivity": recall_score(y_test, y_pred, pos_label=1),
+            "Specificity": specificity,
+            "Precision": precision_score(y_test, y_pred, zero_division=0),
+            "F1": f1_score(y_test, y_pred, average='macro'),
+            "Balanced Accuracy": balanced_accuracy_score(y_test, y_pred)
+        })
 
     # Gesamtes Training auf allen Daten
     X_embeddings_processed = embedding_pipeline.fit_transform(summaries)
     X_combined = np.hstack([X_tabular, X_embeddings_processed])
-
     search.fit(X_combined, y)
+    y_pred = search.predict(X_combined)
+    y_train_pred_proba = search.predict_proba(X_combined)[:, 1]
 
-    combined_train_score = roc_auc_score(y, search.predict_proba(X_combined)[:, 1])
+    train_metrics = {
+        "AUC": roc_auc_score(y, y_train_pred_proba),
+        "AP": average_precision_score(y, y_train_pred_proba),
+        "Sensitivity": recall_score(y, y_pred, pos_label=1),
+        "Specificity": confusion_matrix(y, y_pred).ravel()[0] / (
+                confusion_matrix(y, y_pred).ravel()[0] +
+                confusion_matrix(y, y_pred).ravel()[1]),
+        "Precision": precision_score(y, y_pred, zero_division=0),
+        "F1": f1_score(y, y_pred, average='macro'),
+        "Balanced Accuracy": balanced_accuracy_score(y, y_pred)
+    }
 
     print(f"Best hyperparameters: {search.best_params_}")
-    print(f"Combined train score: {combined_train_score}")
-    print(f"Combined test scores: {hgbc_comb_test_scores}")
+    print(f"Combined train score: {train_metrics}")
+    print(f"Combined test scores: {metrics_per_fold}")
 
-    return combined_train_score, hgbc_comb_test_scores
+    return dataset, ml_method, emb_method, concatenation, train_metrics, metrics_per_fold
 
-    # Todo: Comb. mit RTE
-    # Todo! Wird der beste Aggregierung ausgegeben?
-    # Todo! Dimension Reduktion: Anzahl den Parameter reduzieren; die Daten skalieren (standardscaler),
-    #       PCA, minmax scaler
-    # Todo: -> Ziel: Overfitting reduzieren
-    # Todo: Zweite Dimension - Anzahl der Features ausgeben lassen (muss 40 sein)
-    # Todo: Ergebnisse als Dataframe speichern (to_csv) -> dann einfacher in csv speichern
-    # Todo: die Ergebnisse als csv speichern
+
+def lr_txt_emb_all_emb_agg(feature_extractor, summaries, y, n_splits=3):
+    results = {}
+    skf = StratifiedKFold(n_splits=n_splits)
+
+    methods = [
+        "embedding_cls",
+        "embedding_mean_with_cls_and_sep",
+        "embedding_mean_without_cls_and_sep"
+    ]
+
+    for method in methods:
+        test_scores = []
+        search = GridSearchCV(
+            estimator=Pipeline([
+                ("aggregator", EmbeddingAggregator(feature_extractor, method=method)),
+                ("numerical_scaler", MinMaxScaler()),
+                ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=10000))
+            ]),
+            param_grid={
+                "classifier__C": [2, 10, 50, 250]
+            },
+            scoring="neg_log_loss",
+            cv=RepeatedStratifiedKFold(n_splits=3)
+        )
+
+        for train_index, test_index in skf.split(summaries, y):
+            X_train, X_test = [summaries[i] for i in train_index], [summaries[i] for i in test_index]
+            y_train, y_test = y[train_index], y[test_index]
+
+            # Fit and evaluate for the current method
+            search.fit(X_train, y_train)
+            y_pred_proba = search.predict_proba(X_test)[:, 1]
+            test_scores.append(roc_auc_score(y_test, y_pred_proba))
+
+        # Fit on the entire dataset for train score
+        search.fit(summaries, y)
+        train_score = roc_auc_score(y, search.predict_proba(summaries)[:, 1])
+
+        # Store results
+        results[method] = {
+            "train_score": train_score,
+            "test_scores": test_scores,
+            "best_params": search.best_params_,
+            "embedding_size": len(search.best_estimator_.named_steps["classifier"].coef_[0])
+        }
+
+        print(f"Method: {method}")
+        print(f"Embedding size: {results[method]['embedding_size']}")
+        print(f"Best hyperparameters: {results[method]['best_params']}")
+        print(f"Train score: {results[method]['train_score']}")
+        print(f"Test scores: {results[method]['test_scores']}")
+        print("")
+
+    return results
+
+def hgbc_txt_emb_all_emb_agg(feature_extractor, summaries, y, n_splits=3):
+    results = {}
+    skf = StratifiedKFold(n_splits=n_splits)
+
+    methods = [
+        "embedding_cls",
+        "embedding_mean_with_cls_and_sep",
+        "embedding_mean_without_cls_and_sep"
+    ]
+
+    for method in methods:
+        test_scores = []
+
+        # Create the GridSearchCV pipeline for this method
+        search = GridSearchCV(
+            estimator=Pipeline([
+                ("aggregator", EmbeddingAggregator(feature_extractor, method=method)),
+                ("numerical_scaler", MinMaxScaler()),
+                ("hist_gb", HistGradientBoostingClassifier()),
+            ]),
+            param_grid={
+                "hist_gb__min_samples_leaf": [5, 10, 15, 20],
+            },
+            scoring="neg_log_loss",
+            cv=RepeatedStratifiedKFold(n_splits=3)
+        )
+
+        # Cross-validation for the current method
+        for train_index, test_index in skf.split(summaries, y):
+            X_train, X_test = [summaries[i] for i in train_index], [summaries[i] for i in test_index]
+            y_train, y_test = y[train_index], y[test_index]
+
+            X_train, X_test = np.array(X_train), np.array(X_test)
+
+            # Fit and evaluate
+            search.fit(X_train, y_train)
+            y_pred_proba = search.predict_proba(X_test)[:, 1]
+            test_scores.append(roc_auc_score(y_test, y_pred_proba))
+
+        # Fit on the entire dataset for the train score
+        search.fit(np.array(summaries), y)
+        train_score = roc_auc_score(y, search.predict_proba(np.array(summaries))[:, 1])
+
+        # Store results
+        results[method] = {
+           "train_score": train_score,
+           "test_scores": test_scores,
+           "best_params": search.best_params_,
+        }
+
+        # Print results for the current method
+        print(f"Method: {method}")
+        print(f"Best hyperparameters: {results[method]['best_params']}")
+        print(f"Train score: {results[method]['train_score']}")
+        print(f"Test scores: {results[method]['test_scores']}")
+        print("")
+
+    return results
+
+    # Todo: Comb. mit RTE  | + but test
+    # Todo! Wird der beste Aggregierung ausgegeben? | + run both & evaluate
+
+    # Todo: Ergebnisse als Dataframe speichern (to_csv) in csv speichern | weiter
+
     # Todo: Ausser AUC auch andere Metriken berechnen (Slack) und als Spalten hinzufügen
+    # Todo: check: all previous data displayed correctly?
+
+    # Todo! Dimension Reduktion: Anzahl den Parameter reduzieren; die Daten skalieren (standardscaler),
+    #       PCA, minmax scaler -> Ziel: Overfitting reduzieren
+    # Todo: Zweite Dimension - Anzahl der Features ausgeben lassen (muss 40 sein)
 
     # Todo: Datei n.1: Test Results no Embedding
-    # Spalten für csv-Datei: Dataset, ml_method, emb_method(none), fold(0, 1 oder 2 (alle speichern)), AUC
+    # Spalten für csv-Datei: Dataset, ml_method, emb_method(none), fold, metrics
     # Todo: Datei n.2: Train Results no Embedding
-    # Spalten für csv-Datei: Dataset, ml_method, emb_method(none), AUC
+    # Spalten für csv-Datei: Dataset, ml_method, emb_method(none), metrics
     # Todo: Datei n.3: Test Results RT Embedding
-    # Spalten für csv-Datei: Dataset, ml_method, emb_method(rt), Concatenation(yes/no),
-    # fold(0, 1 oder 2 (alle speichern)), AUC
+    # Spalten für csv-Datei: Dataset, ml_method, emb_method(rt), Concatenation(y/n), fold, metrics
     # Todo: Datei n.4: Train Results RT Embedding
-    # Spalten für csv-Datei: Dataset, ml_method, emb_method, Concatenation(yes/no), AUC
+    # Spalten für csv-Datei: Dataset, ml_method, emb_method, Concatenation(y/n), metrics
 
     # Todo: Datei n.5: Test Results Text Embedding
-    # Spalten für csv-Datei: Dataset, ml_method(lr/hgbc), emb_method(model(Bert etc)),
-    # Concatenation(yes/no), fold(0, 1 oder 2 (alle speichern)), AUC
+    # Spalten für csv-Datei: Dataset, ml_method, emb_method(model), Concatenation(y/n), fold, metrics
     # Todo: Datei n.6: Train Results Text Embedding
-    # Spalten für csv-Datei: Dataset, ml_method, emb_method, Concatenation(yes/no), AUC
+    # Spalten für csv-Datei: Dataset, ml_method, emb_method(model), Concatenation(y/n), metrics
 
-    # Todo: Mario fragen wegen Pycharm
+    # Todo: Pycharm Pro?
