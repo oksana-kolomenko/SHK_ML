@@ -32,7 +32,6 @@ def run():
         nominal_features=nominal_features,
         n_splits=5,
         n_components_range=n_components_range,
-        output_csv="pca_results.csv"
     )
 
     # Display results
