@@ -2,6 +2,7 @@ import numpy as np
 
 from csv_saver import save_results_to_csv
 from helpers import (load_labels, load_features, logistic_regression,)
+from pca_methods import find_best_n_components_and_save_csv
 from values import Dataset
 
 
@@ -21,7 +22,25 @@ def run():
         'penetrating_injury'
     ]
 
-    # 1. logistic regression (no embedding), dataset: posttrauma
+    n_components_range = range(1, 11)  # Test 1 to 10 components
+
+    # Run the optimization and save results
+    results = find_best_n_components_and_save_csv(
+        dataset_name="Posttrauma",
+        X=X_posttrauma,
+        y=y_posttrauma,
+        nominal_features=nominal_features,
+        n_splits=5,
+        n_components_range=n_components_range,
+        output_csv="pca_results.csv"
+    )
+
+    # Display results
+    print("Best n_components:", results["Best n_components"])
+    print("Best Metrics:", results["Best Metrics"])
+
+
+"""    # 1. logistic regression (no embedding), dataset: posttrauma
     log_reg_dataset, log_reg_ml_method, log_reg_emb_method, log_reg_train_metrics, log_reg_test_metrics = \
         logistic_regression(dataset_name=posttrauma_dataset, X=X_posttrauma, y=y_posttrauma,  # test
                             nominal_features=nominal_features)
@@ -42,4 +61,4 @@ def run():
         output_file="no_emb_log_reg_test.csv",
         metrics=log_reg_test_metrics,
         is_train=False
-    )
+    )"""
