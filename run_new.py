@@ -22,7 +22,7 @@ def run():
         'penetrating_injury'
     ]
 
-    n_components_range = range(1, 3)  # Test 1 to 10 components
+    n_components_range = range(1, 11)  # Test 1 to 10 components
 
     # Run the optimization and save results
     results = find_best_n_components_and_save_csv(
@@ -30,7 +30,7 @@ def run():
         X=X_posttrauma,
         y=y_posttrauma,
         nominal_features=nominal_features,
-        n_splits=5,
+        n_splits=3,
         n_components_range=n_components_range,
     )
 
