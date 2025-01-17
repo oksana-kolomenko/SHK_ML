@@ -1023,7 +1023,7 @@ def hgbc_txt_emb_all_emb_agg(feature_extractor, summaries, y, n_splits=3):
 
     # Todo: Ergebnisse als Dataframe speichern (to_csv) in csv speichern | weiter
 
-    # Todo: Ausser AUC auch andere Metriken berechnen (Slack) und als Spalten hinzufügen
+    # Todo: Ausser AUC auch andere Metriken berechnen (Slack) und als Spalten hinzufügen +
     # Todo: check: all previous data displayed correctly?
 
     # Todo! Dimension Reduktion: Anzahl den Parameter reduzieren; die Daten skalieren (standardscaler),
