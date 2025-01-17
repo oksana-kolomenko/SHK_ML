@@ -210,7 +210,7 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y, n_spli
     search = GridSearchCV(
         estimator=Pipeline([
             ("aggregator", EmbeddingAggregator(feature_extractor)),
-            ("numerical_scaler", MinMaxScaler()),
+            ("numerical_scaler", MinMaxScaler()), # test vs. StandardScaler
             ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=10000))
         ]),
         param_grid={
@@ -1027,8 +1027,8 @@ def hgbc_txt_emb_all_emb_agg(feature_extractor, summaries, y, n_splits=3):
     # Todo: check: all previous data displayed correctly?
 
     # Todo! Dimension Reduktion: Anzahl den Parameter reduzieren; die Daten skalieren (standardscaler),
-    #       PCA, minmax scaler -> Ziel: Overfitting reduzieren
-    # Todo: Zweite Dimension - Anzahl der Features ausgeben lassen (muss 40 sein)
+    #       PCA, Ziel: Overfitting reduzieren ~
+    # Todo: Zweite Dimension - Anzahl der Features ausgeben lassen (muss 40 sein) ?
 
     # Todo: Datei n.1: Test Results no Embedding
     # Spalten für csv-Datei: Dataset, ml_method, emb_method(none), fold, metrics

@@ -16,19 +16,10 @@ from text_emb_aggregator import EmbeddingAggregator
 # Numerical Data: PCA requires numerical data. Categorical data needs to be encoded it first (e.g., one-hot encoding).
 # Scaling: Features with different ranges should be scaled (e.g., using StandardScaler or MinMaxScaler) before applying PCA.
 
-
-def find_best_n_components_and_save_csv(dataset_name, X, y, nominal_features, n_splits=3, n_components_range=None, output_csv="pca_results.csv"):
+def find_best_n_components_and_save_csv(dataset_name, X, y, nominal_features, n_splits=3, n_components_range=None,
+                                        train_output_csv="train_results.csv", test_output_csv="test_results.csv"):
     """
-    Optimize `n_components` for Logistic Regression with PCA and save results to a CSV.
-
-    Args:
-        dataset_name (str): Dataset name.
-        X (pd.DataFrame): Feature data.
-        y (pd.Series): Target labels.
-        nominal_features (list): List of nominal (categorical) features.
-        n_splits (int): Number of splits for cross-validation.
-        n_components_range (list): List of `n_components` values to test.
-        output_csv (str): Path to save the results CSV.
+    Optimize `n_components` for Logistic Regression with PCA and save results to separate CSVs for train and test data.
 
     Returns:
         dict: Best `n_components` value and its corresponding metrics.
@@ -36,7 +27,8 @@ def find_best_n_components_and_save_csv(dataset_name, X, y, nominal_features, n_
     if n_components_range is None:
         n_components_range = range(1, X.shape[1] + 1)  # Test all possible components
 
-    results = []  # To collect results for all n_components
+    train_results = []
+    test_results = []
     best_n_components = None
     best_metrics = None
     best_avg_metric_score = -float("inf")  # Initialize with negative infinity for comparison
@@ -53,12 +45,19 @@ def find_best_n_components_and_save_csv(dataset_name, X, y, nominal_features, n_
             n_components=n_components
         )
 
+        # Add n_components to train metrics
+        train_metrics["n_components"] = n_components
+        train_results.append(train_metrics)
+
+        # Add n_components and fold details to each fold in test metrics
+        for fold_metrics in metrics_per_fold:
+            fold_metrics["n_components"] = n_components
+            fold_metrics["Fold"] = len(test_results)  # Fold number as incremental row
+            test_results.append(fold_metrics)
+
         # Calculate the average test metrics across folds
         avg_metrics = {key: np.mean([fold[key] for fold in metrics_per_fold]) for key in metrics_per_fold[0]}
         avg_metrics["n_components"] = n_components  # Add n_components to the metrics
-
-        # Save results to CSV
-        results.append(avg_metrics)
 
         # Use AUC as the primary metric to determine the best n_components
         avg_metric_score = avg_metrics["AUC"]
@@ -70,10 +69,15 @@ def find_best_n_components_and_save_csv(dataset_name, X, y, nominal_features, n_
             }
             best_avg_metric_score = avg_metric_score
 
-    # Save all results to CSV
-    results_df = pd.DataFrame(results)
-    results_df.to_csv(output_csv, index=False)
-    print(f"Results saved to {output_csv}")
+    # Save train and test results to separate CSV files
+    train_results_df = pd.DataFrame(train_results)
+    test_results_df = pd.DataFrame(test_results)
+
+    train_results_df.to_csv(train_output_csv, index=False)
+    test_results_df.to_csv(test_output_csv, index=False)
+
+    print(f"Train results saved to {train_output_csv}")
+    print(f"Test results saved to {test_output_csv}")
 
     print(f"Best n_components: {best_n_components}")
     print(f"Best Metrics: {best_metrics}")

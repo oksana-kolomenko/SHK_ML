@@ -1,4 +1,4 @@
-from new_test import run
+from run_new import run
 
 
 # Press the green button in the gutter to run the script.
