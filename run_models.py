@@ -84,9 +84,9 @@ def run_all_models():
     ###### TABLE DATA ######
     ########################
 
-    # 1. logistic regression (no embedding), dataset: posttrauma
+    """  # 1. logistic regression (no embedding), dataset: posttrauma
     log_reg_dataset, log_reg_ml_method, log_reg_emb_method, log_reg_train_score, log_reg_test_scores = \
-        logistic_regression(dataset=posttrauma_dataset, X=X_posttrauma, y=y_posttrauma,  # test
+        logistic_regression(dataset_name=posttrauma_dataset, X=X_posttrauma, y=y_posttrauma,  # test
                             nominal_features=nominal_features)
 
     save_results_to_csv( # anpassen
@@ -98,7 +98,7 @@ def run_all_models():
 
     # 2. random trees embedding
     (lr_rt_dataset, lr_rt_ml_method, lr_rt_emb_method, lr_rt_concatenation, log_reg_rt_emb_train_score,
-     log_reg_rt_emb_test_scores) = lr_ran_tree_emb(dataset = posttrauma_dataset,X=X_posttrauma, y=y_posttrauma,
+     log_reg_rt_emb_test_scores) = lr_ran_tree_emb(dataset_name = posttrauma_dataset, X=X_posttrauma, y=y_posttrauma,
                                                    nominal_features=nominal_features)
     save_results_to_csv( # anpassen
     dataset_name=lr_rt_dataset,
@@ -110,11 +110,12 @@ def run_all_models():
     
     # 3. hgbc (no embedding)
     hgbc_train_score, hgbc_test_scores = \
-        hgbc(X=X_posttrauma, y=y_posttrauma, nominal_features=nominal_features)
+        hgbc(dataset_name=posttrauma_dataset, X=X_posttrauma, y=y_posttrauma, nominal_features=nominal_features)
 
     # 4. random trees embedding + hgbc
     hgbc_rt_emb_train_score, hgbc_rt_emb_test_scores = \
-        lr_ran_tree_emb(X=X_posttrauma, y=y_posttrauma, nominal_features=nominal_features)
+        lr_ran_tree_emb(dataset_name=posttrauma_dataset, X=X_posttrauma, y=y_posttrauma, 
+                        nominal_features=nominal_features)
 
     labels_local = [
             f"Logistic Regression",
@@ -161,7 +162,7 @@ def run_all_models():
             test_score_mins=test_score_mins_local,
             test_score_maxs=test_score_maxs_local
     )
-
+    """
 
     ########################
     ###### EMBEDDINGS ######
@@ -179,7 +180,7 @@ def run_all_models():
         hgbc_txt_train_score, hgbc_txt_test_scores = hgbc_txt_emb(
             feature_extractor=feature_extractor, summaries=patient_summaries, y=y_posttrauma)
 
-        # Log. Reg. Concatenated (Tab. + Text Embeddings)
+        """        # Log. Reg. Concatenated (Tab. + Text Embeddings)
         lr_conc_txt_train_score, lr_conc_txt_test_scores = concat_lr_tab_txtemb(X_tabular=X_posttrauma,
             nominal_features=nominal_features, feature_extractor=feature_extractor, summaries=patient_summaries, y=y_posttrauma)
 
@@ -194,6 +195,7 @@ def run_all_models():
         # HGBC Concatenated (Tab. + RT Embeddings)
         hgbc_conc_rte_train_score, hgbc_conc_rte_test_scores = concat_lr_tab_txtemb(X_tabular=X_posttrauma,
             nominal_features=nominal_features, feature_extractor=feature_extractor, summaries=patient_summaries, y=y_posttrauma)
+        """
 
         labels_local = [
             f"{model_name} \n+ Logistic Regression",
@@ -206,34 +208,34 @@ def run_all_models():
         train_scores_local = [
             lr_txt_train_score,
             hgbc_txt_train_score,
-            lr_conc_txt_train_score,
-            hgbc_conc_txt_train_score,
-            lr_conc_rte_train_score,
-            hgbc_conc_rte_train_score
+            #lr_conc_txt_train_score,
+            #hgbc_conc_txt_train_score,
+            #lr_conc_rte_train_score,
+            #hgbc_conc_rte_train_score
         ]
         test_score_medians_local = [
             np.median(lr_txt_test_scores),
             np.median(hgbc_txt_test_scores),
-            np.median(lr_conc_txt_test_scores),
-            np.median(hgbc_conc_txt_test_scores),
-            np.median(lr_conc_rte_test_scores),
-            np.median(hgbc_conc_rte_test_scores)
+            #np.median(lr_conc_txt_test_scores),
+            #np.median(hgbc_conc_txt_test_scores),
+            #np.median(lr_conc_rte_test_scores),
+            #np.median(hgbc_conc_rte_test_scores)
         ]
         test_score_mins_local = [
             np.min(lr_txt_test_scores),
             np.min(hgbc_txt_test_scores),
-            np.min(lr_conc_txt_test_scores),
-            np.min(hgbc_conc_txt_test_scores),
-            np.min(lr_conc_rte_test_scores),
-            np.min(hgbc_conc_rte_test_scores)
+            #np.min(lr_conc_txt_test_scores),
+            #np.min(hgbc_conc_txt_test_scores),
+            #np.min(lr_conc_rte_test_scores),
+            #np.min(hgbc_conc_rte_test_scores)
         ]
         test_score_maxs_local = [
             np.max(lr_txt_test_scores),
             np.max(hgbc_txt_test_scores),
-            np.max(lr_conc_txt_test_scores),
-            np.max(hgbc_conc_txt_test_scores),
-            np.max(lr_conc_rte_test_scores),
-            np.max(hgbc_conc_rte_test_scores)
+            #np.max(lr_conc_txt_test_scores),
+            #np.max(hgbc_conc_txt_test_scores),
+            #np.max(lr_conc_rte_test_scores),
+            #np.max(hgbc_conc_rte_test_scores)
         ]
 
         # Convert to arrays
