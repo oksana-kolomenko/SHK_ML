@@ -9,8 +9,8 @@ def create_feature_extractor(model_name):
     """
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     # tokens = to
-    model = AutoModel.from_pretrained(model_name)
-    #model = AutoModel.from_pretrained(model_name).to("cuda:0")
+    #model = AutoModel.from_pretrained(model_name)
+    model = AutoModel.from_pretrained(model_name).to("cuda:0")
     # kann sein, dass man die Pipeline gar nicht benutzen kann. Dann Embeddings anders erstellen
     # Dynamically choose device 0 = GPU
     return pipeline("feature-extraction", model=model, tokenizer=tokenizer, device=0)

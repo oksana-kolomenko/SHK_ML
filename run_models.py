@@ -173,12 +173,12 @@ def run_all_models():
     # Calculate results for each model
     for model_name, feature_extractor in feature_extractors.items():
         # Logistic Regression
-        lr_txt_train_score, lr_txt_test_scores = lr_txt_emb(
-            feature_extractor=feature_extractor, summaries=patient_summaries, y=y_posttrauma)
+        lr_txt_train_score, lr_txt_test_scores = lr_txt_emb(dataset_name=posttrauma_dataset,
+            emb_method="Clinical Logformer", feature_extractor=feature_extractor, summaries=patient_summaries, y=y_posttrauma)
 
         # HGBC
         hgbc_txt_train_score, hgbc_txt_test_scores = hgbc_txt_emb(
-            feature_extractor=feature_extractor, summaries=patient_summaries, y=y_posttrauma)
+            feature_extractor="Clinical Logformer", summaries=patient_summaries, y=y_posttrauma)
 
         """        # Log. Reg. Concatenated (Tab. + Text Embeddings)
         lr_conc_txt_train_score, lr_conc_txt_test_scores = concat_lr_tab_txtemb(X_tabular=X_posttrauma,
