@@ -147,7 +147,7 @@ def lr_rt_emb(dataset_name, X, y, nominal_features, n_splits=3, n_components=Non
                 ]), nominal_features),
                 # Encode ordinal&numerical features with RTE
                 ("numerical", Pipeline([
-                    ("numerical_imputer", IterativeImputer(max_iter=30)),
+                    ("numerical_imputer", IterativeImputer(max_iter=50)),
                     ("embedding", RandomTreesEmbedding())
                 ]), list(set(X.columns.values) - set(nominal_features))),
             ])),
