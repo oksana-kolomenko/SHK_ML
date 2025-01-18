@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 
 from sklearn.compose import ColumnTransformer
+from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomTreesEmbedding, HistGradientBoostingClassifier
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer, SimpleImputer
@@ -42,14 +43,19 @@ def load_summaries():
     return summaries_list
 
 
-def logistic_regression(dataset_name, X, y, nominal_features, n_splits=3):
+def logistic_regression(dataset_name, X, y, nominal_features, n_splits=3, n_components=None):
+    # Todo: try encoding categ. features with OHE (after finding all categ. features (with Ricardo))
     # for csv format
     # dataset und fold(index von test scores) in der anderen Datei
     dataset = dataset_name
     ml_method = "logistic regression"
     emb_method = "none"
+    pca_components = f"PCA ({n_components} components)" if n_components else "none"
     metrics_per_fold = []
     skf = StratifiedKFold(n_splits=n_splits)
+
+    pca_step = ("pca", PCA(n_components=n_components)) if n_components else None
+    numerical_features = list(set(X.columns.values) - set(nominal_features))
 
     search = GridSearchCV(
         estimator=Pipeline([
@@ -61,7 +67,7 @@ def logistic_regression(dataset_name, X, y, nominal_features, n_splits=3):
                 ("numerical", Pipeline([
                     ("numerical_imputer", IterativeImputer(max_iter=30)),
                     ("numerical_scaler", MinMaxScaler())
-                ]), list(set(X.columns.values) - set(nominal_features))),
+                ] + ([pca_step] if pca_step else [])), numerical_features),
             ])),
             ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=10000))
         ]),
@@ -115,35 +121,45 @@ def logistic_regression(dataset_name, X, y, nominal_features, n_splits=3):
     print(f"Train metrics: {train_metrics}")
     print(f"Test metrics per fold: {metrics_per_fold}")
 
-    return dataset, ml_method, emb_method, train_metrics, metrics_per_fold
+    return dataset, ml_method, emb_method, pca_components, train_metrics, metrics_per_fold
 
 
-def lr_ran_tree_emb(dataset_name, X, y, nominal_features, n_splits=3):
+def lr_rt_emb(dataset_name, X, y, nominal_features, n_splits=3, n_components=None):
     dataset = dataset_name
     ml_method = "logistic regression"
     emb_method = "random tree embedding"
     concatenation = "no"
+    pca_components = f"PCA ({n_components} components)" if n_components else "none"
     metrics_per_fold = []
     skf = StratifiedKFold(n_splits=n_splits)
 
-    # GridSearchCV vor der Schleife definieren
+    pca_step = ("pca", PCA(n_components=n_components)) if n_components else None
+
+    # Todo Question: Why both RTE and OHE on categ. features??
+    # Todo: Try OHE on categorical + RTE on numerical (better for Log.Reg. ?)
     search = GridSearchCV(
         estimator=Pipeline([
             ("transformer", ColumnTransformer([
+                # Encode nominal features with OHE
                 ("nominal", Pipeline([
                     ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
                     ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
                 ]), nominal_features),
+                # Encode ordinal&numerical features with RTE
                 ("numerical", Pipeline([
-                    ("numerical_imputer", IterativeImputer(max_iter=30))
+                    ("numerical_imputer", IterativeImputer(max_iter=30)),
+                    ("embedding", RandomTreesEmbedding())
                 ]), list(set(X.columns.values) - set(nominal_features))),
             ])),
-            ("embedding", RandomTreesEmbedding()),
+            # pca_step,
+            # ("embedding", RandomTreesEmbedding()),
             ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=10000))
         ]),
         param_grid={
-            "embedding__n_estimators": [10, 100, 1000],
-            "embedding__max_depth": [2, 5, 10, 15],
+            #"embedding__n_estimators": [10, 100, 1000],
+            #"embedding__max_depth": [2, 5, 10, 15],
+            "transformer__numerical__embedding__n_estimators": [10, 100, 1000],  # Adjusted for nesting
+            "transformer__numerical__embedding__max_depth": [2, 5, 10, 15],
             "classifier__C": [2, 10, 50, 250]
         },
         scoring="neg_log_loss",
@@ -200,7 +216,8 @@ def lr_ran_tree_emb(dataset_name, X, y, nominal_features, n_splits=3):
     return dataset, ml_method, emb_method, concatenation, train_metrics, metrics_per_fold
 
 
-def lr_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y, n_splits=3):  # Todo! Wird die beste Aggregierung ausgegeben?
+def lr_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y, n_splits=3, n_components=None):
+    # Todo! Wird die beste Aggregierung ausgegeben?
     dataset = dataset_name
     ml_method = "logistic regression"
     concatenation = "no"

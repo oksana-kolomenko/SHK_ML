@@ -88,7 +88,7 @@ def find_best_n_components_and_save_csv(dataset_name, X, y, nominal_features, n_
     }
 
 
-def log_reg_pca(dataset_name, X, y, nominal_features, n_splits=3,  n_components=None):
+def log_reg_pca(dataset_name, X, y, nominal_features, n_splits=3, n_components=None):
     dataset = dataset_name
     ml_method = "logistic regression"
     emb_method = f"PCA ({n_components} components)" if n_components else "none"
@@ -106,7 +106,6 @@ def log_reg_pca(dataset_name, X, y, nominal_features, n_splits=3,  n_components=
                     ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
                     ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
                 ]), nominal_features),
-
                 ("numerical", Pipeline([
                     ("numerical_imputer", IterativeImputer(max_iter=30)),
                     ("numerical_scaler", MinMaxScaler())
