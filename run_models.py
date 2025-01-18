@@ -173,12 +173,12 @@ def run_all_models():
     # Calculate results for each model
     for model_name, feature_extractor in feature_extractors.items():
         # Logistic Regression
-        lr_txt_train_score, lr_txt_test_scores = lr_txt_emb(dataset_name=posttrauma_dataset,
-            emb_method="Clinical Logformer", feature_extractor=feature_extractor, summaries=patient_summaries, y=y_posttrauma)
+        lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_train_score, lr_txt_test_scores = lr_txt_emb(dataset_name=posttrauma_dataset,
+            emb_method="Clinical Longformer", feature_extractor=feature_extractor, summaries=patient_summaries, y=y_posttrauma)
 
         # HGBC
-        hgbc_txt_train_score, hgbc_txt_test_scores = hgbc_txt_emb(
-            feature_extractor="Clinical Logformer", summaries=patient_summaries, y=y_posttrauma)
+        hgbc_txt_dataset, hgbc_txt_ml_method, hgbc_txt_emb_method, hgbc_txt_train_score, hgbc_txt_test_scores = hgbc_txt_emb(
+            feature_extractor="Clinical Longformer", summaries=patient_summaries, y=y_posttrauma)
 
         """        # Log. Reg. Concatenated (Tab. + Text Embeddings)
         lr_conc_txt_train_score, lr_conc_txt_test_scores = concat_lr_tab_txtemb(X_tabular=X_posttrauma,
@@ -197,13 +197,29 @@ def run_all_models():
             nominal_features=nominal_features, feature_extractor=feature_extractor, summaries=patient_summaries, y=y_posttrauma)
         """
 
+        save_results_to_csv(output_file="Clinical_Longformer_LR_train.csv", dataset_name=lr_txt_dataset,
+                            ml_method=lr_txt_ml_method, emb_method=lr_txt_emb_method, concatenation="no",
+                            metrics=lr_txt_train_score, is_train=True)
+
+        save_results_to_csv(output_file="Clinical_Longformer_LR_train.csv", dataset_name=lr_txt_dataset,
+                            ml_method=lr_txt_ml_method, emb_method=lr_txt_emb_method, concatenation="no",
+                            metrics=lr_txt_test_scores, is_train=False)
+
+        save_results_to_csv(output_file="Clinical_Longformer_HGBC_train.csv", dataset_name=hgbc_txt_dataset,
+                            ml_method=hgbc_txt_ml_method, emb_method=hgbc_txt_emb_method, concatenation="no",
+                            metrics=hgbc_txt_train_score, is_train=True)
+
+        save_results_to_csv(output_file="Clinical_Longformer_HGBC_train.csv", dataset_name=hgbc_txt_dataset,
+                            ml_method=hgbc_txt_ml_method, emb_method=hgbc_txt_emb_method, concatenation="no",
+                            metrics=hgbc_txt_test_scores, is_train=False)
+
         labels_local = [
             f"{model_name} \n+ Logistic Regression",
             f"{model_name} \n+ HGBC"
-            f"{model_name} \n+ LogReg Table + Text Emb.",
-            f"{model_name} \n+ HGBC Table + Text Emb."
-            f"{model_name} \n+ LogReg Table + RT Emb",
-            f"{model_name} \n+ HGBC Table + RT Emb."
+            #f"{model_name} \n+ LogReg Table + Text Emb.",
+            #f"{model_name} \n+ HGBC Table + Text Emb."
+            #f"{model_name} \n+ LogReg Table + RT Emb",
+            #f"{model_name} \n+ HGBC Table + RT Emb."
         ]
         train_scores_local = [
             lr_txt_train_score,
