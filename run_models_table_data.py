@@ -45,7 +45,12 @@ def run_models_on_table_data():
     # test ...
     """
 
-    # 2. log reg + random trees embedding
+    log_reg_rt_emb_train_score, log_reg_rt_emb_test_scores = lr_rt_emb(dataset_name=posttrauma_dataset,
+                                                                       X=X_posttrauma,
+                                                                       y=y_posttrauma,
+                                                                       nominal_features=nominal_features)
+
+    """    # 2. log reg + random trees embedding
     (lr_rt_dataset, lr_rt_ml_method, lr_rt_emb_method, lr_rt_concatenation, log_reg_rt_emb_train_score,
      log_reg_rt_emb_test_scores) = lr_rt_emb(dataset_name=posttrauma_dataset, X=X_posttrauma, y=y_posttrauma,
                                              nominal_features=nominal_features)
@@ -65,7 +70,7 @@ def run_models_on_table_data():
         is_train=False,
         metrics=log_reg_rt_emb_test_scores,
         ml_method=lr_rt_ml_method,
-        output_file="rte_log_reg_test.csv")
+        output_file="rte_log_reg_test.csv")"""
 
     # test ...
 
