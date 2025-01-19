@@ -603,6 +603,9 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
         y_train, y_test = y[train_index], y[test_index]
 
         print(f"Fitting the model for fold {fold + 1}...")
+        print(f"X_tab_train shape: {X_tab_train.shape}")
+        print(f"Number of summaries_train: {len(summaries_train)}")
+        print(f"y_train shape: {y_train.shape}")
         search.fit({"tabular": X_tab_train, "embeddings": summaries_train}, y_train)
 
         print(f"Making predictions for fold {fold + 1}...")
