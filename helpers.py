@@ -541,6 +541,7 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
                       n_splits=3):
     start_time = time.time()
     print(f"Starting the concat_lr_txt_emb method {start_time}")
+
     dataset = dataset_name
     ml_method = "Logistic Regression"
     emb_method = emb_method
@@ -549,168 +550,52 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
     skf = StratifiedKFold(n_splits=n_splits)
 
     numerical_features = list(set(X_tabular.columns) - set(nominal_features))
-    print(f"Numerical features identified: {numerical_features}")
 
+    print(f"Numerical features identified: {numerical_features}")
     print(f"Setting up the pipeline at {time.time()}")
 
-    tabular_pipeline = Pipeline([
-        ("tabular_transformer", ColumnTransformer([
-            ("nominal", Pipeline([
-                ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
-                ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
-            ]), nominal_features),
-            ("numerical", Pipeline([
-                ("numerical_imputer", IterativeImputer(max_iter=50)),
-                ("numerical_scaler", MinMaxScaler())
-            ]), numerical_features)
-        ]))
-    ])
-
-    embeddings_pipeline = Pipeline([
-        ("aggregator", EmbeddingAggregator(feature_extractor)),
-        ("scaler", MinMaxScaler())
-    ])
-
-    pipeline = Pipeline([
-        ("features", FeatureUnion([
-            ("tabular", tabular_pipeline),
-            ("embeddings", embeddings_pipeline)
-        ])),
-        ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=10000))
-    ])
-
-    """pipeline = Pipeline([
-        ("feature_combiner", ColumnTransformer([
-            # Verarbeitung der tabellarischen Daten
-            ("tabular", ColumnTransformer([
-                ("nominal", Pipeline([
-                    ("nominal_imputer", SimpleImputer(strategy="most_frequent")),  # try other?
-                    ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
-                ]), nominal_features),
-                ("numerical", Pipeline([
-                    ("numerical_imputer", IterativeImputer(max_iter=50)),
-                    ("numerical_scaler", MinMaxScaler())
-                ]), numerical_features),
-            ]), X_tabular.columns),
-
-            # Verarbeitung der Embeddings
-            ("embeddings", Pipeline([
-                ("aggregator", EmbeddingAggregator(feature_extractor)),
-                ("numerical_scaler", MinMaxScaler())
-            ]), summaries)
-        ])),
-        ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=10000))
-    ])"""
-    print("Setting up the parameter grid...")
-    param_grid = {
-        "classifier__C": [2, 10, 50, 250],
-        "features__embeddings__aggregator__method": [
-            "embedding_cls",
-            "embedding_mean_with_cls_and_sep",
-            "embedding_mean_without_cls_and_sep"
-        ]
-    }
-
-    print("Initializing GridSearchCV...")
     search = GridSearchCV(
-        estimator=pipeline,
-        param_grid=param_grid,
+        estimator=Pipeline([
+            ("feature_combiner", ColumnTransformer([
+                ("tabular", Pipeline([
+                    ("tabular_transformer", ColumnTransformer([
+                        ("nominal", Pipeline([
+                            ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
+                            ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
+                        ]), nominal_features),
+                        ("numerical", Pipeline([
+                            ("numerical_imputer", IterativeImputer(max_iter=30)),
+                            ("numerical_scaler", MinMaxScaler())
+                        ]), numerical_features),
+                    ])),
+                ])),
+                ("text", Pipeline([
+                    ("embedding_aggregator", EmbeddingAggregator(feature_extractor)),
+                ]), "passthrough"),
+            ])),
+            ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=10000))
+        ]),
+        param_grid={
+            "classifier__C": [2, 10, 50, 250],
+            "feature_combiner__text__embedding_aggregator__method": [
+                "embedding_cls",
+                "embedding_mean_with_cls_and_sep",
+                "embedding_mean_without_cls_and_sep"
+            ]
+        },
         scoring="neg_log_loss",
         cv=RepeatedStratifiedKFold(n_splits=3)
     )
 
-    print("Starting cross-validation...")
-    # Cross-Validation
-    for fold, (train_index, test_index) in enumerate(skf.split(X_tabular, y)):
-        print(f"Processing fold {fold + 1}...")
-        # Aufteilen der tabellarischen Daten und Embeddings
-        X_tab_train, X_tab_test = X_tabular.iloc[train_index], X_tabular.iloc[test_index]
-        summaries_train = [summaries[i] for i in train_index]
-        summaries_test = [summaries[i] for i in test_index]
+    for train_index, test_index in skf.split(X_tabular, y):
+        X_train, X_test = X_tabular.iloc[train_index], X_tabular.iloc[test_index]
+        summaries_train, summaries_test = [summaries[i] for i in train_index], [summaries[i] for i in test_index]
         y_train, y_test = y[train_index], y[test_index]
 
-        # Flatten nested lists in summaries_train and summaries_test
-        summaries_train_array = np.array(
-            [summary[0] if isinstance(summary, list) else summary for summary in summaries_train])
-        summaries_test_array = np.array(
-            [summary[0] if isinstance(summary, list) else summary for summary in summaries_test])
+        search.fit({"tabular": X_train, "text": summaries_train}, y_train)
 
-        # Validate that all inputs are strings
-        assert all(isinstance(summary, str) for summary in
-                   summaries_train_array), "Non-string data detected in summaries_train_array."
-        assert all(isinstance(summary, str) for summary in
-                   summaries_test_array), "Non-string data detected in summaries_test_array."
-
-        # Reshape if necessary
-        """        if summaries_train_array.ndim == 1:
-            summaries_train_array = summaries_train_array.reshape(-1, 1)
-        if summaries_test_array.ndim == 1:
-            summaries_test_array = summaries_test_array.reshape(-1, 1)"""
-
-        # Debugging: Print sample data
-        print(f"Sample summaries_train_array after preprocessing: {summaries_train_array[:5]}")
-        print(f"Sample summaries_test_array after preprocessing: {summaries_test_array[:5]}")
-
-        print(f"Data types in summaries_train_array: {type(summaries_train_array[0])}")
-
-        invalid_rows = [i for i, summary in enumerate(summaries_train_array) if not isinstance(summary, str)]
-        print(f"Invalid rows in summaries_train_array: {invalid_rows}")
-
-        # Create a DataFrame for embeddings
-        summaries_train_df = pd.DataFrame(
-            summaries_train_array,
-            columns=[f"embedding_{i}" for i in range(summaries_train_array.shape[1])]
-        )
-
-        print(f"Sample summaries_test_array: {summaries_test_array[:5]}")
-        print(f"Data types in summaries_test_array: {type(summaries_test_array[0])}")
-
-        invalid_rows_test = [i for i, summary in enumerate(summaries_test_array) if not isinstance(summary, str)]
-        print(f"Invalid rows in summaries_train_array: {invalid_rows_test}")
-
-        # Create a DataFrame for embeddings
-        summaries_test_df = pd.DataFrame(
-            summaries_test_array,
-            columns=[f"embedding_{i}" for i in range(summaries_test_array.shape[1])]
-        )
-
-        print(f"Fitting the model for fold {fold + 1}...")
-        print(f"X_tab_train shape: {X_tab_train.shape}")
-        print(f"!!! Tabular data shape (after pipeline): {X_tab_train.shape}")
-        print(f"!!! Embeddings data shape (after pipeline): {summaries_train_array.shape}")
-
-        processed_tabular = tabular_pipeline.fit_transform(X_tab_train)
-        print(f"!!! Processed tabular shape: {processed_tabular.shape}")
-
-        processed_embeddings = embeddings_pipeline.fit_transform(summaries_train_array)
-        print(f"!!! Processed embeddings shape: {processed_embeddings.shape}")
-
-        assert len(X_tabular) == len(summaries), "Mismatch in row counts between tabular and embedding data."
-
-        print(f"Number of summaries_train: {len(summaries_train)}")
-        print(f"y_train shape: {y_train.shape}")
-
-        #combined_train = np.hstack((X_tab_train.values, summaries_train_array))
-        #combined_test = np.hstack((X_tab_test.values, summaries_test_array))
-
-        # Combine X_tabular and embeddings
-        combined_train = pd.concat([X_tab_train.reset_index(drop=True), summaries_train_df.reset_index(drop=True)],
-                                   axis=1)
-        combined_test = pd.concat([X_tab_test.reset_index(drop=True), summaries_test_df.reset_index(drop=True)], axis=1)
-
-        #search.fit({"tabular": X_tab_train, "embeddings": summaries_train}, y_train)
-        print(f"Combined train columns: {combined_train.columns}")
-        print(f"Combined test columns: {combined_test.columns}")
-
-        print(f"Combined train shape: {combined_train.shape}")
-        print(f"Combined test shape: {combined_test.shape}")
-        search.fit(combined_train, y_train)
-
-        print(f"Making predictions for fold {fold + 1}...")
-        #y_test_pred = search.predict({"tabular": X_tab_test, "embeddings": summaries_test})
-        #y_test_pred_proba = search.predict_proba({"tabular": X_tab_test, "embeddings": summaries_test})[:, 1]
-        y_test_pred = search.predict(combined_test)
-        y_test_pred_proba = search.predict(combined_test)[:, 1]
+        y_test_pred = search.predict({"tabular": X_test, "text": summaries_test})
+        y_test_pred_proba = search.predict_proba({"tabular": X_test, "text": summaries_test})[:, 1]
 
         # Calculate metrics
         tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
@@ -727,27 +612,11 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
             "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
         })
 
-    print("Fitting the model on the entire dataset...")
+    search.fit({"tabular": X_tabular, "text": summaries}, y)
 
-    summaries_array = np.array(summaries)
-    """    if summaries_array.ndim == 1:
-        summaries_array = summaries_array.reshape(-1, 1)"""
+    y_train_pred = search.predict({"tabular": X_tabular, "text": summaries})
+    y_train_pred_proba = search.predict_proba({"tabular": X_tabular, "text": summaries})[:, 1]
 
-    summaries_df = pd.DataFrame(
-        summaries_array,
-        columns=[f"embedding_{i}" for i in range(summaries_array.shape[1])]
-    )
-
-    combined_all = pd.concat([X_tabular.reset_index(drop=True), summaries_df.reset_index(drop=True)], axis=1)
-    print(f"Combined all columns: {combined_all.columns}")
-    print(f"Combined all shape: {combined_all.shape}")
-    search.fit(combined_all, y)
-
-    y_train_pred = search.predict(combined_all)
-    y_train_pred_proba = search.predict_proba(combined_all)[:, 1]
-
-    print("Calculating training metrics...")
-    # Calculate training metrics
     train_metrics = {
         "AUC": roc_auc_score(y, y_train_pred_proba),
         "AP": average_precision_score(y, y_train_pred_proba),
@@ -759,12 +628,11 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
         "Balanced Accuracy": balanced_accuracy_score(y, y_train_pred)
     }
 
-    print(f"Feature set size: {len(search.best_estimator_.named_steps['classifier'].coef_[0])}")
+    print(f"Combined feature size: {len(search.best_estimator_.named_steps['classifier'].coef_[0])}")
     print(f"Best hyperparameters: {search.best_params_}")
     print(f"Train metrics: {train_metrics}")
     print(f"Test metrics per fold: {metrics_per_fold}")
 
-    print(f"Completed in {time.time() - start_time:.2f} seconds!")
     return dataset, ml_method, emb_method, concatenation, train_metrics, metrics_per_fold
 
 
