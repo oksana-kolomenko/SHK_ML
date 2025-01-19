@@ -287,6 +287,7 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y, n_spli
         "F1": f1_score(y, y_train_pred, average='macro'),
         "Balanced Accuracy": balanced_accuracy_score(y, y_train_pred)
     }
+
     print(f"embedding size: {len(search.best_estimator_.named_steps['classifier'].coef_[0])}")
     print(f"Best hyperparameters: {search.best_params_}")
     print(f"Train metrics: {train_metrics}")
