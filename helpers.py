@@ -662,6 +662,8 @@ def combine_data(X_tabular, summaries, feature_extractor):
                     print(f"Shape of first element: {len(t[0])} (if it's a list)")
             # print(f"Content preview: {t[:2]}")  # Show the first 2 elements of `t` (if it's a list)
             print("---")
+            if len(t.shape) == 1:
+                t = t.reshape(-1, 1)
         print(f"Ammount of embs: {len(text_embeddings)}")
         # Ensure the embeddings are 2D
         # if len(text_embeddings.shape) == 1:
