@@ -622,7 +622,7 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
 
     y_train_pred = search.predict(X_combined)
     y_train_pred_proba = search.predict_proba(X_combined)[:, 1]
-    
+
     train_metrics = {
         "AUC": roc_auc_score(y, y_train_pred_proba),
         "AP": average_precision_score(y, y_train_pred_proba),
