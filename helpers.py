@@ -650,7 +650,8 @@ def combine_data(X_tabular, summaries, feature_extractor):
         #text_embeddings = np.array([feature_extractor(summary) for summary in summaries])
         text_embeddings = feature_extractor(summaries)
         for t in text_embeddings:
-            print(f"Embedding: {t}")
+            print(f"Embedding_len: {len(t)}")
+        print(f"Ammount of embs: {len(text_embeddings)}")
         # Ensure the embeddings are 2D
         if len(text_embeddings.shape) == 1:
             text_embeddings = text_embeddings.reshape(-1, 1)
