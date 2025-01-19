@@ -602,19 +602,25 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
         summaries_test = [summaries[i] for i in test_index]
         y_train, y_test = y[train_index], y[test_index]
 
+        summaries_train_array = np.array(summaries_train)
+        if summaries_train_array.ndim == 1:
+            summaries_train_array = summaries_train_array.reshape(-1, 1)
+
+        summaries_test_array = np.array(summaries_test)
+        if summaries_test_array.ndim == 1:
+            summaries_test_array = summaries_test_array.reshape(-1, 1)
+
         print(f"Fitting the model for fold {fold + 1}...")
         print(f"X_tab_train shape: {X_tab_train.shape}")
         print(f"Number of summaries_train: {len(summaries_train)}")
         print(f"y_train shape: {y_train.shape}")
 
-
-        combined_train = np.hstack((X_tab_train.values, np.array(summaries_train)))
-        combined_test = np.hstack((X_tab_test.values, np.array(summaries_test)))
+        combined_train = np.hstack((X_tab_train.values, summaries_train_array))
+        combined_test = np.hstack((X_tab_test.values, summaries_test_array))
         #search.fit({"tabular": X_tab_train, "embeddings": summaries_train}, y_train)
         print(f"Combined train shape: {combined_train.shape}")
         print(f"Combined test shape: {combined_test.shape}")
         search.fit(combined_train, y_train)
-
 
         print(f"Making predictions for fold {fold + 1}...")
         #y_test_pred = search.predict({"tabular": X_tab_test, "embeddings": summaries_test})
@@ -638,7 +644,11 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
         })
 
     print("Fitting the model on the entire dataset...")
-    combined_all = np.hstack((X_tabular.values, np.array(summaries)))
+
+    summaries_array = np.array(summaries)
+    if summaries_array.ndim == 1:
+        summaries_array = summaries_array.reshape(-1, 1)
+    combined_all = np.hstack((X_tabular.values, summaries_array))
     print(f"Combined train shape: {combined_all.shape}")
     search.fit(combined_all, y)
 
