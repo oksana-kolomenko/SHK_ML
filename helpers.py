@@ -645,7 +645,10 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
 def combine_data(X_tabular, summaries, feature_extractor):
         """Combine tabular and text data into a single feature set."""
         # Extract text embeddings
-        text_embeddings = np.array([feature_extractor(summary) for summary in summaries])
+        #for summary in summaries:
+        #    print(f"Length of feature_ext(summary): {np.array(feature_extractor(summary)).shape}")
+        #text_embeddings = np.array([feature_extractor(summary) for summary in summaries])
+        text_embeddings = feature_extractor(summaries)
         # Ensure the embeddings are 2D
         if len(text_embeddings.shape) == 1:
             text_embeddings = text_embeddings.reshape(-1, 1)
