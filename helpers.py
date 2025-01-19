@@ -651,6 +651,17 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
 
         print(f"Fitting the model for fold {fold + 1}...")
         print(f"X_tab_train shape: {X_tab_train.shape}")
+        print(f"!!! Tabular data shape (after pipeline): {X_tab_train.shape}")
+        print(f"!!! Embeddings data shape (after pipeline): {summaries_train_array.shape}")
+        
+        processed_tabular = tabular_pipeline.fit_transform(X_tab_train)
+        print(f"!!! Processed tabular shape: {processed_tabular.shape}")
+
+        processed_embeddings = embeddings_pipeline.fit_transform(summaries_train_array)
+        print(f"!!! Processed embeddings shape: {processed_embeddings.shape}")
+
+        assert len(X_tabular) == len(summaries), "Mismatch in row counts between tabular and embedding data."
+
         print(f"Number of summaries_train: {len(summaries_train)}")
         print(f"y_train shape: {y_train.shape}")
 
