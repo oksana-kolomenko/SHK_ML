@@ -10,7 +10,7 @@ from sklearn.ensemble import RandomTreesEmbedding, HistGradientBoostingClassifie
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer, SimpleImputer
 from sklearn.linear_model import LogisticRegression
-from sklearn.pipeline import Pipeline
+from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.preprocessing import OneHotEncoder, MinMaxScaler#, OrdinalEncoder
 #from sklearn.base import TransformerMixin, BaseEstimator
 from sklearn.model_selection import StratifiedKFold, GridSearchCV, RepeatedStratifiedKFold
@@ -552,7 +552,34 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
     print(f"Numerical features identified: {numerical_features}")
 
     print(f"Setting up the pipeline at {time.time()}")
+
+    tabular_pipeline = Pipeline([
+        ("tabular_transformer", ColumnTransformer([
+            ("nominal", Pipeline([
+                ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
+                ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
+            ]), nominal_features),
+            ("numerical", Pipeline([
+                ("numerical_imputer", IterativeImputer(max_iter=50)),
+                ("numerical_scaler", MinMaxScaler())
+            ]), numerical_features)
+        ]))
+    ])
+
+    embeddings_pipeline = Pipeline([
+        ("embedding_transform", EmbeddingAggregator(feature_extractor)),
+        ("scaler", MinMaxScaler())
+    ])
+
     pipeline = Pipeline([
+        ("features", FeatureUnion([
+            ("tabular", tabular_pipeline),
+            ("embeddings", embeddings_pipeline)
+        ])),
+        ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=10000))
+    ])
+
+    """pipeline = Pipeline([
         ("feature_combiner", ColumnTransformer([
             # Verarbeitung der tabellarischen Daten
             ("tabular", ColumnTransformer([
@@ -573,7 +600,7 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
             ]), summaries)
         ])),
         ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=10000))
-    ])
+    ])"""
     print("Setting up the parameter grid...")
     param_grid = {
         "classifier__C": [2, 10, 50, 250],
