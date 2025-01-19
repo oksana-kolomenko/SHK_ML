@@ -642,16 +642,15 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
                    summaries_test_array), "Non-string data detected in summaries_test_array."
 
         # Reshape if necessary
-        if summaries_train_array.ndim == 1:
+        """        if summaries_train_array.ndim == 1:
             summaries_train_array = summaries_train_array.reshape(-1, 1)
         if summaries_test_array.ndim == 1:
-            summaries_test_array = summaries_test_array.reshape(-1, 1)
+            summaries_test_array = summaries_test_array.reshape(-1, 1)"""
 
         # Debugging: Print sample data
         print(f"Sample summaries_train_array after preprocessing: {summaries_train_array[:5]}")
         print(f"Sample summaries_test_array after preprocessing: {summaries_test_array[:5]}")
 
-        print(f"Sample summaries_train_array: {summaries_train_array[:5]}")
         print(f"Data types in summaries_train_array: {type(summaries_train_array[0])}")
 
         invalid_rows = [i for i, summary in enumerate(summaries_train_array) if not isinstance(summary, str)]
@@ -731,8 +730,8 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
     print("Fitting the model on the entire dataset...")
 
     summaries_array = np.array(summaries)
-    if summaries_array.ndim == 1:
-        summaries_array = summaries_array.reshape(-1, 1)
+    """    if summaries_array.ndim == 1:
+        summaries_array = summaries_array.reshape(-1, 1)"""
 
     summaries_df = pd.DataFrame(
         summaries_array,
