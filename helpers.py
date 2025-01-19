@@ -567,7 +567,7 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
     ])
 
     embeddings_pipeline = Pipeline([
-        ("embedding_transformer", EmbeddingAggregator(feature_extractor)),
+        ("aggregator", EmbeddingAggregator(feature_extractor)),
         ("scaler", MinMaxScaler())
     ])
 
