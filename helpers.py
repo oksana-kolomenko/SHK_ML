@@ -606,11 +606,21 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
         print(f"X_tab_train shape: {X_tab_train.shape}")
         print(f"Number of summaries_train: {len(summaries_train)}")
         print(f"y_train shape: {y_train.shape}")
-        search.fit({"tabular": X_tab_train, "embeddings": summaries_train}, y_train)
+
+
+        combined_train = np.hstack((X_tab_train.values, np.array(summaries_train)))
+        combined_test = np.hstack((X_tab_test.values, np.array(summaries_test)))
+        #search.fit({"tabular": X_tab_train, "embeddings": summaries_train}, y_train)
+        print(f"Combined train shape: {combined_train.shape}")
+        print(f"Combined test shape: {combined_test.shape}")
+        search.fit(combined_train, y_train)
+
 
         print(f"Making predictions for fold {fold + 1}...")
-        y_test_pred = search.predict({"tabular": X_tab_test, "embeddings": summaries_test})
-        y_test_pred_proba = search.predict_proba({"tabular": X_tab_test, "embeddings": summaries_test})[:, 1]
+        #y_test_pred = search.predict({"tabular": X_tab_test, "embeddings": summaries_test})
+        #y_test_pred_proba = search.predict_proba({"tabular": X_tab_test, "embeddings": summaries_test})[:, 1]
+        y_test_pred = search.predict(combined_test)
+        y_test_pred_proba = search.predict(combined_test)[:, 1]
 
         # Calculate metrics
         tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
@@ -628,9 +638,12 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
         })
 
     print("Fitting the model on the entire dataset...")
-    search.fit({"tabular": X_tabular, "embeddings": summaries}, y)
-    y_train_pred = search.predict({"tabular": X_tabular, "embeddings": summaries})
-    y_train_pred_proba = search.predict_proba({"tabular": X_tabular, "embeddings": summaries})[:, 1]
+    combined_all = np.hstack((X_tabular.values, np.array(summaries)))
+    print(f"Combined train shape: {combined_all.shape}")
+    search.fit(combined_all, y)
+
+    y_train_pred = search.predict(combined_all)
+    y_train_pred_proba = search.predict_proba(combined_all)[:, 1]
 
     print("Calculating training metrics...")
     # Calculate training metrics
