@@ -48,7 +48,6 @@ def load_summaries():
 def logistic_regression(dataset_name, X, y, nominal_features, n_splits=3, n_components=None):
     # Todo: try encoding categ. features with OHE (after finding all categ. features (with Ricardo))
     # for csv format
-    # dataset und fold(index von test scores) in der anderen Datei
     dataset = dataset_name
     ml_method = "logistic regression"
     emb_method = "none"
@@ -243,7 +242,7 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y, n_spli
         scoring="neg_log_loss",
         cv=RepeatedStratifiedKFold(n_splits=3)
     )
-    """ 
+
     for train_index, test_index in skf.split(summaries, y):
         X_train, X_test = [summaries[i] for i in train_index], [summaries[i] for i in test_index]
         y_train, y_test = y[train_index], y[test_index]
@@ -268,7 +267,7 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y, n_spli
             "F1": f1_score(y_test, y_test_pred, average='macro'),
             "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
         })
-    """
+
     search.fit(
         summaries,
         y
@@ -573,6 +572,7 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
                 ])),
                 ("text", Pipeline([
                     ("embedding_aggregator", EmbeddingAggregator(feature_extractor)),
+                    ("numerical_scaler", MinMaxScaler()),  # test vs. StandardScaler
                 ])),
             ])),
             ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=10000))
@@ -664,8 +664,8 @@ def combine_data(X_tabular, summaries, feature_extractor):
             print("---")
         print(f"Ammount of embs: {len(text_embeddings)}")
         # Ensure the embeddings are 2D
-        if len(text_embeddings.shape) == 1:
-            text_embeddings = text_embeddings.reshape(-1, 1)
+        # if len(text_embeddings.shape) == 1:
+        #    text_embeddings = text_embeddings.reshape(-1, 1)
         # Concatenate tabular data and text embeddings
         combined_data = np.hstack([X_tabular.to_numpy(), text_embeddings])
         return combined_data
