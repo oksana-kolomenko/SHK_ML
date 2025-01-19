@@ -1,13 +1,13 @@
 import numpy as np
 
 from csv_saver import save_results_to_csv
-from helpers import (load_labels, load_features, load_summaries, logistic_regression,
-                     lr_rt_emb, hgbc, hgbc_ran_tree_emb, concat_lr_txt_emb)
+from helpers import (load_labels, load_features, load_summaries, concat_lr_txt_emb)
 from bar_plotting import plot_bar_chart
+from models import feature_extractor_clinical
 from values import Dataset
 
 
-def run_models_on_table_data():
+def run_models_concatenated():
     posttrauma_dataset = Dataset.POSTTRAUMA.value
 
     # load features and labels
@@ -31,8 +31,8 @@ def run_models_on_table_data():
         # others?
     ]
     feature_extractors = {
-        # Clinical Longformer (done)
-        # "Clinical-Longformer": feature_extractor_clinical,
+        # Clinical Longformer
+        "Clinical-Longformer": feature_extractor_clinical,
 
         # BERT (half done)
         # "BERT": feature_extractor_bert,
@@ -96,6 +96,7 @@ def run_models_on_table_data():
                                                                        summaries=patient_summaries,
                                                                        y=y_posttrauma)
 
+        """        
         # HGBC Concatenated (Tab. + Text Embeddings)
         (hgbc_conc_dataset, hgbc_conc_ml_method, hgbc_conc_emb_method,
          hgbc_conc_train_score, hgbc_conc_test_scores) = concat_lr_txt_emb(dataset_name=posttrauma_dataset,
@@ -124,17 +125,18 @@ def run_models_on_table_data():
                                                                                    nominal_features=nominal_features,
                                                                                    feature_extractor=feature_extractor,
                                                                                    summaries=patient_summaries,
-                                                                                   y=y_posttrauma)
+                                                                                   y=y_posttrauma)"""
 
         # Todo: check
-        save_results_to_csv(output_file=f"{model_name}_LR_train.csv", dataset_name=lr_conc_dataset,
+        save_results_to_csv(output_file=f"{model_name}_LR_conc_train.csv", dataset_name=lr_conc_dataset,
                             ml_method=lr_conc_ml_method, emb_method=lr_conc_emb_method, concatenation="no",
                             metrics=lr_conc_train_score, is_train=True)
 
-        save_results_to_csv(output_file=f"{model_name}_LR_test.csv", dataset_name=lr_conc_dataset,
+        save_results_to_csv(output_file=f"{model_name}_LR_conc_test.csv", dataset_name=lr_conc_dataset,
                             ml_method=lr_conc_ml_method, emb_method=lr_conc_emb_method, concatenation="no",
                             metrics=lr_conc_test_scores, is_train=False)
 
+        """ 
         save_results_to_csv(output_file=f"{model_name}_LR_rte_train.csv", dataset_name=lr_conc_rte_dataset,
                             ml_method=lr_conc_rte_ml_method, emb_method=lr_conc_rte_emb_method, concatenation="no",
                             metrics=lr_conc_rte_train_score, is_train=True)
@@ -158,33 +160,33 @@ def run_models_on_table_data():
         save_results_to_csv(output_file=f"{model_name}_HGBC_rte_test.csv", dataset_name=hgbc_conc_rte_dataset,
                             ml_method=hgbc_conc_rte_ml_method, emb_method=hgbc_conc_rte_emb_method, concatenation="no",
                             metrics=hgbc_conc_rte_test_scores, is_train=False)
-
+        """
         labels_local = [
-            # f"{model_name} \n+ LogReg Table + Text Emb.",
+            f"{model_name} \n+ LogReg Table + Text Emb.",
             # f"{model_name} \n+ HGBC Table + Text Emb."
             # f"{model_name} \n+ LogReg Table + RT Emb",
             # f"{model_name} \n+ HGBC Table + RT Emb."
         ]
         train_scores_local = [
-            # lr_conc_txt_train_score,
+            lr_conc_train_score,
             # hgbc_conc_txt_train_score,
             # lr_conc_rte_train_score,
             # hgbc_conc_rte_train_score
         ]
         test_score_medians_local = [
-            # np.median(lr_conc_txt_test_scores),
+            np.median(lr_conc_test_scores),
             # np.median(hgbc_conc_txt_test_scores),
             # np.median(lr_conc_rte_test_scores),
             # np.median(hgbc_conc_rte_test_scores)
         ]
         test_score_mins_local = [
-            # np.min(lr_conc_txt_test_scores),
+            np.min(lr_conc_test_scores),
             # np.min(hgbc_conc_txt_test_scores),
             # np.min(lr_conc_rte_test_scores),
             # np.min(hgbc_conc_rte_test_scores)
         ]
         test_score_maxs_local = [
-            # np.max(lr_conc_txt_test_scores),
+            np.max(lr_conc_test_scores),
             # np.max(hgbc_conc_txt_test_scores),
             # np.max(lr_conc_rte_test_scores),
             # np.max(hgbc_conc_rte_test_scores)

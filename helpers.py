@@ -1,4 +1,6 @@
 import os
+import time
+
 import numpy as np
 import pandas as pd
 
@@ -9,8 +11,8 @@ from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer, SimpleImputer
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import OneHotEncoder, MinMaxScaler, OrdinalEncoder
-from sklearn.base import TransformerMixin, BaseEstimator
+from sklearn.preprocessing import OneHotEncoder, MinMaxScaler#, OrdinalEncoder
+#from sklearn.base import TransformerMixin, BaseEstimator
 from sklearn.model_selection import StratifiedKFold, GridSearchCV, RepeatedStratifiedKFold
 from sklearn.metrics import (
     roc_auc_score, recall_score, precision_score, f1_score, balanced_accuracy_score, confusion_matrix,
@@ -537,6 +539,8 @@ def hgbc_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y, n_sp
 
 def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_extractor, nominal_features, y,
                       n_splits=3):
+    start_time = time.time()
+    print(f"Starting the concat_lr_txt_emb method {start_time}")
     dataset = dataset_name
     ml_method = "Logistic Regression"
     emb_method = emb_method
@@ -545,7 +549,9 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
     skf = StratifiedKFold(n_splits=n_splits)
 
     numerical_features = list(set(X_tabular.columns) - set(nominal_features))
+    print(f"Numerical features identified: {numerical_features}")
 
+    print(f"Setting up the pipeline at {time.time()}")
     pipeline = Pipeline([
         ("feature_combiner", ColumnTransformer([
             # Verarbeitung der tabellarischen Daten
@@ -568,7 +574,7 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
         ])),
         ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=10000))
     ])
-
+    print("Setting up the parameter grid...")
     param_grid = {
         "classifier__C": [2, 10, 50, 250],
         "aggregator__method": [
@@ -578,6 +584,7 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
         ]
     }
 
+    print("Initializing GridSearchCV...")
     search = GridSearchCV(
         estimator=pipeline,
         param_grid=param_grid,
@@ -585,16 +592,20 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
         cv=RepeatedStratifiedKFold(n_splits=3)
     )
 
+    print("Starting cross-validation...")
     # Cross-Validation
-    for train_index, test_index in skf.split(X_tabular, y):
+    for fold, (train_index, test_index) in enumerate(skf.split(X_tabular, y)):
+        print(f"Processing fold {fold + 1}...")
         # Aufteilen der tabellarischen Daten und Embeddings
         X_tab_train, X_tab_test = X_tabular.iloc[train_index], X_tabular.iloc[test_index]
         summaries_train = [summaries[i] for i in train_index]
         summaries_test = [summaries[i] for i in test_index]
         y_train, y_test = y[train_index], y[test_index]
 
+        print(f"Fitting the model for fold {fold + 1}...")
         search.fit({"tabular": X_tab_train, "embeddings": summaries_train}, y_train)
 
+        print(f"Making predictions for fold {fold + 1}...")
         y_test_pred = search.predict({"tabular": X_tab_test, "embeddings": summaries_test})
         y_test_pred_proba = search.predict_proba({"tabular": X_tab_test, "embeddings": summaries_test})[:, 1]
 
@@ -613,10 +624,12 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
             "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
         })
 
+    print("Fitting the model on the entire dataset...")
     search.fit({"tabular": X_tabular, "embeddings": summaries}, y)
     y_train_pred = search.predict({"tabular": X_tabular, "embeddings": summaries})
     y_train_pred_proba = search.predict_proba({"tabular": X_tabular, "embeddings": summaries})[:, 1]
 
+    print("Calculating training metrics...")
     # Calculate training metrics
     train_metrics = {
         "AUC": roc_auc_score(y, y_train_pred_proba),
@@ -634,6 +647,7 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
     print(f"Train metrics: {train_metrics}")
     print(f"Test metrics per fold: {metrics_per_fold}")
 
+    print(f"Completed in {time.time() - start_time:.2f} seconds!")
     return dataset, ml_method, emb_method, concatenation, train_metrics, metrics_per_fold
 
 
@@ -743,7 +757,6 @@ def concat_lr_tab_rt_emb(dataset_name, X_tabular, summaries, nominal_features, y
     print(f"Train metrics: {train_metrics}")
     print(f"Test metrics per fold: {metrics_per_fold}")
 
-    # Return results
     return dataset, ml_method, emb_method, concatenation, train_metrics, metrics_per_fold
 
 
