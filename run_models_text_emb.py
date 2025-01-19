@@ -3,13 +3,15 @@ import numpy as np
 from csv_saver import save_results_to_csv
 from helpers import load_labels, load_summaries, lr_txt_emb, hgbc_txt_emb
 from bar_plotting import plot_bar_chart
+from models import feature_extractor_clinical
+
 """from models import feature_extractor_clinical, feature_extractor_electra_small, feature_extractor_electra_large, \
     feature_extractor_electra_base, \
     feature_extractor_bert"""
 from values import Dataset
 
 
-def run_models_on_table_data():
+def run_models_on_txt_emb():
     posttrauma_dataset = Dataset.POSTTRAUMA.value
 
     # load features and labels
@@ -18,7 +20,7 @@ def run_models_on_table_data():
 
     feature_extractors = {
         # Clinical Longformer (done)
-        # "Clinical-Longformer": feature_extractor_clinical,
+        "Clinical-Longformer": feature_extractor_clinical,
 
         # BERT (half done)
         # "BERT": feature_extractor_bert,
@@ -79,10 +81,10 @@ def run_models_on_table_data():
             emb_method=model_name, feature_extractor=feature_extractor, summaries=patient_summaries,
             y=y_posttrauma)
 
-        # HGBC
+        """# HGBC
         hgbc_txt_dataset, hgbc_txt_ml_method, hgbc_txt_emb_method, hgbc_txt_train_score, hgbc_txt_test_scores = hgbc_txt_emb(
             feature_extractor=model_name, summaries=patient_summaries, y=y_posttrauma)
-
+        """
         save_results_to_csv(output_file=f"{model_name}_LR_train.csv", dataset_name=lr_txt_dataset,
                             ml_method=lr_txt_ml_method, emb_method=lr_txt_emb_method, concatenation="no",
                             metrics=lr_txt_train_score, is_train=True)
@@ -91,33 +93,33 @@ def run_models_on_table_data():
                             ml_method=lr_txt_ml_method, emb_method=lr_txt_emb_method, concatenation="no",
                             metrics=lr_txt_test_scores, is_train=False)
 
-        save_results_to_csv(output_file=f"{model_name}_HGBC_train.csv", dataset_name=hgbc_txt_dataset,
+        """save_results_to_csv(output_file=f"{model_name}_HGBC_train.csv", dataset_name=hgbc_txt_dataset,
                             ml_method=hgbc_txt_ml_method, emb_method=hgbc_txt_emb_method, concatenation="no",
                             metrics=hgbc_txt_train_score, is_train=True)
 
         save_results_to_csv(output_file=f"{model_name}_HGBC_train.csv", dataset_name=hgbc_txt_dataset,
                             ml_method=hgbc_txt_ml_method, emb_method=hgbc_txt_emb_method, concatenation="no",
                             metrics=hgbc_txt_test_scores, is_train=False)
-
+        """
         labels_local = [
             f"{model_name} \n+ Logistic Regression",
-            f"{model_name} \n+ HGBC"
+            # f"{model_name} \n+ HGBC"
         ]
         train_scores_local = [
             lr_txt_train_score,
-            hgbc_txt_train_score
+         #   hgbc_txt_train_score
         ]
         test_score_medians_local = [
             np.median(lr_txt_test_scores),
-            np.median(hgbc_txt_test_scores)
+          #  np.median(hgbc_txt_test_scores)
         ]
         test_score_mins_local = [
             np.min(lr_txt_test_scores),
-            np.min(hgbc_txt_test_scores)
+           # np.min(hgbc_txt_test_scores)
         ]
         test_score_maxs_local = [
             np.max(lr_txt_test_scores),
-            np.max(hgbc_txt_test_scores)
+            #np.max(hgbc_txt_test_scores)
         ]
 
         # Convert to arrays
