@@ -535,10 +535,11 @@ def hgbc_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y, n_sp
     return dataset, ml_method, emb_method, concatenation, train_metrics, metrics_per_fold
 
 
-def concat_lr_tab_txtemb(dataset_name, emb_method, X_tabular, summaries, feature_extractor, nominal_features, y,
-                         n_splits=3):
+def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_extractor, nominal_features, y,
+                      n_splits=3):
     dataset = dataset_name
     ml_method = "Logistic Regression"
+    emb_method = emb_method
     concatenation = "yes"
     metrics_per_fold = []
     skf = StratifiedKFold(n_splits=n_splits)
@@ -547,7 +548,6 @@ def concat_lr_tab_txtemb(dataset_name, emb_method, X_tabular, summaries, feature
 
     pipeline = Pipeline([
         ("feature_combiner", ColumnTransformer([
-
             # Verarbeitung der tabellarischen Daten
             ("tabular", ColumnTransformer([
                 ("nominal", Pipeline([
@@ -555,7 +555,7 @@ def concat_lr_tab_txtemb(dataset_name, emb_method, X_tabular, summaries, feature
                     ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
                 ]), nominal_features),
                 ("numerical", Pipeline([
-                    ("numerical_imputer", IterativeImputer(max_iter=30)),
+                    ("numerical_imputer", IterativeImputer(max_iter=50)),
                     ("numerical_scaler", MinMaxScaler())
                 ]), numerical_features),
             ]), X_tabular.columns),

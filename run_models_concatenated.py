@@ -2,7 +2,7 @@ import numpy as np
 
 from csv_saver import save_results_to_csv
 from helpers import (load_labels, load_features, load_summaries, logistic_regression,
-                     lr_rt_emb, hgbc, hgbc_ran_tree_emb, concat_lr_tab_txtemb)
+                     lr_rt_emb, hgbc, hgbc_ran_tree_emb, concat_lr_txt_emb)
 from bar_plotting import plot_bar_chart
 from values import Dataset
 
@@ -88,43 +88,43 @@ def run_models_on_table_data():
     for model_name, feature_extractor in feature_extractors.items():
         # Log. Reg. Concatenated (Tab. + Text Embeddings)
         (lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,
-         lr_conc_train_score, lr_conc_test_scores) = concat_lr_tab_txtemb(dataset_name=posttrauma_dataset,
-                                                                          emb_method=model_name,
-                                                                          X_tabular=X_posttrauma,
-                                                                          nominal_features=nominal_features,
-                                                                          feature_extractor=feature_extractor,
-                                                                          summaries=patient_summaries,
-                                                                          y=y_posttrauma)
+         lr_conc_train_score, lr_conc_test_scores) = concat_lr_txt_emb(dataset_name=posttrauma_dataset,
+                                                                       emb_method=model_name,
+                                                                       X_tabular=X_posttrauma,
+                                                                       nominal_features=nominal_features,
+                                                                       feature_extractor=feature_extractor,
+                                                                       summaries=patient_summaries,
+                                                                       y=y_posttrauma)
 
         # HGBC Concatenated (Tab. + Text Embeddings)
         (hgbc_conc_dataset, hgbc_conc_ml_method, hgbc_conc_emb_method,
-         hgbc_conc_train_score, hgbc_conc_test_scores) = concat_lr_tab_txtemb(dataset_name=posttrauma_dataset,
-                                                                              emb_method=model_name,
-                                                                              X_tabular=X_posttrauma,
-                                                                              nominal_features=nominal_features,
-                                                                              feature_extractor=feature_extractor,
-                                                                              summaries=patient_summaries,
-                                                                              y=y_posttrauma)
+         hgbc_conc_train_score, hgbc_conc_test_scores) = concat_lr_txt_emb(dataset_name=posttrauma_dataset,
+                                                                           emb_method=model_name,
+                                                                           X_tabular=X_posttrauma,
+                                                                           nominal_features=nominal_features,
+                                                                           feature_extractor=feature_extractor,
+                                                                           summaries=patient_summaries,
+                                                                           y=y_posttrauma)
 
         # Log. Reg. Concatenated (Tab. + RT Embeddings)
         (lr_conc_rte_dataset, lr_conc_rte_ml_method, lr_conc_rte_emb_method,
-         lr_conc_rte_train_score, lr_conc_rte_test_scores) = concat_lr_tab_txtemb(dataset_name=posttrauma_dataset,
-                                                                                  emb_method=f"{model_name} + RTE",
-                                                                                  X_tabular=X_posttrauma,
-                                                                                  nominal_features=nominal_features,
-                                                                                  feature_extractor=feature_extractor,
-                                                                                  summaries=patient_summaries,
-                                                                                  y=y_posttrauma)
+         lr_conc_rte_train_score, lr_conc_rte_test_scores) = concat_lr_txt_emb(dataset_name=posttrauma_dataset,
+                                                                               emb_method=f"{model_name} + RTE",
+                                                                               X_tabular=X_posttrauma,
+                                                                               nominal_features=nominal_features,
+                                                                               feature_extractor=feature_extractor,
+                                                                               summaries=patient_summaries,
+                                                                               y=y_posttrauma)
 
         # HGBC Concatenated (Tab. + RT Embeddings)
         (hgbc_conc_rte_dataset, hgbc_conc_rte_ml_method, hgbc_conc_rte_emb_method,
-         hgbc_conc_rte_train_score, hgbc_conc_rte_test_scores) = concat_lr_tab_txtemb(dataset_name=posttrauma_dataset,
-                                                                                      emb_method=f"{model_name} + RTE",
-                                                                                      X_tabular=X_posttrauma,
-                                                                                      nominal_features=nominal_features,
-                                                                                      feature_extractor=feature_extractor,
-                                                                                      summaries=patient_summaries,
-                                                                                      y=y_posttrauma)
+         hgbc_conc_rte_train_score, hgbc_conc_rte_test_scores) = concat_lr_txt_emb(dataset_name=posttrauma_dataset,
+                                                                                   emb_method=f"{model_name} + RTE",
+                                                                                   X_tabular=X_posttrauma,
+                                                                                   nominal_features=nominal_features,
+                                                                                   feature_extractor=feature_extractor,
+                                                                                   summaries=patient_summaries,
+                                                                                   y=y_posttrauma)
 
         # Todo: check
         save_results_to_csv(output_file=f"{model_name}_LR_train.csv", dataset_name=lr_conc_dataset,
