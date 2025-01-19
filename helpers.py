@@ -606,26 +606,39 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
         if summaries_train_array.ndim == 1:
             summaries_train_array = summaries_train_array.reshape(-1, 1)
 
+        # Create a DataFrame for embeddings
+        summaries_train_df = pd.DataFrame(
+            summaries_train_array,
+            columns=[f"embedding_{i}" for i in range(summaries_train_array.shape[1])]
+        )
+
         summaries_test_array = np.array(summaries_test)
         if summaries_test_array.ndim == 1:
             summaries_test_array = summaries_test_array.reshape(-1, 1)
+
+        # Create a DataFrame for embeddings
+        summaries_test_df = pd.DataFrame(
+            summaries_test_array,
+            columns=[f"embedding_{i}" for i in range(summaries_test_array.shape[1])]
+        )
 
         print(f"Fitting the model for fold {fold + 1}...")
         print(f"X_tab_train shape: {X_tab_train.shape}")
         print(f"Number of summaries_train: {len(summaries_train)}")
         print(f"y_train shape: {y_train.shape}")
 
-        combined_train = np.hstack((X_tab_train.values, summaries_train_array))
-        combined_test = np.hstack((X_tab_test.values, summaries_test_array))
+        #combined_train = np.hstack((X_tab_train.values, summaries_train_array))
+        #combined_test = np.hstack((X_tab_test.values, summaries_test_array))
 
-        combined_train = pd.DataFrame(combined_train, columns=list(X_tab_train.columns) + [f"embedding_{i}" for i in
-                                                                                           range(
-                                                                                               summaries_train_array.shape[
-                                                                                                   1])])
-        combined_test = pd.DataFrame(combined_test, columns=list(X_tab_test.columns) + [f"embedding_{i}" for i in range(
-            summaries_test_array.shape[1])])
+        # Combine X_tabular and embeddings
+        combined_train = pd.concat([X_tab_train.reset_index(drop=True), summaries_train_df.reset_index(drop=True)],
+                                   axis=1)
+        combined_test = pd.concat([X_tab_test.reset_index(drop=True), summaries_test_df.reset_index(drop=True)], axis=1)
 
         #search.fit({"tabular": X_tab_train, "embeddings": summaries_train}, y_train)
+        print(f"Combined train columns: {combined_train.columns}")
+        print(f"Combined test columns: {combined_test.columns}")
+
         print(f"Combined train shape: {combined_train.shape}")
         print(f"Combined test shape: {combined_test.shape}")
         search.fit(combined_train, y_train)
@@ -656,11 +669,15 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
     summaries_array = np.array(summaries)
     if summaries_array.ndim == 1:
         summaries_array = summaries_array.reshape(-1, 1)
-    combined_all = np.hstack((X_tabular.values, summaries_array))
-    combined_all = pd.DataFrame(combined_all, columns=list(X_tabular.columns) + [f"embedding_{i}" for i in range(
-        summaries_array.shape[1])])
 
-    print(f"Combined train shape: {combined_all.shape}")
+    summaries_df = pd.DataFrame(
+        summaries_array,
+        columns=[f"embedding_{i}" for i in range(summaries_array.shape[1])]
+    )
+
+    combined_all = pd.concat([X_tabular.reset_index(drop=True), summaries_df.reset_index(drop=True)], axis=1)
+    print(f"Combined all columns: {combined_all.columns}")
+    print(f"Combined all shape: {combined_all.shape}")
     search.fit(combined_all, y)
 
     y_train_pred = search.predict(combined_all)
