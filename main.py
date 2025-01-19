@@ -4,7 +4,7 @@ import time
 
 import numpy as np
 
-from run_models_concatenated import run_models_concatenated
+#from run_models_concatenated import run_models_concatenated
 
 
 def dummy_function():
@@ -17,7 +17,14 @@ def dummy_function():
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    run_models_concatenated()
+    #run_models_concatenated()
+    import torch
+
+    print(f"Is CUDA available: {torch.cuda.is_available()}")
+    print(f"CUDA device count: {torch.cuda.device_count()}")
+    print(f"Current CUDA device: {torch.cuda.current_device()}")
+    print(f"Device name: {torch.cuda.get_device_name(0)}")
+
     # run_models_on_table_data()
     # run()
     # create_summaries()
