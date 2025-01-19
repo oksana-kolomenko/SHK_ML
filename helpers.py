@@ -629,9 +629,27 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
         summaries_test = [summaries[i] for i in test_index]
         y_train, y_test = y[train_index], y[test_index]
 
-        summaries_train_array = np.array(summaries_train)
+        # Flatten nested lists in summaries_train and summaries_test
+        summaries_train_array = np.array(
+            [summary[0] if isinstance(summary, list) else summary for summary in summaries_train])
+        summaries_test_array = np.array(
+            [summary[0] if isinstance(summary, list) else summary for summary in summaries_test])
+
+        # Validate that all inputs are strings
+        assert all(isinstance(summary, str) for summary in
+                   summaries_train_array), "Non-string data detected in summaries_train_array."
+        assert all(isinstance(summary, str) for summary in
+                   summaries_test_array), "Non-string data detected in summaries_test_array."
+
+        # Reshape if necessary
         if summaries_train_array.ndim == 1:
             summaries_train_array = summaries_train_array.reshape(-1, 1)
+        if summaries_test_array.ndim == 1:
+            summaries_test_array = summaries_test_array.reshape(-1, 1)
+
+        # Debugging: Print sample data
+        print(f"Sample summaries_train_array after preprocessing: {summaries_train_array[:5]}")
+        print(f"Sample summaries_test_array after preprocessing: {summaries_test_array[:5]}")
 
         print(f"Sample summaries_train_array: {summaries_train_array[:5]}")
         print(f"Data types in summaries_train_array: {type(summaries_train_array[0])}")
@@ -644,10 +662,6 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
             summaries_train_array,
             columns=[f"embedding_{i}" for i in range(summaries_train_array.shape[1])]
         )
-
-        summaries_test_array = np.array(summaries_test)
-        if summaries_test_array.ndim == 1:
-            summaries_test_array = summaries_test_array.reshape(-1, 1)
 
         print(f"Sample summaries_test_array: {summaries_test_array[:5]}")
         print(f"Data types in summaries_test_array: {type(summaries_test_array[0])}")
