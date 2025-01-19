@@ -649,8 +649,17 @@ def combine_data(X_tabular, summaries, feature_extractor):
         #    print(f"Length of feature_ext(summary): {np.array(feature_extractor(summary)).shape}")
         #text_embeddings = np.array([feature_extractor(summary) for summary in summaries])
         text_embeddings = feature_extractor(summaries)
-        for t in text_embeddings:
-            print(f"Embedding_type: {type(t)}")
+        for idx, t in enumerate(text_embeddings):
+            print(f"Embedding {idx}:")
+            print(f"Type: {type(t)}")  # Type of the embedding
+            print(f"Length: {len(t)}")  # Length of the embedding (if it's a list)
+            if isinstance(t, list):
+                # If `t` is a list, check the type and length of its elements
+                print(f"Element type: {type(t[0])} (if not empty)")
+                if isinstance(t[0], list):  # If each element in `t` is also a list
+                    print(f"Shape of first element: {len(t[0])} (if it's a list)")
+            print(f"Content preview: {t[:2]}")  # Show the first 2 elements of `t` (if it's a list)
+            print("---")
         print(f"Ammount of embs: {len(text_embeddings)}")
         # Ensure the embeddings are 2D
         if len(text_embeddings.shape) == 1:
