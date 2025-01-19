@@ -633,6 +633,12 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
         if summaries_train_array.ndim == 1:
             summaries_train_array = summaries_train_array.reshape(-1, 1)
 
+        print(f"Sample summaries_train_array: {summaries_train_array[:5]}")
+        print(f"Data types in summaries_train_array: {type(summaries_train_array[0])}")
+
+        invalid_rows = [i for i, summary in enumerate(summaries_train_array) if not isinstance(summary, str)]
+        print(f"Invalid rows in summaries_train_array: {invalid_rows}")
+
         # Create a DataFrame for embeddings
         summaries_train_df = pd.DataFrame(
             summaries_train_array,
@@ -642,6 +648,12 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
         summaries_test_array = np.array(summaries_test)
         if summaries_test_array.ndim == 1:
             summaries_test_array = summaries_test_array.reshape(-1, 1)
+
+        print(f"Sample summaries_test_array: {summaries_test_array[:5]}")
+        print(f"Data types in summaries_test_array: {type(summaries_test_array[0])}")
+
+        invalid_rows_test = [i for i, summary in enumerate(summaries_test_array) if not isinstance(summary, str)]
+        print(f"Invalid rows in summaries_train_array: {invalid_rows_test}")
 
         # Create a DataFrame for embeddings
         summaries_test_df = pd.DataFrame(
@@ -653,7 +665,7 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
         print(f"X_tab_train shape: {X_tab_train.shape}")
         print(f"!!! Tabular data shape (after pipeline): {X_tab_train.shape}")
         print(f"!!! Embeddings data shape (after pipeline): {summaries_train_array.shape}")
-        
+
         processed_tabular = tabular_pipeline.fit_transform(X_tab_train)
         print(f"!!! Processed tabular shape: {processed_tabular.shape}")
 

@@ -33,10 +33,16 @@ class EmbeddingAggregator(BaseEstimator, TransformerMixin):
 
     def transform(self, X):
         if self.method == "embedding_cls":
+            if not all(isinstance(x, str) for x in X):
+                raise ValueError("All inputs to EmbeddingAggregator must be strings.")
             return self._embedding_cls(X)
         elif self.method == "embedding_mean_with_cls_and_sep":
+            if not all(isinstance(x, str) for x in X):
+                raise ValueError("All inputs to EmbeddingAggregator must be strings.")
             return self._embedding_mean_with_cls_and_sep(X)
         elif self.method == "embedding_mean_without_cls_and_sep":
+            if not all(isinstance(x, str) for x in X):
+                raise ValueError("All inputs to EmbeddingAggregator must be strings.")
             return self._embedding_mean_without_cls_and_sep(X)
         else:
             raise ValueError("Invalid aggregation method")
