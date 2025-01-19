@@ -592,7 +592,7 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
         summaries_train, summaries_test = [summaries[i] for i in train_index], [summaries[i] for i in test_index]
         y_train, y_test = y[train_index], y[test_index]
 
-        search.fit({"tabular": X_train, "text": summaries_train}, y_train)
+        search.fit((X_train, summaries_train), y_train)
 
         y_test_pred = search.predict({"tabular": X_test, "text": summaries_test})
         y_test_pred_proba = search.predict_proba({"tabular": X_test, "text": summaries_test})[:, 1]
@@ -612,7 +612,7 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
             "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
         })
 
-    search.fit({"tabular": X_tabular, "text": summaries}, y)
+    search.fit((X_tabular, summaries), y)
 
     y_train_pred = search.predict({"tabular": X_tabular, "text": summaries})
     y_train_pred_proba = search.predict_proba({"tabular": X_tabular, "text": summaries})[:, 1]
