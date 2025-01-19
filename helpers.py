@@ -641,6 +641,7 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
 
     return dataset, ml_method, emb_method, concatenation, train_metrics, metrics_per_fold
 
+
 def combine_data(X_tabular, summaries, feature_extractor):
         """Combine tabular and text data into a single feature set."""
         # Extract text embeddings
@@ -651,6 +652,7 @@ def combine_data(X_tabular, summaries, feature_extractor):
         # Concatenate tabular data and text embeddings
         combined_data = np.hstack([X_tabular.to_numpy(), text_embeddings])
         return combined_data
+
 
 def concat_lr_tab_rt_emb(dataset_name, X_tabular, summaries, nominal_features, y, n_splits=3):
     dataset = dataset_name

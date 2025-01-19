@@ -92,7 +92,7 @@ def run_models_concatenated():
                                                                        emb_method=model_name,
                                                                        X_tabular=X_posttrauma,
                                                                        nominal_features=nominal_features,
-                                                                       feature_extractor=feature_extractor,
+                                                                       feature_extractor=feature_extractor_clinical,
                                                                        summaries=patient_summaries,
                                                                        y=y_posttrauma)
 
