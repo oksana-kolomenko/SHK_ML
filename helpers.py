@@ -588,17 +588,20 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
     )
 
     for train_index, test_index in skf.split(X_tabular, y):
+        # Split tabular data, summaries, and labels
         X_train_tabular, X_test_tabular = X_tabular.iloc[train_index], X_tabular.iloc[test_index]
         summaries_train, summaries_test = [summaries[i] for i in train_index], [summaries[i] for i in test_index]
         y_train, y_test = y[train_index], y[test_index]
 
-        combined_train = {"tabular": X_train_tabular, "text": summaries_train}
-        combined_test = {"tabular": X_test_tabular, "text": summaries_test}
-        search.fit(combined_train, y_train)
+        # Combine tabular and text features
+        X_train_combined = combine_data(X_train_tabular, summaries_train, feature_extractor)
+        X_test_combined = combine_data(X_test_tabular, summaries_test, feature_extractor)
 
-        y_test_pred = search.predict(combined_test)
-        y_test_pred_proba = search.predict_proba(combined_test)[:, 1]
+        # Fit and evaluate
+        search.fit(X_train_combined, y_train)
 
+        y_test_pred = search.predict(X_test_combined)
+        y_test_pred_proba = search.predict_proba(X_test_combined)[:, 1]
         # Calculate metrics
         tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
         specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
@@ -614,12 +617,12 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
             "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
         })
 
-    combined_data = {"tabular": X_tabular, "text": summaries}
-    search.fit(combined_data, y)
+    X_combined = combine_data(X_tabular, summaries, feature_extractor)
+    search.fit(X_combined, y)
 
-    y_train_pred = search.predict(combined_data)
-    y_train_pred_proba = search.predict_proba(combined_data)[:, 1]
-
+    y_train_pred = search.predict(X_combined)
+    y_train_pred_proba = search.predict_proba(X_combined)[:, 1]
+    
     train_metrics = {
         "AUC": roc_auc_score(y, y_train_pred_proba),
         "AP": average_precision_score(y, y_train_pred_proba),
@@ -638,6 +641,16 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
 
     return dataset, ml_method, emb_method, concatenation, train_metrics, metrics_per_fold
 
+def combine_data(X_tabular, summaries, feature_extractor):
+        """Combine tabular and text data into a single feature set."""
+        # Extract text embeddings
+        text_embeddings = np.array([feature_extractor(summary) for summary in summaries])
+        # Ensure the embeddings are 2D
+        if len(text_embeddings.shape) == 1:
+            text_embeddings = text_embeddings.reshape(-1, 1)
+        # Concatenate tabular data and text embeddings
+        combined_data = np.hstack([X_tabular.to_numpy(), text_embeddings])
+        return combined_data
 
 def concat_lr_tab_rt_emb(dataset_name, X_tabular, summaries, nominal_features, y, n_splits=3):
     dataset = dataset_name
