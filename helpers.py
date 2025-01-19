@@ -567,7 +567,7 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
     ])
 
     embeddings_pipeline = Pipeline([
-        ("embedding_transform", EmbeddingAggregator(feature_extractor)),
+        ("embedding_transformer", EmbeddingAggregator(feature_extractor)),
         ("scaler", MinMaxScaler())
     ])
 
@@ -604,7 +604,7 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
     print("Setting up the parameter grid...")
     param_grid = {
         "classifier__C": [2, 10, 50, 250],
-        "feature_combiner__embeddings__aggregator__method": [
+        "embedding_transformer__embeddings__aggregator__method": [
             "embedding_cls",
             "embedding_mean_with_cls_and_sep",
             "embedding_mean_without_cls_and_sep"
