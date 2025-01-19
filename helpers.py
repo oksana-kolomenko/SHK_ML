@@ -243,6 +243,7 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y, n_spli
         scoring="neg_log_loss",
         cv=RepeatedStratifiedKFold(n_splits=3)
     )
+    """ 
     for train_index, test_index in skf.split(summaries, y):
         X_train, X_test = [summaries[i] for i in train_index], [summaries[i] for i in test_index]
         y_train, y_test = y[train_index], y[test_index]
@@ -267,7 +268,7 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y, n_spli
             "F1": f1_score(y_test, y_test_pred, average='macro'),
             "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
         })
-
+    """
     search.fit(
         summaries,
         y
