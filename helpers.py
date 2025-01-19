@@ -556,7 +556,7 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
 
     search = GridSearchCV(
         estimator=Pipeline([
-            ("feature_combiner", ColumnTransformer([
+            ("feature_combiner", FeatureUnion([
                 ("tabular", Pipeline([
                     ("tabular_transformer", ColumnTransformer([
                         ("nominal", Pipeline([
@@ -571,7 +571,7 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
                 ])),
                 ("text", Pipeline([
                     ("embedding_aggregator", EmbeddingAggregator(feature_extractor)),
-                ]), "passthrough"),
+                ])),
             ])),
             ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=10000))
         ]),
@@ -588,14 +588,16 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
     )
 
     for train_index, test_index in skf.split(X_tabular, y):
-        X_train, X_test = X_tabular.iloc[train_index], X_tabular.iloc[test_index]
+        X_train_tabular, X_test_tabular = X_tabular.iloc[train_index], X_tabular.iloc[test_index]
         summaries_train, summaries_test = [summaries[i] for i in train_index], [summaries[i] for i in test_index]
         y_train, y_test = y[train_index], y[test_index]
 
-        search.fit((X_train, summaries_train), y_train)
+        combined_train = {"tabular": X_train_tabular, "text": summaries_train}
+        combined_test = {"tabular": X_test_tabular, "text": summaries_test}
+        search.fit(combined_train, y_train)
 
-        y_test_pred = search.predict({"tabular": X_test, "text": summaries_test})
-        y_test_pred_proba = search.predict_proba({"tabular": X_test, "text": summaries_test})[:, 1]
+        y_test_pred = search.predict(combined_test)
+        y_test_pred_proba = search.predict_proba(combined_test)[:, 1]
 
         # Calculate metrics
         tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
@@ -612,10 +614,11 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
             "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
         })
 
-    search.fit((X_tabular, summaries), y)
+    combined_data = {"tabular": X_tabular, "text": summaries}
+    search.fit(combined_data, y)
 
-    y_train_pred = search.predict({"tabular": X_tabular, "text": summaries})
-    y_train_pred_proba = search.predict_proba({"tabular": X_tabular, "text": summaries})[:, 1]
+    y_train_pred = search.predict(combined_data)
+    y_train_pred_proba = search.predict_proba(combined_data)[:, 1]
 
     train_metrics = {
         "AUC": roc_auc_score(y, y_train_pred_proba),
