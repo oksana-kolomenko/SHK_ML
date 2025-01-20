@@ -78,7 +78,7 @@ def run_models_on_txt_emb():
         # Logistic Regression
         lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_train_score, lr_txt_test_scores = lr_txt_emb(
             dataset_name=posttrauma_dataset,
-            emb_method=model_name, feature_extractor=feature_extractor, summaries=patient_summaries,
+            emb_method=model_name, feature_extractor=feature_extractor, raw_text_summaries=patient_summaries,
             y=y_posttrauma)
 
         """# HGBC

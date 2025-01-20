@@ -217,7 +217,7 @@ def lr_rt_emb(dataset_name, X, y, nominal_features, n_splits=3, n_components=Non
     return dataset, ml_method, emb_method, concatenation, train_metrics, metrics_per_fold
 
 
-def lr_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y, n_splits=3, n_components=None):
+def lr_txt_emb(dataset_name, emb_method, feature_extractor, raw_text_summaries, y, n_splits=3, n_components=None):
     # Todo! Wird die beste Aggregierung ausgegeben?
     dataset = dataset_name
     ml_method = "logistic regression"
@@ -243,8 +243,8 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y, n_spli
         cv=RepeatedStratifiedKFold(n_splits=3)
     )
 
-    for train_index, test_index in skf.split(summaries, y):
-        X_train, X_test = [summaries[i] for i in train_index], [summaries[i] for i in test_index]
+    for train_index, test_index in skf.split(raw_text_summaries, y):
+        X_train, X_test = [raw_text_summaries[i] for i in train_index], [raw_text_summaries[i] for i in test_index]
         y_train, y_test = y[train_index], y[test_index]
 
         # Fit and evaluate
@@ -269,12 +269,12 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y, n_spli
         })
 
     search.fit(
-        summaries,
+        raw_text_summaries,
         y
     )
 
-    y_train_pred = search.predict(summaries)
-    y_train_pred_proba = search.predict_proba(summaries)[:, 1]
+    y_train_pred = search.predict(raw_text_summaries)
+    y_train_pred_proba = search.predict_proba(raw_text_summaries)[:, 1]
 
     # Training metrics
     train_metrics = {
