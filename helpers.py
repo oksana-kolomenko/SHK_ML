@@ -843,7 +843,7 @@ def concat_txt_tab_hgbc(dataset_name, emb_method, X_tabular, y, nominal_features
         })
 
         print(f"Summaries shape: {len(train_data['summaries'])}")
-        print(f"Tabular data shape: {train_data['tabular_data'].shape}")
+        #print(f"Tabular data shape: {train_data['tabular_data'].shape}")
 
         assert len(X_tab_train) == len(summaries_train) == len(y_train), "Mismatch in training data sizes"
 
