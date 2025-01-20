@@ -798,6 +798,8 @@ def concat_txt_tab_hgbc(dataset_name, emb_method, X_tabular, y, nominal_features
     metrics_per_fold = []
     skf = StratifiedKFold(n_splits=n_splits)
 
+    categorical_indices = [X_tabular.columns.get_loc(col) for col in nominal_features]
+
     embedding_pipeline = Pipeline([
         ("aggregator", EmbeddingAggregator(feature_extractor)),
         ("scaler", MinMaxScaler())
@@ -811,7 +813,7 @@ def concat_txt_tab_hgbc(dataset_name, emb_method, X_tabular, y, nominal_features
 
     full_pipeline = Pipeline([
         ("preprocessor", preprocessor),
-        ("classifier", HistGradientBoostingClassifier(categorical_features=nominal_features))
+        ("classifier", HistGradientBoostingClassifier(categorical_features=categorical_indices))
     ])
     param_grid = {
         "classifier__min_samples_leaf": [5, 10, 15, 20],
@@ -843,7 +845,9 @@ def concat_txt_tab_hgbc(dataset_name, emb_method, X_tabular, y, nominal_features
         })
 
         print(f"Summaries shape: {len(train_data['summaries'])}")
-        #print(f"Tabular data shape: {train_data['tabular_data'].shape}")
+        print(f"Categorical indices: {categorical_indices}")
+        print(f"Train data columns: {train_data.columns}")
+        print(f"Test data columns: {test_data.columns}")
 
         assert len(X_tab_train) == len(summaries_train) == len(y_train), "Mismatch in training data sizes"
 
