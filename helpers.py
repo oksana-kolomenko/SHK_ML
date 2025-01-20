@@ -804,8 +804,9 @@ def concat_txt_tab_hgbc(dataset_name, emb_method, X_tabular, y, nominal_features
     ])
 
     preprocessor = ColumnTransformer([
-        ("embedding", embedding_pipeline, "summaries"),  # Apply embedding_pipeline to summaries
-        ("passthrough", "passthrough", ["tabular_data"])  # Pass through tabular data as-is
+        ("embedding", embedding_pipeline, "summaries"),  # Apply embedding_pipeline to the summaries column
+        ("passthrough", "passthrough", [f"tabular_col_{i}" for i in range(X_tab_train.shape[1])])
+        # Pass through tabular columns
     ])
 
     full_pipeline = Pipeline([
@@ -832,14 +833,14 @@ def concat_txt_tab_hgbc(dataset_name, emb_method, X_tabular, y, nominal_features
         print(f"Length of summaries_train: {len(summaries_train)}")
         print(f"Length of y_train: {len(y_train)}")
 
-        train_data = {
+        train_data = pd.DataFrame({
             "summaries": summaries_train,
-            "tabular_data": X_tab_train
-        }
-        test_data = {
+            **{f"tabular_col_{i}": X_tab_train.iloc[:, i] for i in range(X_tab_train.shape[1])}
+        })
+        test_data = pd.DataFrame({
             "summaries": summaries_test,
-            "tabular_data": X_tab_test
-        }
+            **{f"tabular_col_{i}": X_tab_test.iloc[:, i] for i in range(X_tab_test.shape[1])}
+        })
 
         print(f"Summaries shape: {len(train_data['summaries'])}")
         print(f"Tabular data shape: {train_data['tabular_data'].shape}")
