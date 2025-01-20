@@ -1,7 +1,7 @@
 import numpy as np
 
 from csv_saver import save_results_to_csv
-from helpers import (load_labels, load_features, load_summaries, concat_lr_txt_emb)
+from helpers import (load_labels, load_features, load_summaries, concat_txt_tab_hgbc)
 from bar_plotting import plot_bar_chart
 from models import feature_extractor_clinical
 from values import Dataset
@@ -99,7 +99,7 @@ def run_models_concatenated():
 
         # HGBC Concatenated (Tab. + Text Embeddings)
         (hgbc_conc_dataset, hgbc_conc_ml_method, hgbc_conc_emb_method,
-         hgbc_conc_train_score, hgbc_conc_test_scores) = concat_lr_txt_emb(dataset_name=posttrauma_dataset,
+         hgbc_conc_train_score, hgbc_conc_test_scores) = concat_txt_tab_hgbc(dataset_name=posttrauma_dataset,
                                                                            emb_method=model_name,
                                                                            X_tabular=X_posttrauma,
                                                                            nominal_features=nominal_features,
