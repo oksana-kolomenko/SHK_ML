@@ -805,7 +805,7 @@ def concat_txt_tab_hgbc(dataset_name, emb_method, X_tabular, y, nominal_features
 
     preprocessor = ColumnTransformer([
         ("embedding", embedding_pipeline, "summaries"),  # Apply embedding_pipeline to the summaries column
-        ("passthrough", "passthrough", [f"tabular_col_{i}" for i in range(X_tab_train.shape[1])])
+        ("passthrough", "passthrough", [f"tabular_col_{i}" for i in range(X_tabular.shape[1])])
         # Pass through tabular columns
     ])
 
