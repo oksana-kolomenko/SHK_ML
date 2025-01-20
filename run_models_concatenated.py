@@ -199,7 +199,7 @@ def run_models_concatenated():
         test_score_maxs_local = np.array(test_score_maxs_local)
 
         plot_bar_chart(
-            filename=f"{model_name}",
+            filename=f"{model_name}_",
             labels=labels_local,
             train_scores=train_scores_local,
             test_score_medians=test_score_medians_local,
