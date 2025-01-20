@@ -664,6 +664,8 @@ def combine_data(X_tabular, summaries, feature_extractor):
             print("---")
             if len(np.array(t).shape) == 1:
                 t = t.reshape(-1, 1)
+        print(f"X_tabular_type: {(type(X_tabular))}")
+        print(f"X_tabular_type: {type(text_embeddings)}")
         print(f"X_tabular_shape: {X_tabular.shape[0]}")
         print(f"Text_embeddings_shape: {text_embeddings.shape[0]}")
         print(f"Ammount of embs: {len(text_embeddings)}")
