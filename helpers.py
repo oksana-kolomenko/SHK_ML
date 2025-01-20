@@ -803,8 +803,12 @@ def concat_txt_tab_hgbc(dataset_name, emb_method, X_tabular, y, nominal_features
         ("scaler", MinMaxScaler())
     ])
 
+    full_pipeline = Pipeline([
+        ("embedding", embedding_pipeline),
+        ("classifier", HistGradientBoostingClassifier(categorical_features=nominal_features))
+    ])
     param_grid = {
-        "hist_gb__min_samples_leaf": [5, 10, 15, 20],
+        "classifier__min_samples_leaf": [5, 10, 15, 20],
         "embedding__aggregator__method": [
             "embedding_cls",
             "embedding_mean_with_cls_and_sep",
@@ -828,7 +832,7 @@ def concat_txt_tab_hgbc(dataset_name, emb_method, X_tabular, y, nominal_features
 
         # Modelltraining und Bewertung
         search = GridSearchCV(
-            estimator=HistGradientBoostingClassifier(categorical_features=nominal_features),
+            estimator=full_pipeline,
             param_grid=param_grid,
             scoring="neg_log_loss",
             cv=RepeatedStratifiedKFold(n_splits=3)
