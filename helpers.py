@@ -798,18 +798,18 @@ def concat_txt_tab_hgbc(dataset_name, emb_method, X_tabular, y, nominal_features
     metrics_per_fold = []
     skf = StratifiedKFold(n_splits=n_splits)
 
-    embedding_pipeline = Pipeline([
-        ("aggregator", EmbeddingAggregator(feature_extractor)),
-        ("scaler", MinMaxScaler())
+    preprocessor = ColumnTransformer([
+        ("embedding", embedding_pipeline, "summaries"),  # Apply embedding_pipeline to summaries
+        ("passthrough", "passthrough", ["tabular_data"])  # Pass through tabular data as-is
     ])
 
     full_pipeline = Pipeline([
-        ("embedding", embedding_pipeline),
+        ("preprocessor", preprocessor),
         ("classifier", HistGradientBoostingClassifier(categorical_features=nominal_features))
     ])
     param_grid = {
         "classifier__min_samples_leaf": [5, 10, 15, 20],
-        "embedding__aggregator__method": [
+        "preprocessor__embedding__aggregator__method": [
             "embedding_cls",
             "embedding_mean_with_cls_and_sep",
             "embedding_mean_without_cls_and_sep"
@@ -823,12 +823,15 @@ def concat_txt_tab_hgbc(dataset_name, emb_method, X_tabular, y, nominal_features
         summaries_test = [summaries[i] for i in test_index]
         y_train, y_test = y[train_index], y[test_index]
 
-        X_embeddings_train = embedding_pipeline.fit_transform(summaries_train)
-        X_embeddings_test = embedding_pipeline.transform(summaries_test)
+        train_data = {
+            "summaries": summaries_train,
+            "tabular_data": X_tab_train
+        }
+        test_data = {
+            "summaries": summaries_test,
+            "tabular_data": X_tab_test
+        }
 
-        # Kombination von tabellarischen Daten und Embeddings
-        X_train_combined = np.hstack([X_tab_train, X_embeddings_train])  # todo: Dimension ausgeben und checken
-        X_test_combined = np.hstack([X_tab_test, X_embeddings_test])
 
         # Modelltraining und Bewertung
         search = GridSearchCV(
@@ -837,31 +840,39 @@ def concat_txt_tab_hgbc(dataset_name, emb_method, X_tabular, y, nominal_features
             scoring="neg_log_loss",
             cv=RepeatedStratifiedKFold(n_splits=3)
         )
-        search.fit(X_train_combined, y_train)
-        y_pred_proba = search.predict_proba(X_test_combined)[:, 1]
+        search.fit(train_data, y_train)
+        y_pred_proba = search.predict_proba(test_data)[:, 1]
 
         # Calculate metrics
-        tn, fp, fn, tp = confusion_matrix(y_test, search.predict(X_test_combined)).ravel()
+        tn, fp, fn, tp = confusion_matrix(y_test, search.predict(test_data)).ravel()
         specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
 
         metrics_per_fold.append({
             "Fold": len(metrics_per_fold),
             "AUC": roc_auc_score(y_test, y_pred_proba),
             "AP": average_precision_score(y_test, y_pred_proba),
-            "Sensitivity": recall_score(y_test, search.predict(X_test_combined), pos_label=1),
+            "Sensitivity": recall_score(y_test, search.predict(test_data), pos_label=1),
             "Specificity": specificity,
-            "Precision": precision_score(y_test, search.predict(X_test_combined), zero_division=0),
-            "F1": f1_score(y_test, search.predict(X_test_combined), average='macro'),
-            "Balanced Accuracy": balanced_accuracy_score(y_test, search.predict(X_test_combined))
+            "Precision": precision_score(y_test, search.predict(test_data), zero_division=0),
+            "F1": f1_score(y_test, search.predict(test_data), average='macro'),
+            "Balanced Accuracy": balanced_accuracy_score(y_test, search.predict(test_data))
         })
 
-    # Gesamtes Training auf allen Daten
-    X_embeddings_processed = embedding_pipeline.fit_transform(summaries)
-    X_combined = np.hstack([X_tabular, X_embeddings_processed])
+    train_data = {
+        "summaries": summaries,
+        "tabular_data": X_tabular
+    }
 
-    search.fit(X_combined, y)
-    y_train_pred = search.predict(X_combined),
-    y_train_pred_proba = search.predict_proba(X_combined)[:, 1]
+    # Modelltraining und Bewertung
+    search = GridSearchCV(
+        estimator=full_pipeline,
+        param_grid=param_grid,
+        scoring="neg_log_loss",
+        cv=RepeatedStratifiedKFold(n_splits=3)
+    )
+    search.fit(train_data, y)
+    y_train_pred = search.predict(train_data),
+    y_train_pred_proba = search.predict_proba(train_data)[:, 1]
 
     # Calculate training metrics
     train_metrics = {
