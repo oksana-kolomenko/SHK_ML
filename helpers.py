@@ -666,10 +666,9 @@ def combine_data(X_tabular, summaries, feature_extractor):
                 t = t.reshape(-1, 1)
         print(f"X_tabular_type: {(type(X_tabular))}")
         print(f"Text_Embeddings_type: {type(text_embeddings)}")
-        print(f"Text_Embeddings_type: {type(summaries)}")
-        print(f"X_tabular_shape: {X_tabular.shape[0]}") # = 54
-        print(f"Text_embeddings_shape: {text_embeddings.shape[0]}")
+        print(f"Summaries_type: {type(summaries)}")
         print(f"Ammount of embs: {len(text_embeddings)}")
+        print(f"Ammount of embs: {len(X_tabular)}")
         # Todo: Here is the problem:
         combined_data = np.hstack([X_tabular.to_numpy(), text_embeddings])
         return combined_data
