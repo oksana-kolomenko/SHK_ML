@@ -828,6 +828,10 @@ def concat_txt_tab_hgbc(dataset_name, emb_method, X_tabular, y, nominal_features
         summaries_test = [summaries[i] for i in test_index]
         y_train, y_test = y[train_index], y[test_index]
 
+        print(f"Length of X_tab_train: {len(X_tab_train)}")
+        print(f"Length of summaries_train: {len(summaries_train)}")
+        print(f"Length of y_train: {len(y_train)}")
+
         train_data = {
             "summaries": summaries_train,
             "tabular_data": X_tab_train
@@ -837,6 +841,10 @@ def concat_txt_tab_hgbc(dataset_name, emb_method, X_tabular, y, nominal_features
             "tabular_data": X_tab_test
         }
 
+        print(f"Summaries shape: {len(train_data['summaries'])}")
+        print(f"Tabular data shape: {train_data['tabular_data'].shape}")
+
+        assert len(X_tab_train) == len(summaries_train) == len(y_train), "Mismatch in training data sizes"
 
         # Modelltraining und Bewertung
         search = GridSearchCV(
