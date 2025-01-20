@@ -664,11 +664,10 @@ def combine_data(X_tabular, summaries, feature_extractor):
             print("---")
             if len(np.array(t).shape) == 1:
                 t = t.reshape(-1, 1)
+        print(f"X_tabular_shape: {X_tabular.shape[0]}")
+        print(f"Text_embeddings_shape: {text_embeddings.shape[0]}")
         print(f"Ammount of embs: {len(text_embeddings)}")
-        # Ensure the embeddings are 2D
-        # if len(text_embeddings.shape) == 1:
-        #    text_embeddings = text_embeddings.reshape(-1, 1)
-        # Concatenate tabular data and text embeddings
+        # Todo: Here is the problem:
         combined_data = np.hstack([X_tabular.to_numpy(), text_embeddings])
         return combined_data
 
