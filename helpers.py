@@ -798,6 +798,11 @@ def concat_txt_tab_hgbc(dataset_name, emb_method, X_tabular, y, nominal_features
     metrics_per_fold = []
     skf = StratifiedKFold(n_splits=n_splits)
 
+    embedding_pipeline = Pipeline([
+        ("aggregator", EmbeddingAggregator(feature_extractor)),
+        ("scaler", MinMaxScaler())
+    ])
+
     preprocessor = ColumnTransformer([
         ("embedding", embedding_pipeline, "summaries"),  # Apply embedding_pipeline to summaries
         ("passthrough", "passthrough", ["tabular_data"])  # Pass through tabular data as-is
