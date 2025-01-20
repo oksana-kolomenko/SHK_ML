@@ -646,10 +646,6 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
 
 def combine_data(X_tabular, summaries, feature_extractor):
         """Combine tabular and text data into a single feature set."""
-        # Extract text embeddings
-        #for summary in summaries:
-        #    print(f"Length of feature_ext(summary): {np.array(feature_extractor(summary)).shape}")
-        #text_embeddings = np.array([feature_extractor(summary) for summary in summaries])
         raw_embeddings = feature_extractor(summaries)
         text_embeddings = []
         for embedding in raw_embeddings:
@@ -658,26 +654,16 @@ def combine_data(X_tabular, summaries, feature_extractor):
                 text_embeddings.append(embedding[0])
             else:
                 text_embeddings.append(embedding)
-        """        for idx, t in enumerate(text_embeddings):
-            print(f"Embedding {idx}:")
-            print(f"Type: {type(t)}")  # Type of the embedding
-            print(f"Length: {len(t)}")  # Length of the embedding (if it's a list)
-            if isinstance(t, list):
-                # If `t` is a list, check the type and length of its elements
-                print(f"Element type: {type(t[0])} (if not empty)")
-                if isinstance(t[0], list):  # If each element in `t` is also a list
-                    print(f"Shape of first element: {len(t[0])} (if it's a list)")
-            # print(f"Content preview: {t[:2]}")  # Show the first 2 elements of `t` (if it's a list)
-            print("---")
-            if len(np.array(t).shape) == 1:
-                t = t.reshape(-1, 1)"""
+
+        for idx, emb in enumerate(text_embeddings):
+            print(f"Embedding {idx} shape: {np.array(emb).shape}, Type: {type(emb)}")
+
         print(f"X_tabular_type: {(type(X_tabular))}")
         print(f"Text_Embeddings_type: {type(text_embeddings)}")
         print(f"Summaries_type: {type(summaries)}")
         print(f"Ammount of embs: {len(text_embeddings)}")
         print(f"Len of X_tab: {len(X_tabular)}")
-        # Todo: Here is the problem:
-        # Check for variable-length embeddings
+
         max_len = max(len(emb) for emb in text_embeddings)
         text_embeddings = np.array([
             np.pad(emb, (0, max_len - len(emb)), mode='constant')  # Pad shorter embeddings
@@ -690,7 +676,6 @@ def combine_data(X_tabular, summaries, feature_extractor):
 
         # Combine tabular and text embeddings
         combined_data = np.hstack([X_tabular.to_numpy(), text_embeddings])
-        return combined_data
         return combined_data
 
 
