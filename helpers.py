@@ -647,6 +647,7 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
 def combine_data(X_tabular, summaries, feature_extractor):
         """Combine tabular and text data into a single feature set."""
         raw_embeddings = summaries
+        print(f"First Summary: {summaries[0]}")
         text_embeddings = []
         for embedding in raw_embeddings:
             if isinstance(embedding, list) and len(embedding) == 1:
