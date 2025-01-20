@@ -876,10 +876,16 @@ def concat_txt_tab_hgbc(dataset_name, emb_method, X_tabular, y, nominal_features
             "Balanced Accuracy": balanced_accuracy_score(y_test, search.predict(test_data))
         })
 
-    train_data = {
+    train_data = pd.DataFrame({
         "summaries": summaries,
-        "tabular_data": X_tabular
-    }
+        **{f"tabular_col_{i}": X_tabular.iloc[:, i] for i in range(X_tabular.shape[1])}
+    })
+
+    print(f"Summaries shape: {len(train_data['summaries'])}")
+    print(f"Categorical indices: {categorical_indices}")
+    print(f"Train data columns: {train_data.columns}")
+
+    assert len(X_tabular) == len(summaries) == len(y), "Mismatch in training data sizes"
 
     # Modelltraining und Bewertung
     search = GridSearchCV(
