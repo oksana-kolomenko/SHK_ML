@@ -2,9 +2,8 @@
 # from run_new import run
 import time
 import numpy as np
-# from run_models_text_emb import run_models_on_txt_emb
 from run_models_concatenated import run_models_concatenated
-
+# from run_models_text_emb import run_models_on_txt_emb
 
 if __name__ == '__main__':
     run_models_concatenated()

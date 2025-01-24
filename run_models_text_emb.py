@@ -1,9 +1,9 @@
 import numpy as np
 
 from csv_saver import save_results_to_csv
-from helpers import load_labels, load_summaries, lr_txt_emb, hgbc_txt_emb
+from helpers import load_labels, load_summaries, lr_txt_emb#, hgbc_txt_emb
 from bar_plotting import plot_bar_chart
-from models import feature_extractor_clinical
+from models import feature_extractor_bert
 
 """from models import feature_extractor_clinical, feature_extractor_electra_small, feature_extractor_electra_large, \
     feature_extractor_electra_base, \
@@ -20,10 +20,10 @@ def run_models_on_txt_emb():
 
     feature_extractors = {
         # Clinical Longformer (done)
-        "Clinical-Longformer": feature_extractor_clinical,
+        # "Clinical-Longformer": feature_extractor_clinical,
 
         # BERT (half done)
-        # "BERT": feature_extractor_bert,
+        "BERT": feature_extractor_bert,
 
         # ELECTRA (half done)
         # "ELECTRA-Small": feature_extractor_electra_small,
@@ -76,8 +76,9 @@ def run_models_on_txt_emb():
     for model_name, feature_extractor in feature_extractors.items():
 
         # Logistic Regression
-        lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_train_score, lr_txt_test_scores = lr_txt_emb(
-            dataset_name=posttrauma_dataset,
+        (lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_concatenation, lr_pca_components,
+         lr_txt_train_score, lr_txt_test_scores) = lr_txt_emb(
+            dataset_name=posttrauma_dataset, n_components=40,
             emb_method=model_name, feature_extractor=feature_extractor, raw_text_summaries=patient_summaries,
             y=y_posttrauma)
 

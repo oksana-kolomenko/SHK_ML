@@ -77,6 +77,7 @@ class EmploymentStatus(Enum):
     def value(self):
         return self._value
 
+
 class PenetratingInjury(Enum):
     PENETRATED_SKIN = ("yes", 1)
     DID_NOT_PENETRATE_SKIN = ("no", 0)

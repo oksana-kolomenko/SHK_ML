@@ -8,14 +8,15 @@ def create_feature_extractor(model_name):
     Compatible with: CL, Bert, Electra, SimSce, BGE, some GTE(thenlper), tbc
     """
     print("Starting to create a feature extractor.")
+    device = 0 if torch.cuda.is_available() else -1
+    device_name = "GPU" if device == 0 else "CPU"
+    print(f"Selected device: {device_name}")
+
     tokenizer = AutoTokenizer.from_pretrained(model_name)
-    # tokens = to
-    #model = AutoModel.from_pretrained(model_name)
-    model = AutoModel.from_pretrained(model_name).to("cuda:0")
-    # kann sein, dass man die Pipeline gar nicht benutzen kann. Dann Embeddings anders erstellen
-    # Dynamically choose device 0 = GPU
+    model = AutoModel.from_pretrained(model_name).to("cuda:0" if device == 0 else "cpu")
+
     print("Finished creating a feature extractor.")
-    return pipeline("feature-extraction", model=model, tokenizer=tokenizer, device=0)
+    return pipeline("feature-extraction", model=model, tokenizer=tokenizer, device=device)
 
     """device = 0 if torch.cuda.is_available() else "cpu" # sonst None
 

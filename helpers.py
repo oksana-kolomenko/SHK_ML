@@ -45,6 +45,170 @@ def load_summaries():
     return summaries_list
 
 
+def test_text_embeddings(feature_extractor, raw_text_summaries, y, n_splits=3, n_components=None, n_repeats=1):
+    embedding_aggregator = EmbeddingAggregator(feature_extractor, method="embedding_cls")
+    embeddings = embedding_aggregator.transform(raw_text_summaries)
+    print("Generated embeddings shape:", embeddings.shape)
+    print(f"Last embedding: {embeddings[-1]}")
+
+
+def concat_lr_txt_emb_no_pipeline(feature_extractor, raw_text_summaries, X, y, nominal_features, imp_max_iter,
+                                  lr_max_iter, text_features, n_repeats, n_splits=3, n_components=40):
+    text_emb_method = "embedding_cls"
+
+    # add text as new column
+    text_column_name = "text"
+    X[text_column_name] = raw_text_summaries
+
+    nominal_imputer = SimpleImputer(strategy="most_frequent")
+    nominal_encoder = OneHotEncoder(handle_unknown="ignore")
+
+    numerical_imputer = IterativeImputer(max_iter=imp_max_iter)
+    numerical_scaler = MinMaxScaler()
+
+    embedding_aggregator = EmbeddingAggregator(feature_extractor, method=text_emb_method)
+
+    lr_model = LogisticRegression(max_iter=lr_max_iter, class_weight="balanced")
+
+    skf = RepeatedStratifiedKFold(n_splits=n_splits, n_repeats=n_repeats, random_state=42)
+    skf.get_n_splits(X, y)
+
+    # prepare data
+    numerical_features = list(set(X.columns) - set(nominal_features) - set(text_features))  # todo:replace hardcoding
+    print(f"Numerical features identified: {numerical_features}")
+    imputed_numerical = numerical_imputer.fit_transform(X[numerical_features])
+    scaled_numerical = numerical_scaler.fit_transform(imputed_numerical)
+
+    X[nominal_features] = nominal_imputer.fit_transform(X[nominal_features])
+    encoded_nominal = nominal_encoder.fit_transform(X[nominal_features]).toarray()
+
+    # Embeddings
+    print(f"Type raw_sum: {type(raw_text_summaries)}")
+    print(f"Len raw_sum: {len(raw_text_summaries)}")
+    print(f"Type features in column: {type(text_features)}")
+    print(f"Len features in column: {len(X[text_features])}")
+    print(f"Text features in column: {X[text_features]}")
+
+    raw_embeddings = embedding_aggregator.transform(raw_text_summaries)
+    print(f"len raw_embeddings: {len(raw_embeddings)}")
+    #print(f"shape raw_embeddings: {raw_embeddings.shape}")
+
+    raw_scalierte_embeddings = numerical_scaler.fit_transform(raw_embeddings)
+
+    print(f"len raw_scal_embeddings: {len(raw_scalierte_embeddings)}")
+    print(f"shape raw_scal_embeddings: {raw_scalierte_embeddings.shape}")
+
+    # todo: pre-step: convert X[text] features to a list with the length 82
+    embeddings = embedding_aggregator.transform(X[text_column_name].tolist())
+    print(f"len embeddings: {len(embeddings)}") # should be 82
+    print(f"shape embeddings: {embeddings.shape}")
+
+    scalierte_embeddings = numerical_scaler.fit_transform(embeddings)
+
+    print(f"len scal_embeddings: {len(scalierte_embeddings)}")
+    print(f"shape scal_embeddings: {scalierte_embeddings.shape}")  # should be(82, 768)
+    pca = PCA(n_components=n_components)
+    reduced_embeddings = pca.fit_transform(scalierte_embeddings)
+
+    combined_features = np.hstack((encoded_nominal, scaled_numerical, reduced_embeddings))
+
+    print("Final Scaled Data (as NumPy Array):")
+    print(combined_features)
+
+    print(f"Categorical Features: {len(nominal_features)}")
+    print(f"Text Features: {len(text_features)}")
+    print(f"Numerical Features: {len(set(X.columns) - set(nominal_features))}")
+
+    # Count unique categories in each categorical feature
+    for col in nominal_features:
+        print(f"{col} has {X[col].nunique()} unique categories.")
+
+    # Embeddings
+    #pca = PCA(n_components=n_components)
+    #reduced_embeddings = pca.fit_transform(scalierte_embeddings)
+
+    #explained_variance = pca.explained_variance_ratio_
+    #print(f"Explained Variance by Top {n_components} Components: {sum(explained_variance) * 100:.2f}%")
+
+    print(f"Type of embeddings: {type(embeddings)}")
+    print(f"Combined_X shape: {combined_features.shape}")
+    print(f"Embeddings shape: {embeddings.shape}")
+    #print(f"Reduced embeddings shape: {reduced_embeddings.shape}")
+
+    print(f"Combined shape: {combined_features.shape}")
+
+    test_scores = []
+
+    for train_index, test_index in skf.split(combined_features, y):
+        X_train, X_test = combined_features[train_index], combined_features[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+
+        print("\nTrain Indices:", train_index)
+        print("Test Indices:", test_index)
+        print("X_train:\n", X_train)
+        print("X_test:\n", X_test)
+        print("y_train:", y_train)
+        print("y_test:", y_test)
+        lr_model.fit(X_train, y_train)
+
+        score = roc_auc_score(y_test, lr_model.predict_proba(X_test)[:, 1])
+        test_scores.append(score)
+        print(score)
+
+    lr_model.fit(combined_features, y)
+
+    score_ = roc_auc_score(y, lr_model.predict_proba(combined_features)[:, 1])
+
+    print(f"LR_model train Scores: {score_}")
+    print(f"LR_model test Scores: {test_scores}")
+
+
+def lr_txt_emb_pca_no_pipeline(feature_extractor, raw_text_summaries, y, nominal_features, n_splits=3,
+                                  n_components=40, n_repeats=1):
+    text_emb_method = "embedding_cls"
+    nominal_imputer = SimpleImputer(strategy="most_frequent")
+    numerical_imputer = IterativeImputer(max_iter=5)
+    numerical_scaler = MinMaxScaler()
+    embedding_aggregator = EmbeddingAggregator(feature_extractor, method=text_emb_method)
+    lr_model = LogisticRegression(max_iter=1000, class_weight="balanced")
+    skf = RepeatedStratifiedKFold(n_splits=n_splits, n_repeats=n_repeats, random_state=42)
+
+    # Embeddings
+    embeddings = embedding_aggregator.transform(raw_text_summaries)
+    scalierte_embeddings = numerical_scaler.fit_transform(embeddings)
+    pca = PCA(n_components=n_components)
+    reduced_embeddings = pca.fit_transform(scalierte_embeddings)
+
+    explained_variance = pca.explained_variance_ratio_
+    print(f"Explained Variance by Top {n_components} Components: {sum(explained_variance) * 100:.2f}%")
+    print(f"Reduced embeddings shape: {reduced_embeddings.shape}")
+
+    test_scores = []
+
+    for train_index, test_index in skf.split(reduced_embeddings, y):
+        X_train, X_test = reduced_embeddings[train_index], reduced_embeddings[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+
+        print("\nTrain Indices:", train_index)
+        print("Test Indices:", test_index)
+        print("X_train:\n", X_train)
+        print("X_test:\n", X_test)
+        print("y_train:", y_train)
+        print("y_test:", y_test)
+        lr_model.fit(X_train, y_train)
+
+        score = roc_auc_score(y_test, lr_model.predict_proba(X_test)[:, 1])
+        test_scores.append(score)
+        print(score)
+
+    lr_model.fit(reduced_embeddings, y)
+
+    score_ = roc_auc_score(y, lr_model.predict_proba(reduced_embeddings)[:, 1])
+
+    print(f"LR_model train Scores: {score_}")
+    print(f"LR_model test Scores: {test_scores}")
+
+
 def logistic_regression(dataset_name, X, y, nominal_features, n_splits=3, n_components=None):
     # Todo: try encoding categ. features with OHE (after finding all categ. features (with Ricardo))
     # for csv format
@@ -66,7 +230,7 @@ def logistic_regression(dataset_name, X, y, nominal_features, n_splits=3, n_comp
                     ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
                 ]), nominal_features),
                 ("numerical", Pipeline([
-                    ("numerical_imputer", IterativeImputer(max_iter=30)),
+                    ("numerical_imputer", IterativeImputer(max_iter=30)),  # todo=5 fürs Testen
                     ("numerical_scaler", MinMaxScaler())
                 ] + ([pca_step] if pca_step else [])), numerical_features),
             ])),
@@ -153,7 +317,7 @@ def lr_rt_emb(dataset_name, X, y, nominal_features, n_splits=3, n_components=Non
                 ]), list(set(X.columns.values) - set(nominal_features))),
             ])),
             # pca_step,
-            # ("embedding", RandomTreesEmbedding()),
+            # ("embedding", RandomTreesEmbedding()), ist doch ok? test
             ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=10000))
         ]),
         param_grid={
@@ -217,33 +381,42 @@ def lr_rt_emb(dataset_name, X, y, nominal_features, n_splits=3, n_components=Non
     return dataset, ml_method, emb_method, concatenation, train_metrics, metrics_per_fold
 
 
-def lr_txt_emb(dataset_name, emb_method, feature_extractor, raw_text_summaries, y, n_splits=3, n_components=None):
+# n_components aus dem Datensatz nehmen (40 für Posttrauma (shape[1])
+def lr_txt_emb(dataset_name, emb_method, feature_extractor, raw_text_summaries, y, n_splits=3,
+               n_components=None, n_repeats=1, max_iter=1000):  # todo: für resulate, wenn alles läuft: n_repeats=10
     # Todo! Wird die beste Aggregierung ausgegeben?
     dataset = dataset_name
     ml_method = "logistic regression"
     concatenation = "no"
     metrics_per_fold = []
-    skf = StratifiedKFold(n_splits=n_splits)
+    skf = StratifiedKFold(n_splits=n_splits) # macht es Sinn?
+    pca_components = f"PCA ({n_components} components)" if n_components else "none"
+
+    pipeline_steps = [
+        ("aggregator", EmbeddingAggregator(feature_extractor)),
+        ("numerical_scaler", MinMaxScaler())  # Testen vs. StandardScaler
+    ]
+    if n_components:
+        pipeline_steps.append(("pca", PCA(n_components=n_components)))
+
+    pipeline_steps.append(("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=max_iter)))
 
     search = GridSearchCV(
-        estimator=Pipeline([
-            ("aggregator", EmbeddingAggregator(feature_extractor)),
-            ("numerical_scaler", MinMaxScaler()), # test vs. StandardScaler
-            ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=10000))
-        ]),
+        estimator=Pipeline(pipeline_steps),
         param_grid={
-            "classifier__C": [2, 10, 50, 250],
+            "classifier__C": [2, 10],  # , 50, 250],
             "aggregator__method": [
                 "embedding_cls",
-                "embedding_mean_with_cls_and_sep",
-                "embedding_mean_without_cls_and_sep"
+                #"embedding_mean_with_cls_and_sep",
+                #"embedding_mean_without_cls_and_sep"
             ]
         },
         scoring="neg_log_loss",
-        cv=RepeatedStratifiedKFold(n_splits=3)
+        cv=RepeatedStratifiedKFold(n_splits=3, n_repeats=n_repeats)
     )
 
     for train_index, test_index in skf.split(raw_text_summaries, y):
+        print(f"train, text index: {train_index}, {test_index}")
         X_train, X_test = [raw_text_summaries[i] for i in train_index], [raw_text_summaries[i] for i in test_index]
         y_train, y_test = y[train_index], y[test_index]
 
@@ -293,7 +466,7 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, raw_text_summaries, 
     print(f"Train metrics: {train_metrics}")
     print(f"Test metrics per fold: {metrics_per_fold}")
 
-    return dataset, ml_method, emb_method, concatenation, train_metrics, metrics_per_fold
+    return dataset, ml_method, emb_method, concatenation, pca_components, train_metrics, metrics_per_fold
 
 
 def hgbc(dataset_name, X, y, nominal_features, n_splits=3):
@@ -539,7 +712,7 @@ def hgbc_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y, n_sp
 
 
 def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_extractor, nominal_features, y,
-                      n_splits=3):
+                      n_splits=3, imp_max_iter=5, class_max_iter=1000):
     start_time = time.time()
     print(f"Starting the concat_lr_txt_emb method {start_time}")
 
@@ -565,7 +738,7 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
                             ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
                         ]), nominal_features),
                         ("numerical", Pipeline([
-                            ("numerical_imputer", IterativeImputer(max_iter=30)),
+                            ("numerical_imputer", IterativeImputer(max_iter=imp_max_iter)),
                             ("numerical_scaler", MinMaxScaler())
                         ]), numerical_features),
                     ])),
@@ -575,14 +748,16 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
                     ("numerical_scaler", MinMaxScaler()),  # test vs. StandardScaler
                 ])),
             ])),
-            ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=10000))
+            # todo: ohne classificator die shape nach der vorverarbeitung ausgeben lassen
+            # todo: muss ca [40] + [768] sein
+            ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=class_max_iter))
         ]),
         param_grid={
-            "classifier__C": [2, 10, 50, 250],
+            "classifier__C": [2, 10], # für test , 50, 250],
             "feature_combiner__text__embedding_aggregator__method": [
                 "embedding_cls",
-                "embedding_mean_with_cls_and_sep",
-                "embedding_mean_without_cls_and_sep"
+                #"embedding_mean_with_cls_and_sep",
+                #"embedding_mean_without_cls_and_sep"
             ]
         },
         scoring="neg_log_loss",
@@ -656,23 +831,6 @@ def combine_data(X_tabular, summaries, feature_extractor):
             else:
                 text_embeddings.append(embedding)
 
-        for idx, emb in enumerate(text_embeddings):
-            print(f"Embedding {idx} shape: {np.array(emb).shape}, Type: {type(emb)}")
-
-        print(f"X_tabular_type: {(type(X_tabular))}")
-        print(f"Text_Embeddings_type: {type(text_embeddings)}")
-        print(f"Summaries_type: {type(summaries)}")
-        print(f"Ammount of embs: {len(text_embeddings)}")
-        print(f"Len of X_tab: {len(X_tabular)}")
-
-        max_len = max(len(emb) for emb in text_embeddings)
-        text_embeddings = np.array([
-            np.pad(emb, (0, max_len - len(emb)), mode='constant')  # Pad shorter embeddings
-            if len(emb) < max_len else np.array(emb)[:max_len]  # Truncate longer embeddings
-            for emb in text_embeddings
-        ])
-
-        # Ensure shapes match for horizontal stacking
         assert X_tabular.shape[0] == text_embeddings.shape[0], "Mismatch in number of samples."
 
         # Combine tabular and text embeddings
@@ -680,7 +838,8 @@ def combine_data(X_tabular, summaries, feature_extractor):
         return combined_data
 
 
-def concat_lr_tab_rt_emb(dataset_name, X_tabular, summaries, nominal_features, y, n_splits=3):
+def concat_lr_tab_rt_emb(dataset_name, X_tabular, summaries, nominal_features, y, n_splits=3,
+                         imp_max_iter=5, class_max_iter=1000):
     dataset = dataset_name
     ml_method = "Logistic Regression"
     emb_method = "Random Trees Embedding"
@@ -790,7 +949,8 @@ def concat_lr_tab_rt_emb(dataset_name, X_tabular, summaries, nominal_features, y
 
 
 # TODO! Anpassen
-def concat_txt_tab_hgbc(dataset_name, emb_method, X_tabular, y, nominal_features, feature_extractor, summaries, n_splits=3):
+def concat_txt_tab_hgbc(dataset_name, emb_method, X_tabular, y, nominal_features, feature_extractor, summaries,
+                        n_splits=3):
     dataset = dataset_name
     ml_method = "HistGradientBoosting"
     emb_method = emb_method
@@ -816,11 +976,11 @@ def concat_txt_tab_hgbc(dataset_name, emb_method, X_tabular, y, nominal_features
         ("classifier", HistGradientBoostingClassifier(categorical_features=categorical_indices))
     ])
     param_grid = {
-        "classifier__min_samples_leaf": [5, 10, 15, 20],
+        "classifier__min_samples_leaf": [5, 10], #  weniger für Test, 15, 20],
         "preprocessor__embedding__aggregator__method": [
             "embedding_cls",
-            "embedding_mean_with_cls_and_sep",
-            "embedding_mean_without_cls_and_sep"
+            # "embedding_mean_with_cls_and_sep",
+            # "embedding_mean_without_cls_and_sep"
         ]
     }
 
