@@ -769,15 +769,15 @@ def concat_lr_txt_emb(dataset_name, emb_method,
             ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=class_max_iter))
         ]),
         param_grid={
-            "classifier__C": [2, 10],  # für test , 50, 250],
+            "classifier__C": [2, 10, 50, 250],
             "transformer__text__embedding_aggregator__method": [
                 "embedding_cls",
-                # "embedding_mean_with_cls_and_sep",
-                # "embedding_mean_without_cls_and_sep"
+                "embedding_mean_with_cls_and_sep",
+                "embedding_mean_without_cls_and_sep"
             ]
         },
         scoring="neg_log_loss",
-        cv=RepeatedStratifiedKFold(n_splits=n_splits)
+        cv=skf
     )
 
     for train_index, test_index in skf.split(X_tabular, y):
