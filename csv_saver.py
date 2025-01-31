@@ -15,7 +15,7 @@ csv_names = [
 
 
 def save_results_to_csv(output_file, dataset_name, ml_method, emb_method, concatenation,
-                        metrics, is_train):
+                        best_params, pca_n_comp, metrics, is_train):
     """
     Save logistic regression results to a CSV file.
 
@@ -38,6 +38,8 @@ def save_results_to_csv(output_file, dataset_name, ml_method, emb_method, concat
         metrics["ML Method"] = ml_method
         metrics["Embedding Method"] = emb_method
         metrics["Concatenation"] = concatenation
+        metrics["Best Parameters"] = best_params
+        metrics["PCA n_components"] = pca_n_comp
         metrics = {key: float(value) if isinstance(value, np.float64) else value for key, value in metrics.items()}
         data.append(metrics)
     else:
@@ -47,6 +49,8 @@ def save_results_to_csv(output_file, dataset_name, ml_method, emb_method, concat
             fold_metrics["ML Method"] = ml_method
             fold_metrics["Embedding Method"] = emb_method
             fold_metrics["Concatenation"] = concatenation
+            metrics["Best Parameters"] = best_params
+            metrics["PCA n_components"] = pca_n_comp
             fold_metrics = {key: float(value) if isinstance(value, np.float64) else value for key, value in
                             fold_metrics.items()}
 
@@ -56,12 +60,12 @@ def save_results_to_csv(output_file, dataset_name, ml_method, emb_method, concat
 
     if is_train:
         column_order = [
-            "Dataset", "ML Method", "Embedding Method", "Concatenation",
+            "Dataset", "ML Method", "Embedding Method", "Concatenation", "Best Parameters", "PCA n_components",
             "AUC", "AP", "Sensitivity", "Specificity", "Precision", "F1", "Balanced Accuracy"
         ]
     else:
         column_order = [
-            "Fold", "Dataset", "ML Method", "Embedding Method", "Concatenation",
+            "Fold", "Dataset", "ML Method", "Embedding Method", "Concatenation", "Best Parameters", "PCA n_components",
             "AUC", "AP", "Sensitivity", "Specificity", "Precision", "F1", "Balanced Accuracy"
         ]
 

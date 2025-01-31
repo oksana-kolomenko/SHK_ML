@@ -3,7 +3,7 @@ import numpy as np
 from csv_saver import save_results_to_csv
 from helpers import (load_labels, load_features, load_summaries)
 from bar_plotting import plot_bar_chart
-from helpers import concat_lr_txt_emb
+from helpers import concat_lr_txt_emb, concat_txt_tab_hgbc
 from models import feature_extractor_bert
 from values import Dataset
 
@@ -85,8 +85,9 @@ def run_models_concatenated():
     }
 
     # TEXT EMBEDDINGS #
-    (lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,
-     lr_conc_yesno, lr_conc_train_score, lr_conc_test_scores) = concat_lr_txt_emb(
+    """(lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,
+     lr_conc_yesno, lr_best_params, lr_pca_components, lr_conc_train_score,
+     lr_conc_test_scores) = concat_lr_txt_emb(
                         dataset_name=posttrauma_dataset,
                         emb_method="Bert",
                         feature_extractor=feature_extractor_bert,
@@ -97,11 +98,14 @@ def run_models_concatenated():
                         imp_max_iter=5, class_max_iter=1000,
                         n_components=40, n_repeats=1)
 
+    # todo:save train&test results as list and iterate
     save_results_to_csv(output_file=f"{feature_extractor_bert}_LR_conc_train.csv",
                         dataset_name=lr_conc_dataset,
                         ml_method=lr_conc_ml_method,
                         emb_method=lr_conc_emb_method,
                         concatenation=lr_conc_yesno,
+                        best_params=lr_best_params,
+                        pca_n_comp=lr_pca_components,
                         metrics=lr_conc_train_score,
                         is_train=True)
 
@@ -110,7 +114,42 @@ def run_models_concatenated():
                         ml_method=lr_conc_ml_method,
                         emb_method=lr_conc_emb_method,
                         concatenation=lr_conc_yesno,
+                        best_params=lr_best_params,
+                        pca_n_comp=lr_pca_components,
                         metrics=lr_conc_test_scores,
+                        is_train=False)"""
+
+    (hgbc_conc_dataset, hgbc_conc_ml_method, hgbc_conc_emb_method,
+     hgbc_conc_yesno, hgbc_best_params, hgbc_pca_components, hgbc_conc_train_score,
+     hgbc_conc_test_scores) = concat_txt_tab_hgbc(
+                        dataset_name=posttrauma_dataset,
+                        emb_method="Bert",
+                        feature_extractor=feature_extractor_bert,
+                        raw_text_summaries=patient_summaries,
+                        X_tabular=X_posttrauma, y=y_posttrauma,
+                        nominal_features=nominal_features,
+                        text_feature_column_name=text_feature,
+                        n_components=40)
+
+    # todo:save train&test results as list and iterate
+    save_results_to_csv(output_file=f"{feature_extractor_bert}_HGBC_conc_train.csv",
+                        dataset_name=hgbc_conc_dataset,
+                        ml_method=hgbc_conc_ml_method,
+                        emb_method=hgbc_conc_emb_method,
+                        concatenation=hgbc_conc_yesno,
+                        best_params=hgbc_best_params,
+                        pca_n_comp=hgbc_pca_components,
+                        metrics=hgbc_conc_train_score,
+                        is_train=True)
+
+    save_results_to_csv(output_file=f"{feature_extractor_bert}_HGBC_conc_test.csv",
+                        dataset_name=hgbc_conc_dataset,
+                        ml_method=hgbc_conc_ml_method,
+                        emb_method=hgbc_conc_emb_method,
+                        concatenation=hgbc_conc_yesno,
+                        best_params=hgbc_best_params,
+                        pca_n_comp=hgbc_pca_components,
+                        metrics=hgbc_conc_test_scores,
                         is_train=False)
 
     """
