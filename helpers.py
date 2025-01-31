@@ -985,7 +985,7 @@ def concat_txt_tab_hgbc(dataset_name, emb_method,
         ]),
         param_grid={
             "classifier__min_samples_leaf": [5, 10],  # weniger für Test, 15, 20],
-            "transformer__text__embedding__aggregator__method": [
+            "transformer__text__embedding_aggregator__method": [
                 "embedding_cls",
                 # "embedding_mean_with_cls_and_sep",
                 # "embedding_mean_without_cls_and_sep"
