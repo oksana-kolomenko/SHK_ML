@@ -390,7 +390,9 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, raw_text_summaries, 
     ml_method = "logistic regression"
     concatenation = "no"
     metrics_per_fold = []
-    skf = StratifiedKFold(n_splits=n_splits)  # macht es Sinn?
+    skf = RepeatedStratifiedKFold(n_splits=n_splits,
+                                  n_repeats=n_repeats,
+                                  random_state=42)  # macht es Sinn?
     pca_components = f"PCA ({n_components} components)" if n_components else "none"
 
     pipeline_steps = [
@@ -413,7 +415,7 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, raw_text_summaries, 
             ]
         },
         scoring="neg_log_loss",
-        cv=RepeatedStratifiedKFold(n_splits=3, n_repeats=n_repeats)
+        cv=skf
     )
 
     for train_index, test_index in skf.split(raw_text_summaries, y):
@@ -837,28 +839,30 @@ def concat_lr_txt_emb(dataset_name, emb_method,
 
 
 def concat_lr_tab_rt_emb(dataset_name, X_tabular, summaries,
-                         nominal_features, y, n_splits=3,
+                         nominal_features, y, n_repeats,
+                         n_splits=3,
                          imp_max_iter=5, class_max_iter=1000):
     dataset = dataset_name
     ml_method = "Logistic Regression"
     emb_method = "Random Trees Embedding"
     concatenation = "yes"
     metrics_per_fold = []
-    skf = StratifiedKFold(n_splits=n_splits)
+    skf = RepeatedStratifiedKFold(n_splits=n_splits,
+                                  n_repeats=n_repeats,
+                                  random_state=42)
 
     numerical_features = list(set(X_tabular.columns) - set(nominal_features))
 
     pipeline = Pipeline([
-        ("feature_combiner", ColumnTransformer([
+        ("feature_combiner", FeatureUnion([
             # Verarbeitung der tabellarischen Daten
-            ("tabular", ColumnTransformer([
+            ("raw", ColumnTransformer([
                 ("nominal", Pipeline([
                     ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
                     ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
                 ]), nominal_features),
                 ("numerical", Pipeline([
-                    ("numerical_imputer", IterativeImputer(max_iter=30)),
-                    ("numerical_scaler", MinMaxScaler())
+                    ("numerical_imputer", IterativeImputer(max_iter=imp_max_iter)),
                 ]), numerical_features),
             ]), X_tabular.columns),
 
@@ -870,42 +874,40 @@ def concat_lr_tab_rt_emb(dataset_name, X_tabular, summaries,
                         ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
                     ]), nominal_features),
                     ("numerical", Pipeline([
-                        ("numerical_imputer", IterativeImputer(max_iter=30))
+                        ("numerical_imputer", IterativeImputer(max_iter=imp_max_iter))
                     ]), numerical_features),
-                ])),
-                ("embedding", RandomTreesEmbedding())
-            ]), summaries)
+                ]), X_tabular.columns),
+                ("embedding", RandomTreesEmbedding()) # check
+            ]))
         ])),
-        ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=10000))
+        ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=class_max_iter))
     ])
 
     param_grid = {
-        "classifier__C": [2, 10, 50, 250],
-        "embedding__n_estimators": [10, 100, 1000],
-        "embedding__max_depth": [2, 5, 10, 15],
+        "classifier__C": [2, 10], #, 50, 250],
+        "embedding__n_estimators": [10], #, 100, 1000],
+        "embedding__max_depth": [2] #, 5] #, 10, 15],
     }
 
     search = GridSearchCV(
         estimator=pipeline,
         param_grid=param_grid,
         scoring="neg_log_loss",
-        cv=RepeatedStratifiedKFold(n_splits=3)
+        cv=skf
     )
 
     # Cross-Validation
     for train_index, test_index in skf.split(X_tabular, y):
         # Aufteilen der tabellarischen Daten und Embeddings
         X_tab_train, X_tab_test = X_tabular.iloc[train_index], X_tabular.iloc[test_index]
-        summaries_train = [summaries[i] for i in train_index]
-        summaries_test = [summaries[i] for i in test_index]
         y_train, y_test = y[train_index], y[test_index]
 
         # Fit the model
-        search.fit({"tabular": X_tab_train, "embeddings": summaries_train}, y_train)
+        search.fit(X_tab_train, y_train)
 
         # Predictions and probabilities
-        y_test_pred = search.predict({"tabular": X_tab_test, "embeddings": summaries_test})
-        y_test_pred_proba = search.predict_proba({"tabular": X_tab_test, "embeddings": summaries_test})[:, 1]
+        y_test_pred = search.predict(X_tab_test)
+        y_test_pred_proba = search.predict_proba(X_tab_test)[:, 1]
 
         # Calculate metrics
         tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
@@ -923,9 +925,9 @@ def concat_lr_tab_rt_emb(dataset_name, X_tabular, summaries,
         })
 
         # Train on the full dataset
-    search.fit({"tabular": X_tabular, "embeddings": summaries}, y)
-    y_train_pred = search.predict({"tabular": X_tabular, "embeddings": summaries})
-    y_train_pred_proba = search.predict_proba({"tabular": X_tabular, "embeddings": summaries})[:, 1]
+    search.fit(X_tabular, y)
+    y_train_pred = search.predict(X_tabular)
+    y_train_pred_proba = search.predict_proba(X_tabular)[:, 1]
 
     # Calculate training metrics
     train_metrics = {
@@ -947,18 +949,19 @@ def concat_lr_tab_rt_emb(dataset_name, X_tabular, summaries,
     return dataset, ml_method, emb_method, concatenation, train_metrics, metrics_per_fold
 
 
-# TODO! Anpassen
 def concat_txt_tab_hgbc(dataset_name, emb_method,
                         X_tabular, y, text_feature_column_name,
                         nominal_features, feature_extractor,
-                        raw_text_summaries, n_components,
-                        n_splits=3):
+                        raw_text_summaries, n_repeats,
+                        n_components, n_splits=3):
     dataset = dataset_name
     ml_method = "HistGradientBoostingClassifier"
     emb_method = emb_method
     concatenation = "yes"
     metrics_per_fold = []
-    skf = StratifiedKFold(n_splits=n_splits)
+    skf = RepeatedStratifiedKFold(n_splits=n_splits,
+                                  n_repeats=n_repeats,
+                                  random_state=42)
 
     n_components = 0
     # categorical_indices = [X_tabular.columns.get_loc(col) for col in nominal_features]
@@ -973,6 +976,8 @@ def concat_txt_tab_hgbc(dataset_name, emb_method,
     print(f"All columns length: {X_tabular.shape}")
     print(f"Non-text columns length: {len(X_tabular[non_text_columns])}")
 
+    categorical_indices = [X_tabular.columns.get_loc(col) for col in nominal_features]
+
     search = GridSearchCV(
         estimator=Pipeline([
             ("transformer", ColumnTransformer([
@@ -981,7 +986,7 @@ def concat_txt_tab_hgbc(dataset_name, emb_method,
                     ("numerical_scaler", MinMaxScaler())
                 ]), text_features)
             ])),
-            ("classifier", HistGradientBoostingClassifier(categorical_features=nominal_features))
+            ("classifier", HistGradientBoostingClassifier(categorical_features=categorical_indices))
         ]),
         param_grid={
             "classifier__min_samples_leaf": [5, 10],  # weniger für Test, 15, 20],
@@ -992,7 +997,7 @@ def concat_txt_tab_hgbc(dataset_name, emb_method,
             ]
         },
         scoring="neg_log_loss",
-        cv=RepeatedStratifiedKFold(n_splits=3)
+        cv=skf
     )
 
     for train_index, test_index in skf.split(X_tabular, y):
@@ -1026,7 +1031,7 @@ def concat_txt_tab_hgbc(dataset_name, emb_method,
             "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
         })
 
-    assert len(X_tabular) == len(text_features) == len(y), "Mismatch in training data sizes"
+    assert len(X_tabular) == len(text_features) == len(y), "Mismatch in training data sizes" # here problem
 
     search.fit(X_tabular, y)
     y_train_pred = search.predict(X_tabular),
