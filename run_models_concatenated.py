@@ -3,7 +3,7 @@ import numpy as np
 from csv_saver import save_results_to_csv
 from helpers import (load_labels, load_features, load_summaries)
 from bar_plotting import plot_bar_chart
-from helpers_new import conc_lr_txt_emb
+from helpers import concat_lr_txt_emb
 from models import feature_extractor_bert
 from values import Dataset
 
@@ -85,7 +85,35 @@ def run_models_concatenated():
     }
 
     # TEXT EMBEDDINGS #
+    (lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,
+     lr_conc_yesno, lr_conc_train_score, lr_conc_test_scores) = concat_lr_txt_emb(
+                        dataset_name=posttrauma_dataset,
+                        emb_method="Bert",
+                        feature_extractor=feature_extractor_bert,
+                        raw_text_summaries=patient_summaries,
+                        X_tabular=X_posttrauma, y=y_posttrauma,
+                        nominal_features=nominal_features,
+                        text_feature_column_name=text_feature,
+                        imp_max_iter=5, class_max_iter=1000,
+                        n_components=40, n_repeats=1)
 
+    save_results_to_csv(output_file=f"{feature_extractor_bert}_LR_conc_train.csv",
+                        dataset_name=lr_conc_dataset,
+                        ml_method=lr_conc_ml_method,
+                        emb_method=lr_conc_emb_method,
+                        concatenation=lr_conc_yesno,
+                        metrics=lr_conc_train_score,
+                        is_train=True)
+
+    save_results_to_csv(output_file=f"{feature_extractor_bert}_LR_conc_test.csv",
+                        dataset_name=lr_conc_dataset,
+                        ml_method=lr_conc_ml_method,
+                        emb_method=lr_conc_emb_method,
+                        concatenation=lr_conc_yesno,
+                        metrics=lr_conc_test_scores,
+                        is_train=False)
+
+    """
     # Calculate results for each model
     for model_name, feature_extractor in feature_extractors.items():
 
@@ -93,13 +121,10 @@ def run_models_concatenated():
                         lr_max_iter=1000, n_repeats=1, nominal_features=nominal_features, text_feature=text_feature,
                         raw_text_summaries=patient_summaries)
 
-        """
+        
         lr_txt_emb_pca_no_pipeline(feature_extractor=feature_extractor,
                                    nominal_features=nominal_features,
                                    raw_text_summaries=patient_summaries, y=y_posttrauma)
-        """
-
-        """
         # Log. Reg. Concatenated (Tab. + Text Embeddings)
         concat_lr_txt_emb_no_pipeline(feature_extractor=feature_extractor, X=X_posttrauma,
                                       nominal_features=nominal_features,

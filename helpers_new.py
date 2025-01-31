@@ -39,63 +39,98 @@ class DebugTransformer(TransformerMixin, BaseEstimator):
         return X
 
 
-def conc_lr_txt_emb_(feature_extractor, raw_text_summaries, X, y, nominal_features, text_feature, imp_max_iter,
-                    lr_max_iter, n_repeats, n_splits=3, n_components=10):
+# try with Feature Union
+def conc_lr_txt_emb_(feature_extractor, raw_text_summaries,
+                     X, y, nominal_features, text_feature,
+                     imp_max_iter, lr_max_iter, n_repeats,
+                     n_splits=3, n_components=10):
 
-    cv = RepeatedStratifiedKFold(n_splits=n_splits, n_repeats=n_repeats, random_state=42)
+    cv = RepeatedStratifiedKFold(n_splits=n_splits,
+                                 n_repeats=n_repeats,
+                                 random_state=42)
 
-    numerical_features = list(set(X.columns) - set(nominal_features))
-
+    numerical_features = list(set(X.columns) -
+                              set(nominal_features))
 
     print(f"Tabelle Größe {len(X.columns)}")
     print(f"Tabelle Größe {X.shape}")
 
-    pca_components = f"PCA ({n_components} components)" if n_components else "none"
-    pca_step = ("pca", PCA(n_components=n_components)) if n_components else None
+    pca_components = f"PCA ({n_components} components)" \
+        if n_components else "none"
+    pca_step = ("pca", PCA(n_components=n_components)) \
+        if n_components else None
 
     search = GridSearchCV(
         estimator=Pipeline([
-            ("transformer", FeatureUnion([
-
+            ("feature_combiner", FeatureUnion([
+                ("tabular", Pipeline([
+                    ("tabular_transformer", ColumnTransformer([
+                        ("nominal", Pipeline([
+                            ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
+                            ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
+                        ]), nominal_features),
+                        ("numerical", Pipeline([
+                            ("numerical_imputer", IterativeImputer(max_iter=imp_max_iter)),
+                            ("numerical_scaler", MinMaxScaler())
+                        ]), numerical_features),
+                    ])),
+                ])),
+                ("text", Pipeline([
+                    ("embedding_aggregator", EmbeddingAggregator(feature_extractor)),
+                    ("numerical_scaler", MinMaxScaler()),  # test vs. StandardScaler
+                ])),
             ])),
-            ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=lr_max_iter))
+            # todo: ohne classificator die shape nach der vorverarbeitung ausgeben lassen
+            # todo: muss ca [40] + [768] sein
+            ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=imp_max_iter))
         ]),
-
-
-        param_grid={"classifier__C": [2, 10], #, 50, 250]},
-                    "transformer__text__embedding_aggregator__method": [
-                        "embedding_cls"
-                    ]
-                },
+        param_grid={
+            "classifier__C": [2, 10], # für test , 50, 250],
+            "feature_combiner__text__embedding_aggregator__method": [
+                "embedding_cls",
+                #"embedding_mean_with_cls_and_sep",
+                #"embedding_mean_without_cls_and_sep"
+            ]
+        },
         scoring="neg_log_loss",
         cv=RepeatedStratifiedKFold(n_splits=3),
         error_score="raise"
     )
-
     search.fit(X, y)
 
 
-def conc_lr_txt_emb(feature_extractor, raw_text_summaries, X, y, nominal_features, text_feature, imp_max_iter,
-                    lr_max_iter, n_repeats, n_splits=3, n_components=10):
+def conc_lr_txt_emb(feature_extractor, raw_text_summaries,
+                    X, y, nominal_features, text_feature_column_name,
+                    imp_max_iter, lr_max_iter, n_repeats,
+                    n_splits=3, n_components=10):
 
-    cv = RepeatedStratifiedKFold(n_splits=n_splits, n_repeats=n_repeats, random_state=42)
+    cv = RepeatedStratifiedKFold(n_splits=n_splits,
+                                 n_repeats=n_repeats,
+                                 random_state=42)
 
     # add text as a new column
-    text_features = [text_feature]
-    X[text_feature] = raw_text_summaries
-    numerical_features = list(set(X.columns) - set(nominal_features) - set(text_features))
+    text_features = [text_feature_column_name]
+    X[text_feature_column_name] = raw_text_summaries
 
-    assert len(X[text_feature]) == 82, "Text features are more than 82"
+    # separate numerical features
+    numerical_features = list(set(X.columns) -
+                              set(nominal_features) -
+                              set(text_features))
 
-    print(f"Tabelle Größe {len(X.columns)}")
-    print(f"Tabelle Größe {X.shape}")
+    assert len(X[text_feature_column_name]) == 82, \
+        "Text features length is not equal 82"
+
+    print(f"Tabelle Größe {len(X.columns)}") # muss 41
+    print(f"Tabelle Größe {X.shape}") # muss 41X82
 
     print(f"X.columns: {X.columns}")
     print(f"Type text features: {type(text_features)}")
     print("Text features:", text_features)
 
-    pca_components = f"PCA ({n_components} components)" if n_components else "none"
-    pca_step = ("pca", PCA(n_components=n_components)) if n_components else None
+    pca_components = f"PCA ({n_components} components)" \
+        if n_components else "none"
+    pca_step = ("pca", PCA(n_components=n_components)) \
+        if n_components else None
 
     search = GridSearchCV(
         estimator=Pipeline([
@@ -114,8 +149,10 @@ def conc_lr_txt_emb(feature_extractor, raw_text_summaries, X, y, nominal_feature
                     ("embedding_aggregator", EmbeddingAggregator(feature_extractor)),
                     ("debug_text", DebugTransformer(name="Text Debug")),
                     ("numerical_scaler", MinMaxScaler()),
-                ]), text_features), # todo: as columnname übergeben, im Emb. Aggr. Eingabetype anpassen und dort die Tabelle haben
-                # + ([pca_step] if pca_step else [])), X[text_column_name].tolist()),  # todo: text is one col pro row, after embedding
+                ]), text_features),  # todo: as columnname übergeben,
+                # todo: im Emb. Aggr. Eingabetype anpassen
+                # todo: und dort die Tabelle haben
+                # + ([pca_step] if pca_step else [])), X[text_column_name].tolist()),
                 # todo: should be 768 and after pca 40!
             ])),
             ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=lr_max_iter))
@@ -126,14 +163,16 @@ def conc_lr_txt_emb(feature_extractor, raw_text_summaries, X, y, nominal_feature
                     ]
                 },
         scoring="neg_log_loss",
-        cv=RepeatedStratifiedKFold(n_splits=3),
+        # cv=cv,
         error_score="raise"
     )
 
     search.fit(X, y)
 
     y_pred = search.predict(X)
-    y_pred_proba = search.predict_proba(X)[:1]
+    y_pred_proba = search.predict_proba(X)[:, 1]
+    r_a_score = roc_auc_score(y, y_pred_proba)
 
     print(f"Y pred: {y_pred}")
     print(f"Y pred proba: {y_pred_proba}")
+    print(f"AUC: {r_a_score}")

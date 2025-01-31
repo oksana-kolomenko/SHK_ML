@@ -313,6 +313,7 @@ def lr_rt_emb(dataset_name, X, y, nominal_features, n_splits=3, n_components=Non
                 # Encode ordinal&numerical features with RTE
                 ("numerical", Pipeline([
                     ("numerical_imputer", IterativeImputer(max_iter=50)),
+                    # TODO: Skalieren?
                     ("embedding", RandomTreesEmbedding())
                 ]), list(set(X.columns.values) - set(nominal_features))),
             ])),
@@ -554,6 +555,7 @@ def hgbc_ran_tree_emb(dataset_name, X, y, nominal_features, n_splits=3):
                 ]), nominal_features),
                 ("numerical", Pipeline([
                     ("numerical_imputer", IterativeImputer(max_iter=30))
+                    # TODO: skalieren (nein)
                 ]), list(set(X.columns.values) - set(nominal_features))),
             ])),
             ("embedding", RandomTreesEmbedding()),
@@ -711,42 +713,55 @@ def hgbc_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y, n_sp
     return dataset, ml_method, emb_method, concatenation, train_metrics, metrics_per_fold
 
 
-def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_extractor, nominal_features, y,
-                      n_splits=3, imp_max_iter=5, class_max_iter=1000):
+def concat_lr_txt_emb(dataset_name, emb_method,
+                      feature_extractor, raw_text_summaries,
+                      X_tabular, y, nominal_features, text_feature_column_name,
+                      imp_max_iter, class_max_iter, n_repeats,
+                      n_components, n_splits=3):
     start_time = time.time()
-    print(f"Starting the concat_lr_txt_emb method {start_time}")
+    readable_time = time.strftime("%H:%M:%S", time.localtime(start_time))
+    print(f"Starting the concat_lr_txt_emb method {readable_time}")
 
     dataset = dataset_name
     ml_method = "Logistic Regression"
     emb_method = emb_method
     concatenation = "yes"
     metrics_per_fold = []
-    skf = StratifiedKFold(n_splits=n_splits)
+    skf = RepeatedStratifiedKFold(n_splits=n_splits,
+                                  n_repeats=n_repeats,
+                                  random_state=42)
 
-    numerical_features = list(set(X_tabular.columns) - set(nominal_features))
+    # add new column (text summaries)
+    text_features = [text_feature_column_name]
+    X_tabular[text_feature_column_name] = raw_text_summaries
+
+    # define numerical features
+    numerical_features = list(set(X_tabular.columns) -
+                              set(nominal_features) -
+                              set(text_features))
 
     print(f"Numerical features identified: {numerical_features}")
-    print(f"Setting up the pipeline at {time.time()}")
+    print(f"Setting up the pipeline at { time.strftime('%H:%M:%S', time.localtime(time.time()))}")
+    print(f"Tabelle Größe {X_tabular.shape}")  # muss 41X82
+    print(f"All columns: {X_tabular.columns}")
 
+    pca_components = f"PCA ({n_components} components)" \
+        if n_components else "none"
     search = GridSearchCV(
         estimator=Pipeline([
-            ("feature_combiner", FeatureUnion([
-                ("tabular", Pipeline([
-                    ("tabular_transformer", ColumnTransformer([
-                        ("nominal", Pipeline([
-                            ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
-                            ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
-                        ]), nominal_features),
-                        ("numerical", Pipeline([
-                            ("numerical_imputer", IterativeImputer(max_iter=imp_max_iter)),
-                            ("numerical_scaler", MinMaxScaler())
-                        ]), numerical_features),
-                    ])),
-                ])),
+            ("transformer", ColumnTransformer([
+                ("nominal", Pipeline([
+                    ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
+                    ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
+                ]), nominal_features),
+                ("numerical", Pipeline([
+                    ("numerical_imputer", IterativeImputer(max_iter=imp_max_iter)),
+                    ("numerical_scaler", MinMaxScaler())
+                ]), numerical_features),
                 ("text", Pipeline([
                     ("embedding_aggregator", EmbeddingAggregator(feature_extractor)),
                     ("numerical_scaler", MinMaxScaler()),  # test vs. StandardScaler
-                ])),
+                ]), text_features),
             ])),
             # todo: ohne classificator die shape nach der vorverarbeitung ausgeben lassen
             # todo: muss ca [40] + [768] sein
@@ -754,31 +769,28 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
         ]),
         param_grid={
             "classifier__C": [2, 10], # für test , 50, 250],
-            "feature_combiner__text__embedding_aggregator__method": [
+            "transformer__text__embedding_aggregator__method": [
                 "embedding_cls",
                 #"embedding_mean_with_cls_and_sep",
                 #"embedding_mean_without_cls_and_sep"
             ]
         },
         scoring="neg_log_loss",
-        cv=RepeatedStratifiedKFold(n_splits=3)
+        cv=RepeatedStratifiedKFold(n_splits=n_splits)
     )
 
     for train_index, test_index in skf.split(X_tabular, y):
         # Split tabular data, summaries, and labels
-        X_train_tabular, X_test_tabular = X_tabular.iloc[train_index], X_tabular.iloc[test_index]
-        summaries_train, summaries_test = [summaries[i] for i in train_index], [summaries[i] for i in test_index]
+        X_train, X_test = X_tabular.iloc[train_index], X_tabular.iloc[test_index]
+        summaries_train, summaries_test = ([raw_text_summaries[i] for i in train_index],
+                                           [raw_text_summaries[i] for i in test_index])
         y_train, y_test = y[train_index], y[test_index]
 
-        # Combine tabular and text features
-        X_train_combined = combine_data(X_train_tabular, summaries_train, feature_extractor)
-        X_test_combined = combine_data(X_test_tabular, summaries_test, feature_extractor)
-
         # Fit and evaluate
-        search.fit(X_train_combined, y_train)
+        search.fit(X_train, y_train)
 
-        y_test_pred = search.predict(X_test_combined)
-        y_test_pred_proba = search.predict_proba(X_test_combined)[:, 1]
+        y_test_pred = search.predict(X_test)
+        y_test_pred_proba = search.predict_proba(X_test)[:, 1]
         # Calculate metrics
         tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
         specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
@@ -794,11 +806,10 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
             "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
         })
 
-    X_combined = combine_data(X_tabular, summaries, feature_extractor)
-    search.fit(X_combined, y)
+    search.fit(X_tabular, y)
 
-    y_train_pred = search.predict(X_combined)
-    y_train_pred_proba = search.predict_proba(X_combined)[:, 1]
+    y_train_pred = search.predict(X_tabular)
+    y_train_pred_proba = search.predict_proba(X_tabular)[:, 1]
 
     train_metrics = {
         "AUC": roc_auc_score(y, y_train_pred_proba),
@@ -811,31 +822,16 @@ def concat_lr_txt_emb(dataset_name, emb_method, X_tabular, summaries, feature_ex
         "Balanced Accuracy": balanced_accuracy_score(y, y_train_pred)
     }
 
+    finish_time = time.time()
+    readable_time = time.strftime("%H:%M:%S", time.localtime(finish_time))
+    print(f"Finished the concat_lr_txt_emb method {readable_time}")
+
     print(f"Combined feature size: {len(search.best_estimator_.named_steps['classifier'].coef_[0])}")
     print(f"Best hyperparameters: {search.best_params_}")
     print(f"Train metrics: {train_metrics}")
     print(f"Test metrics per fold: {metrics_per_fold}")
 
     return dataset, ml_method, emb_method, concatenation, train_metrics, metrics_per_fold
-
-
-def combine_data(X_tabular, summaries, feature_extractor):
-        """Combine tabular and text data into a single feature set."""
-        raw_embeddings = summaries
-        print(f"First Summary: {summaries[0]}")
-        text_embeddings = []
-        for embedding in raw_embeddings:
-            if isinstance(embedding, list) and len(embedding) == 1:
-                # Flatten the single-element list
-                text_embeddings.append(embedding[0])
-            else:
-                text_embeddings.append(embedding)
-
-        assert X_tabular.shape[0] == text_embeddings.shape[0], "Mismatch in number of samples."
-
-        # Combine tabular and text embeddings
-        combined_data = np.hstack([X_tabular.to_numpy(), text_embeddings])
-        return combined_data
 
 
 def concat_lr_tab_rt_emb(dataset_name, X_tabular, summaries, nominal_features, y, n_splits=3,
