@@ -1,7 +1,7 @@
 import numpy as np
 
 from csv_saver import save_results_to_csv
-from helpers import (load_labels, load_features, load_summaries)
+from helpers import (load_labels, load_features, load_summaries, concat_lr_tab_rt_emb)
 from bar_plotting import plot_bar_chart
 from helpers import concat_lr_txt_emb, concat_txt_tab_hgbc
 from models import feature_extractor_bert
@@ -121,6 +121,35 @@ def run_models_concatenated():
                         is_train=False)
 
     """
+    (lr_rt_conc_dataset, lr_rt_conc_ml_method, lr_rt_conc_emb_method,
+     lr_rt_conc_yesno, lr_rt_best_params, lr_rt_pca_components,
+     lr_rt_conc_train_score, lr_rt_conc_test_scores) = concat_lr_tab_rt_emb(
+        dataset_name=posttrauma_dataset,
+        X_tabular=X_posttrauma, y=y_posttrauma,
+        nominal_features=nominal_features,
+        n_repeats=1, class_max_iter=1000, imp_max_iter=5)
+
+    # todo:save train&test results as list and iterate
+    save_results_to_csv(output_file=f"LR_rte_conc_train.csv",
+                        dataset_name=lr_rt_conc_dataset,
+                        ml_method=lr_rt_conc_ml_method,
+                        emb_method=lr_rt_conc_emb_method,
+                        concatenation=lr_rt_conc_yesno,
+                        best_params=lr_rt_best_params,
+                        pca_n_comp=lr_rt_pca_components,
+                        metrics=lr_rt_conc_train_score,
+                        is_train=True)
+
+    save_results_to_csv(output_file=f"LR_rte_conc_test.csv",
+                        dataset_name=lr_rt_conc_dataset,
+                        ml_method=lr_rt_conc_ml_method,
+                        emb_method=lr_rt_conc_emb_method,
+                        concatenation=lr_rt_conc_yesno,
+                        best_params=lr_rt_best_params,
+                        pca_n_comp=lr_rt_pca_components,
+                        metrics=lr_rt_conc_test_scores,
+                        is_train=False)
+    """
     (hgbc_conc_dataset, hgbc_conc_ml_method, hgbc_conc_emb_method,
      hgbc_conc_yesno, hgbc_best_params, hgbc_pca_components, hgbc_conc_train_score,
      hgbc_conc_test_scores) = concat_txt_tab_hgbc(
@@ -154,7 +183,7 @@ def run_models_concatenated():
                         pca_n_comp=hgbc_pca_components,
                         metrics=hgbc_conc_test_scores,
                         is_train=False)
-    """
+    
     # Calculate results for each model
     for model_name, feature_extractor in feature_extractors.items():
 

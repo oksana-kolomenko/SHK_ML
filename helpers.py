@@ -12,7 +12,7 @@ from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer, SimpleImputer
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline, FeatureUnion
-from sklearn.preprocessing import OneHotEncoder, MinMaxScaler  # , OrdinalEncoder
+from sklearn.preprocessing import OneHotEncoder, MinMaxScaler, OrdinalEncoder  # , OrdinalEncoder
 # from sklearn.base import TransformerMixin, BaseEstimator
 from sklearn.model_selection import StratifiedKFold, GridSearchCV, RepeatedStratifiedKFold
 from sklearn.metrics import (
@@ -210,7 +210,7 @@ def lr_txt_emb_pca_no_pipeline(feature_extractor, raw_text_summaries, y, nominal
     print(f"LR_model test Scores: {test_scores}")
 
 
-def logistic_regression(dataset_name, X, y, nominal_features, n_splits=3, n_components=None):
+def logistic_regression(dataset_name, X, y, nominal_features, n_repeats=10, n_splits=3, n_components=None):
     # Todo: try encoding categ. features with OHE (after finding all categ. features (with Ricardo))
     # for csv format
     dataset = dataset_name
@@ -218,7 +218,9 @@ def logistic_regression(dataset_name, X, y, nominal_features, n_splits=3, n_comp
     emb_method = "none"
     pca_components = f"PCA ({n_components} components)" if n_components else "none"
     metrics_per_fold = []
-    skf = StratifiedKFold(n_splits=n_splits)
+    skf = RepeatedStratifiedKFold(n_splits=n_splits,
+                                  n_repeats=n_repeats,
+                                  random_state=42)
 
     pca_step = ("pca", PCA(n_components=n_components)) if n_components else None
     numerical_features = list(set(X.columns.values) - set(nominal_features))
@@ -231,7 +233,7 @@ def logistic_regression(dataset_name, X, y, nominal_features, n_splits=3, n_comp
                     ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
                 ]), nominal_features),
                 ("numerical", Pipeline([
-                                           ("numerical_imputer", IterativeImputer(max_iter=30)),  # todo=5 fürs Testen
+                                           ("numerical_imputer", IterativeImputer(max_iter=50)),  # todo=5 fürs Testen
                                            ("numerical_scaler", MinMaxScaler())
                                        ] + ([pca_step] if pca_step else [])), numerical_features),
             ])),
@@ -239,7 +241,7 @@ def logistic_regression(dataset_name, X, y, nominal_features, n_splits=3, n_comp
         ]),
         param_grid={"classifier__C": [2, 10, 50, 250]},
         scoring="neg_log_loss",
-        cv=RepeatedStratifiedKFold(n_splits=3)
+        cv=skf
     )
 
     for train_index, test_index in skf.split(X, y):
@@ -282,12 +284,14 @@ def logistic_regression(dataset_name, X, y, nominal_features, n_splits=3, n_comp
         "Balanced Accuracy": balanced_accuracy_score(y, y_train_pred)
     }
 
+    best_params = f"{search.best_params_}"
+
     print(f"Feature set size: {len(search.best_estimator_.named_steps['classifier'].coef_[0])}")
-    print(f"Best hyperparameters: {search.best_params_}")
+    print(f"Best hyperparameters: {best_params}")
     print(f"Train metrics: {train_metrics}")
     print(f"Test metrics per fold: {metrics_per_fold}")
 
-    return dataset, ml_method, emb_method, pca_components, train_metrics, metrics_per_fold
+    return dataset, ml_method, emb_method, best_params, pca_components, train_metrics, metrics_per_fold
 
 
 def lr_rt_emb(dataset_name, X, y, nominal_features, n_splits=3, n_components=None):
@@ -309,28 +313,31 @@ def lr_rt_emb(dataset_name, X, y, nominal_features, n_splits=3, n_components=Non
                 # Encode nominal features with OHE
                 ("nominal", Pipeline([
                     ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
-                    ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
+                    ("nominal_encoder", OneHotEncoder(handle_unknown="ignore")),
+                    ("debug_nominal", DebugTransformer(name="Nominal Debug"))
                 ]), nominal_features),
                 # Encode ordinal&numerical features with RTE
                 ("numerical", Pipeline([
-                    ("numerical_imputer", IterativeImputer(max_iter=50)),
+                    ("numerical_imputer", IterativeImputer(max_iter=5)),
+                    # ("debug_numerical", DebugTransformer(name="Numerical Debug"))
                     # TODO: Skalieren?
-                    ("embedding", RandomTreesEmbedding())
+                    # ("embedding", RandomTreesEmbedding(random_state=42))
                 ]), list(set(X.columns.values) - set(nominal_features))),
             ])),
             # pca_step,
-            # ("embedding", RandomTreesEmbedding()), ist doch ok? test
-            ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=10000))
+            ("embedding", RandomTreesEmbedding(random_state=42)),  # ist doch ok? test
+            ("debug_final", DebugTransformer(name="Final Feature Set")),
+            ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=1000))
         ]),
         param_grid={
-            # "embedding__n_estimators": [10, 100, 1000],
-            # "embedding__max_depth": [2, 5, 10, 15],
-            "transformer__numerical__embedding__n_estimators": [10, 100, 1000],  # Adjusted for nesting
-            "transformer__numerical__embedding__max_depth": [2, 5, 10, 15],
-            "classifier__C": [2, 10, 50, 250]
+            "embedding__n_estimators": [10], #, 100, 1000],
+            "embedding__max_depth": [2], #, 5, 10, 15],
+            #"transformer__numerical__embedding__n_estimators": [10],#, 100, 1000],  # Adjusted for nesting
+            #"transformer__numerical__embedding__max_depth": [2, 5], #, 10, 15],
+            "classifier__C": [2, 10] #, 50, 250]
         },
         scoring="neg_log_loss",
-        cv=RepeatedStratifiedKFold(n_splits=3)
+        cv=skf
     )
 
     for train_index, test_index in skf.split(X, y):
@@ -473,13 +480,15 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, raw_text_summaries, 
     return dataset, ml_method, emb_method, concatenation, pca_components, train_metrics, metrics_per_fold
 
 
-def hgbc(dataset_name, X, y, nominal_features, n_splits=3):
+def hgbc(dataset_name, X, y, nominal_features, n_repeats=10, n_splits=3):
     dataset = dataset_name
     ml_method = "HistGradientBoosting"
     emb_method = "none"
     concatenation = "no"
     metrics_per_fold = []
-    skf = StratifiedKFold(n_splits=n_splits)
+    skf = RepeatedStratifiedKFold(n_splits=n_splits,
+                                  n_repeats=n_repeats,
+                                  random_state=42)
 
     # Define GridSearchCV once before the loop
     search = GridSearchCV(
@@ -488,7 +497,7 @@ def hgbc(dataset_name, X, y, nominal_features, n_splits=3):
         ]),
         param_grid={"hist_gb__min_samples_leaf": [5, 10, 15, 20]},
         scoring="neg_log_loss",
-        cv=RepeatedStratifiedKFold(n_splits=3)
+        cv=skf
     )
 
     # Calculate metrics for each fold
@@ -533,12 +542,13 @@ def hgbc(dataset_name, X, y, nominal_features, n_splits=3):
         "F1": f1_score(y, y_train_pred, average='macro'),
         "Balanced Accuracy": balanced_accuracy_score(y, y_train_pred)
     }
+    best_params = f"{search.best_params_}"
 
-    print(f"Best hyperparameters: {search.best_params_}")
+    print(f"Best hyperparameters: {best_params}")
     print(f"Train metrics: {train_metrics}")
     print(f"Test metrics per fold: {metrics_per_fold}")
 
-    return dataset, ml_method, emb_method, concatenation, train_metrics, metrics_per_fold
+    return dataset, ml_method, best_params, train_metrics, metrics_per_fold
 
 
 def hgbc_ran_tree_emb(dataset_name, X, y, nominal_features, n_splits=3):
@@ -561,7 +571,7 @@ def hgbc_ran_tree_emb(dataset_name, X, y, nominal_features, n_splits=3):
                     # TODO: skalieren (nein)
                 ]), list(set(X.columns.values) - set(nominal_features))),
             ])),
-            ("embedding", RandomTreesEmbedding()),
+            ("embedding", RandomTreesEmbedding(random_state=42)),
             ("hist_gb", HistGradientBoostingClassifier())
         ]),
         param_grid={
@@ -844,6 +854,7 @@ def concat_lr_txt_emb(dataset_name, emb_method,
     return dataset, ml_method, emb_method, concatenation, best_params, n_components, train_metrics, metrics_per_fold
 
 
+# Problem: after RTE there are 40 Features, but when debugging ~ 2000
 def concat_lr_tab_rt_emb(dataset_name, X_tabular,
                          nominal_features, y, n_repeats,
                          imp_max_iter, class_max_iter,
@@ -858,49 +869,80 @@ def concat_lr_tab_rt_emb(dataset_name, X_tabular,
                                   random_state=42)
 
     numerical_features = list(set(X_tabular.columns) - set(nominal_features))
+    pca_n_comp = 0
+
+    print(f"Nominal Features: {nominal_features}")
+    print(f"Nominal Features len: {len(nominal_features)}")
+    print(f"Numerical Features: {numerical_features}")
+    print(f"Numerical Features len: {len (numerical_features)}")
+    print(f"X_tabular Columns: {list(X_tabular.columns)}")
+    print(f"X_tabular Columns len: {len(list(X_tabular.columns))}")
 
     pipeline = Pipeline([
         ("feature_combiner", FeatureUnion([
             # Verarbeitung der tabellarischen Daten
             ("raw", ColumnTransformer([
                 ("nominal", Pipeline([
+                    ("debug_nominal", DebugTransformer(name="Nominal Debug")),
                     ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
                     ("nominal_encoder", OneHotEncoder(handle_unknown="ignore")),
-                    ("debug_nominal", DebugTransformer(name="Nominal Debug")),
+                    ("debug_nominal_after", DebugTransformer(name="Nominal Debug after"))
                 ]), nominal_features),
                 ("numerical", Pipeline([
+                    ("debug_numerical", DebugTransformer(name="Numerical Debug")),
                     ("numerical_imputer", IterativeImputer(max_iter=imp_max_iter)),
+                    ("debug_numerical_after", DebugTransformer(name="Numerical Debug after"))
                 ]), numerical_features),
-            ])),
+            ], remainder="passthrough")),
             # Verarbeitung der RT Embeddings
             ("embeddings", Pipeline([
                 ("transformer", ColumnTransformer([
                     ("nominal", Pipeline([
-                        ("debug_nominal", DebugTransformer(name="Nominal Debug")),
+                        ("debug_nominal_emb", DebugTransformer(name="Nominal Debug Emb after")),
                         ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
-                        ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
+                        # ("nominal_encoder", OneHotEncoder(handle_unknown="ignore")),
+                        ("nominal_encoder", OrdinalEncoder(handle_unknown="use_encoded_value", unknown_value=-1)),
+                        ("debug_nominal_emb_after", DebugTransformer(name="Nominal Debug Emb"))
                     ]), nominal_features),
                     ("numerical", Pipeline([
-                        ("numerical_imputer", IterativeImputer(max_iter=imp_max_iter))
+                        ("debug_numerical", DebugTransformer(name="Numerical Debug Emb")),
+                        ("numerical_imputer", IterativeImputer(max_iter=imp_max_iter)),
+                        ("debug_numerical_after", DebugTransformer(name="Numerical Debug Emb after"))
                     ]), numerical_features),
-                ])),
-                ("embedding", RandomTreesEmbedding()) # check
+                ], remainder="passthrough")),
+                ("debug_embedding", DebugTransformer(name="Embedding Debug")),
+                ("embedding", RandomTreesEmbedding(random_state=42)),  # check
+                ("debug_embedding_after", DebugTransformer(name="Embedding Debug after"))
             ]))
         ])),
+        ("debug_final", DebugTransformer(name="Final Feature Set")),
         ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=class_max_iter))
     ])
 
     param_grid = {
         "classifier__C": [2, 10], #, 50, 250],
-        "embedding__n_estimators": [10], #, 100, 1000],
-        "embedding__max_depth": [2] #, 5] #, 10, 15],
+        "feature_combiner__embeddings__embedding__n_estimators": [10], #, 100, 1000],
+        "feature_combiner__embeddings__embedding__max_depth": [2] #, 5] #, 10, 15],
     }
+    # Ensure the feature_combiner is fitted before transformation
+    pipeline.named_steps["feature_combiner"].fit(X_tabular, y)
+
+    # Manually transform data for debugging
+    X_transformed = pipeline.named_steps["feature_combiner"].transform(X_tabular)
+
+    # Print out shape of final transformed features
+    print(f"Final Feature Set Shape (Before Model Training): {X_transformed.shape}")
+
+    # Check if any feature vector is empty
+    if X_transformed.shape[1] == 0:
+        raise ValueError("🚨 FeatureUnion is not concatenating features correctly! Feature set is empty.")
 
     search = GridSearchCV(
         estimator=pipeline,
         param_grid=param_grid,
         scoring="neg_log_loss",
-        cv=skf
+        # cv=skf
+        n_jobs=-1
     )
 
     # Cross-Validation
@@ -948,14 +990,17 @@ def concat_lr_tab_rt_emb(dataset_name, X_tabular,
         "Balanced Accuracy": balanced_accuracy_score(y, y_train_pred)
     }
 
+    best_params = f"{search.best_params_}"
+
     print(f"Feature set size: {len(search.best_estimator_.named_steps['classifier'].coef_[0])}")
-    print(f"Best hyperparameters: {search.best_params_}")
+    print(f"Best hyperparameters: {best_params}")
     print(f"Train metrics: {train_metrics}")
     print(f"Test metrics per fold: {metrics_per_fold}")
 
-    return dataset, ml_method, emb_method, concatenation, train_metrics, metrics_per_fold
+    return dataset, ml_method, emb_method, concatenation, best_params, pca_n_comp, train_metrics, metrics_per_fold
 
 
+# läuft
 def concat_txt_tab_hgbc(dataset_name, emb_method,
                         X_tabular, y, text_feature_column_name,
                         nominal_features, feature_extractor,
@@ -1084,7 +1129,7 @@ def concat_tab_rte_hgbc(dataset_name, X_tabular, y, nominal_features,
     skf = StratifiedKFold(n_splits=n_splits)
 
     embedding_pipeline = Pipeline([
-        ("embedding", RandomTreesEmbedding()),
+        ("embedding", RandomTreesEmbedding(random_state=42)),
         ("scaler", MinMaxScaler())
     ])
     param_grid = {
@@ -1282,8 +1327,13 @@ class DebugTransformer(TransformerMixin, BaseEstimator):
         return self
 
     def transform(self, X):
-        print(f"{self.name}: Output shape {np.array(X).shape}")
-        return X
+        print(f"{self.name}: Input shape {X.shape}")  # Print before transformation
+        if isinstance(X, pd.DataFrame):
+            X_transformed = X.to_numpy()  # Convert to NumPy array
+        else:
+            X_transformed = X
+        print(f"{self.name}: Output shape {X_transformed.shape}")  # Print after transformation
+        return X_transformed
 
 
     # Todo: Comb. mit RTE  | + but test
