@@ -811,6 +811,10 @@ def concat_lr_txt_emb(dataset_name, emb_method,
 
     search.fit(X_tabular, y)
 
+    print(f"X_tablular len: {len(X_tabular)}")
+    print(f"Text_features len: {len(text_features)}")
+    print(f"y len: {len(y)}")
+
     y_train_pred = search.predict(X_tabular)
     y_train_pred_proba = search.predict_proba(X_tabular)[:, 1]
 
