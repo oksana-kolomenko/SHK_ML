@@ -1031,6 +1031,9 @@ def concat_txt_tab_hgbc(dataset_name, emb_method,
             "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
         })
 
+    print(f"X_tablular len: {len(X_tabular)}")
+    print(f"Text_features len: {len(text_features)}")
+    print(f"y len: {len(y)}")
     assert len(X_tabular) == len(text_features) == len(y), "Mismatch in training data sizes" # here problem
 
     search.fit(X_tabular, y)
