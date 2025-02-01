@@ -811,10 +811,6 @@ def concat_lr_txt_emb(dataset_name, emb_method,
 
     search.fit(X_tabular, y)
 
-    print(f"X_tablular len: {len(X_tabular)}")
-    print(f"Text_features len: {len(text_features)}")
-    print(f"y len: {len(y)}")
-
     y_train_pred = search.predict(X_tabular)
     y_train_pred_proba = search.predict_proba(X_tabular)[:, 1]
 
@@ -864,7 +860,8 @@ def concat_lr_tab_rt_emb(dataset_name, X_tabular,
             ("raw", ColumnTransformer([
                 ("nominal", Pipeline([
                     ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
-                    ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
+                    ("nominal_encoder", OneHotEncoder(handle_unknown="ignore")),
+                    ("debug_nominal", DebugTransformer(name="Nominal Debug")),
                 ]), nominal_features),
                 ("numerical", Pipeline([
                     ("numerical_imputer", IterativeImputer(max_iter=imp_max_iter)),
@@ -874,13 +871,14 @@ def concat_lr_tab_rt_emb(dataset_name, X_tabular,
             ("embeddings", Pipeline([
                 ("transformer", ColumnTransformer([
                     ("nominal", Pipeline([
+                        ("debug_nominal", DebugTransformer(name="Nominal Debug")),
                         ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
                         ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
                     ]), nominal_features),
                     ("numerical", Pipeline([
                         ("numerical_imputer", IterativeImputer(max_iter=imp_max_iter))
                     ]), numerical_features),
-                ]), X_tabular.columns),
+                ])),
                 ("embedding", RandomTreesEmbedding()) # check
             ]))
         ])),
@@ -1038,7 +1036,7 @@ def concat_txt_tab_hgbc(dataset_name, emb_method,
     print(f"X_tablular len: {len(X_tabular)}")
     print(f"Text_features len: {len(text_features)}")  # ist = 1 muss aber 82 sein
     print(f"y len: {len(y)}")
-    assert len(X_tabular) == len(text_features) == len(y), "Mismatch in training data sizes" # here problem
+    assert len(X_tabular) == len(y), "Mismatch in training data sizes"
 
     search.fit(X_tabular, y)
     y_train_pred = search.predict(X_tabular),
