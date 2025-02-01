@@ -3,6 +3,7 @@ import time
 
 import numpy as np
 import pandas as pd
+from sklearn.base import TransformerMixin, BaseEstimator
 
 from sklearn.compose import ColumnTransformer
 from sklearn.decomposition import PCA
@@ -838,10 +839,10 @@ def concat_lr_txt_emb(dataset_name, emb_method,
     return dataset, ml_method, emb_method, concatenation, best_params, n_components, train_metrics, metrics_per_fold
 
 
-def concat_lr_tab_rt_emb(dataset_name, X_tabular, summaries,
+def concat_lr_tab_rt_emb(dataset_name, X_tabular,
                          nominal_features, y, n_repeats,
-                         n_splits=3,
-                         imp_max_iter=5, class_max_iter=1000):
+                         imp_max_iter, class_max_iter,
+                         n_splits=3):
     dataset = dataset_name
     ml_method = "Logistic Regression"
     emb_method = "Random Trees Embedding"
@@ -865,7 +866,6 @@ def concat_lr_tab_rt_emb(dataset_name, X_tabular, summaries,
                     ("numerical_imputer", IterativeImputer(max_iter=imp_max_iter)),
                 ]), numerical_features),
             ]), X_tabular.columns),
-
             # Verarbeitung der RT Embeddings
             ("embeddings", Pipeline([
                 ("transformer", ColumnTransformer([
@@ -964,7 +964,6 @@ def concat_txt_tab_hgbc(dataset_name, emb_method,
                                   random_state=42)
 
     n_components = 0
-    # categorical_indices = [X_tabular.columns.get_loc(col) for col in nominal_features]
 
     # add text as a new column
     text_features = [text_feature_column_name]
@@ -983,6 +982,7 @@ def concat_txt_tab_hgbc(dataset_name, emb_method,
             ("transformer", ColumnTransformer([
                 ("text", Pipeline([
                     ("embedding_aggregator", EmbeddingAggregator(feature_extractor)),
+                    ("debug_text", DebugTransformer(name="Text Debug")),
                     ("numerical_scaler", MinMaxScaler())
                 ]), text_features)
             ])),
@@ -997,7 +997,7 @@ def concat_txt_tab_hgbc(dataset_name, emb_method,
             ]
         },
         scoring="neg_log_loss",
-        cv=skf
+        #cv=skf
     )
 
     for train_index, test_index in skf.split(X_tabular, y):
@@ -1255,6 +1255,19 @@ def hgbc_txt_emb_all_emb_agg(feature_extractor, summaries, y, n_splits=3):
         print("")
 
     return results
+
+
+class DebugTransformer(TransformerMixin, BaseEstimator):
+    def __init__(self, name="Step"):
+        self.name = name
+
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X):
+        print(f"{self.name}: Output shape {np.array(X).shape}")
+        return X
+
 
     # Todo: Comb. mit RTE  | + but test
     # Todo! Wird der beste Aggregierung ausgegeben? | + run both & evaluate
