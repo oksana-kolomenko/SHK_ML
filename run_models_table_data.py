@@ -122,7 +122,7 @@ def run_models_on_table_data():
 
     labels_local = [
         # f"Logistic Regression",
-        f"LogReg + RTE"
+        # f"LogReg + RTE"
         # f"HGBC",
         # f"HGBC + RTE"
     ]

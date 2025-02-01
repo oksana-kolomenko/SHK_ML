@@ -1,9 +1,11 @@
 import numpy as np
 
 from csv_saver import save_results_to_csv
-from helpers import load_labels, load_summaries, lr_txt_emb#, hgbc_txt_emb
+from helpers import load_labels, load_summaries, lr_txt_emb, hgbc_txt_emb
 from bar_plotting import plot_bar_chart
-from models import feature_extractor_bert
+from models import feature_extractor_bert, feature_extractor_clinical
+# from models import feature_extractor_simsce
+# from models import feature_extractor_bge
 
 """from models import feature_extractor_clinical, feature_extractor_electra_small, feature_extractor_electra_large, \
     feature_extractor_electra_base, \
@@ -20,7 +22,7 @@ def run_models_on_txt_emb():
 
     feature_extractors = {
         # Clinical Longformer (done)
-        # "Clinical-Longformer": feature_extractor_clinical,
+        "Clinical-Longformer": feature_extractor_clinical,
 
         # BERT (half done)
         "BERT": feature_extractor_bert,
@@ -76,51 +78,56 @@ def run_models_on_txt_emb():
     for model_name, feature_extractor in feature_extractors.items():
 
         # Logistic Regression
-        (lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_concatenation, lr_pca_components,
-         lr_txt_train_score, lr_txt_test_scores) = lr_txt_emb(
-            dataset_name=posttrauma_dataset, n_components=40,
-            emb_method=model_name, feature_extractor=feature_extractor, raw_text_summaries=patient_summaries,
-            y=y_posttrauma)
+        (lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_concatenation, lr_txt_best_params,
+         lr_txt_pca_components, lr_txt_train_score, lr_txt_test_scores) = lr_txt_emb(
+            dataset_name=posttrauma_dataset, n_components=None, emb_method=model_name,
+            feature_extractor=feature_extractor, max_iter=10000, n_repeats=10,
+            raw_text_summaries=patient_summaries, y=y_posttrauma)
 
-        """# HGBC
-        hgbc_txt_dataset, hgbc_txt_ml_method, hgbc_txt_emb_method, hgbc_txt_train_score, hgbc_txt_test_scores = hgbc_txt_emb(
-            feature_extractor=model_name, summaries=patient_summaries, y=y_posttrauma)
-        """
         save_results_to_csv(output_file=f"{model_name}_LR_train.csv", dataset_name=lr_txt_dataset,
                             ml_method=lr_txt_ml_method, emb_method=lr_txt_emb_method, concatenation="no",
+                            best_params=lr_txt_best_params, pca_n_comp=lr_txt_pca_components,
                             metrics=lr_txt_train_score, is_train=True)
 
-        save_results_to_csv(output_file=f"{model_name}_LR_train.csv", dataset_name=lr_txt_dataset,
+        save_results_to_csv(output_file=f"{model_name}_LR_test.csv", dataset_name=lr_txt_dataset,
                             ml_method=lr_txt_ml_method, emb_method=lr_txt_emb_method, concatenation="no",
+                            best_params=lr_txt_best_params, pca_n_comp=lr_txt_pca_components,
                             metrics=lr_txt_test_scores, is_train=False)
 
-        """save_results_to_csv(output_file=f"{model_name}_HGBC_train.csv", dataset_name=hgbc_txt_dataset,
-                            ml_method=hgbc_txt_ml_method, emb_method=hgbc_txt_emb_method, concatenation="no",
-                            metrics=hgbc_txt_train_score, is_train=True)
+        # HGBC
+        hgbc_txt_dataset, hgbc_txt_ml_method, hgbc_txt_emb_method, hgbc_txt_train_score, hgbc_txt_test_scores \
+            = hgbc_txt_emb(dataset_name=posttrauma_dataset, emb_method=model_name, n_components=None,
+                           n_repeats=10, feature_extractor=model_name, summaries=patient_summaries, y=y_posttrauma)
 
         save_results_to_csv(output_file=f"{model_name}_HGBC_train.csv", dataset_name=hgbc_txt_dataset,
                             ml_method=hgbc_txt_ml_method, emb_method=hgbc_txt_emb_method, concatenation="no",
+                            best_params=lr_txt_best_params, pca_n_comp=lr_txt_pca_components,
+                            metrics=hgbc_txt_train_score, is_train=True)
+
+        save_results_to_csv(output_file=f"{model_name}_HGBC_test.csv", dataset_name=hgbc_txt_dataset,
+                            ml_method=hgbc_txt_ml_method, emb_method=hgbc_txt_emb_method, concatenation="no",
+                            best_params=lr_txt_best_params, pca_n_comp=lr_txt_pca_components,
                             metrics=hgbc_txt_test_scores, is_train=False)
-        """
+
         labels_local = [
             f"{model_name} \n+ Logistic Regression",
-            # f"{model_name} \n+ HGBC"
+            f"{model_name} \n+ HGBC"
         ]
         train_scores_local = [
             lr_txt_train_score,
-         #   hgbc_txt_train_score
+            hgbc_txt_train_score
         ]
         test_score_medians_local = [
             np.median(lr_txt_test_scores),
-          #  np.median(hgbc_txt_test_scores)
+            np.median(hgbc_txt_test_scores)
         ]
         test_score_mins_local = [
             np.min(lr_txt_test_scores),
-           # np.min(hgbc_txt_test_scores)
+            np.min(hgbc_txt_test_scores)
         ]
         test_score_maxs_local = [
             np.max(lr_txt_test_scores),
-            #np.max(hgbc_txt_test_scores)
+            np.max(hgbc_txt_test_scores)
         ]
 
         # Convert to arrays
