@@ -1045,7 +1045,7 @@ def concat_txt_tab_hgbc(dataset_name, emb_method,
     assert len(X_tabular) == len(y), "Mismatch in training data sizes"
 
     search.fit(X_tabular, y)
-    y_train_pred = search.predict(X_tabular),
+    y_train_pred = search.predict(X_tabular)
     y_train_pred_proba = search.predict_proba(X_tabular)[:, 1]
 
     print(f"X_tabular shape {X_tabular.shape}")
