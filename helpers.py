@@ -1037,8 +1037,6 @@ def concat_txt_tab_hgbc(dataset_name, emb_method,
                                   n_repeats=n_repeats,
                                   random_state=42)
 
-    n_components = 0
-
     # add text as a new column
     text_features = [text_feature_column_name]
     X_tabular[text_feature_column_name] = raw_text_summaries
@@ -1064,15 +1062,15 @@ def concat_txt_tab_hgbc(dataset_name, emb_method,
             ("classifier", HistGradientBoostingClassifier(categorical_features=categorical_indices))
         ]),
         param_grid={
-            "classifier__min_samples_leaf": [5, 10],  # weniger für Test, 15, 20],
+            "classifier__min_samples_leaf": [5, 10, 15, 20],
             "transformer__text__embedding_aggregator__method": [
                 "embedding_cls",
-                # "embedding_mean_with_cls_and_sep",
-                # "embedding_mean_without_cls_and_sep"
+                "embedding_mean_with_cls_and_sep",
+                "embedding_mean_without_cls_and_sep"
             ]
         },
         scoring="neg_log_loss",
-        #cv=skf
+        cv=skf
     )
 
     for train_index, test_index in skf.split(X_tabular, y):
