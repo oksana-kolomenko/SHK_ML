@@ -717,6 +717,7 @@ def hgbc_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y,
     return dataset, ml_method, emb_method, concatenation, train_metrics, metrics_per_fold
 
 
+# läuft
 def concat_lr_txt_emb(dataset_name, emb_method,
                       feature_extractor, raw_text_summaries,
                       X_tabular, y, nominal_features, text_feature_column_name,
@@ -813,6 +814,10 @@ def concat_lr_txt_emb(dataset_name, emb_method,
 
     y_train_pred = search.predict(X_tabular)
     y_train_pred_proba = search.predict_proba(X_tabular)[:, 1]
+
+    print(f"Shape X_tabular: {X_tabular.shape}")
+    print(f"y shape: {y.shape}")  # Should be (82,)
+    print(f"y_train_pred shape: {y_train_pred.shape}")  # Should also be (82,)
 
     train_metrics = {
         "AUC": roc_auc_score(y, y_train_pred_proba),
@@ -1042,6 +1047,10 @@ def concat_txt_tab_hgbc(dataset_name, emb_method,
     search.fit(X_tabular, y)
     y_train_pred = search.predict(X_tabular),
     y_train_pred_proba = search.predict_proba(X_tabular)[:, 1]
+
+    print(f"X_tabular shape {X_tabular.shape}")
+    print(f"y shape: {y.shape}")  # Should be (82,)
+    print(f"y_train_pred shape: {y_train_pred.shape}")  # Should also be (82,)
 
     # Calculate training metrics
     train_metrics = {
