@@ -12,7 +12,7 @@ class EmbeddingAggregator(BaseEstimator, TransformerMixin):
     # Create embedding based on [CLS] token
     def _embedding_cls(self, text_features):
         print(f"Type of text_features: {type(text_features)}")
-        print(f"First element of text_features: {text_features[0]}")
+        #print(f"First element of text_features: {text_features[0]}")
         print(f"Length of text_features: {len(text_features)}")
         embeddings = []
         for summary in text_features:

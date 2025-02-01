@@ -829,7 +829,7 @@ def concat_lr_txt_emb(dataset_name, emb_method,
     readable_time = time.strftime("%H:%M:%S", time.localtime(finish_time))
     print(f"Finished the concat_lr_txt_emb method {readable_time}")
 
-    best_params = search.best_params_
+    best_params = f"{search.best_params_}"
 
     print(f"Combined feature size: {len(search.best_estimator_.named_steps['classifier'].coef_[0])}")
     print(f"Best hyperparameters: {best_params}")
@@ -1033,7 +1033,7 @@ def concat_txt_tab_hgbc(dataset_name, emb_method,
             "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
         })
 
-    print(f"X_tablular len: {len(X_tabular)}")
+    print(f"X_tabular len: {len(X_tabular)}")
     print(f"Text_features len: {len(text_features)}")  # ist = 1 muss aber 82 sein
     print(f"y len: {len(y)}")
     assert len(X_tabular) == len(y), "Mismatch in training data sizes"
@@ -1055,7 +1055,7 @@ def concat_txt_tab_hgbc(dataset_name, emb_method,
         "Balanced Accuracy": balanced_accuracy_score(y, y_train_pred)
     }
 
-    best_params = search.best_params_
+    best_params = f"{search.best_params_}"
     print(f"Best hyperparameters: {best_params}")
     print(f"Train metrics: {train_metrics}")
     print(f"Test metrics per fold: {metrics_per_fold}")

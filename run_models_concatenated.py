@@ -85,7 +85,7 @@ def run_models_concatenated():
     }
 
     # TEXT EMBEDDINGS #
-    """
+
     (lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,
      lr_conc_yesno, lr_best_params, lr_pca_components, lr_conc_train_score,
      lr_conc_test_scores) = concat_lr_txt_emb(
@@ -154,7 +154,7 @@ def run_models_concatenated():
                         pca_n_comp=hgbc_pca_components,
                         metrics=hgbc_conc_test_scores,
                         is_train=False)
-    """
+    
     # Calculate results for each model
     for model_name, feature_extractor in feature_extractors.items():
 
