@@ -869,7 +869,7 @@ def concat_lr_tab_rt_emb(dataset_name, X_tabular,
                 ("numerical", Pipeline([
                     ("numerical_imputer", IterativeImputer(max_iter=imp_max_iter)),
                 ]), numerical_features),
-            ]), X_tabular.columns),
+            ])),
             # Verarbeitung der RT Embeddings
             ("embeddings", Pipeline([
                 ("transformer", ColumnTransformer([
@@ -1036,7 +1036,7 @@ def concat_txt_tab_hgbc(dataset_name, emb_method,
         })
 
     print(f"X_tablular len: {len(X_tabular)}")
-    print(f"Text_features len: {len(text_features)}")
+    print(f"Text_features len: {len(text_features)}")  # ist = 1 muss aber 82 sein
     print(f"y len: {len(y)}")
     assert len(X_tabular) == len(text_features) == len(y), "Mismatch in training data sizes" # here problem
 

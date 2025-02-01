@@ -95,8 +95,8 @@ def run_models_concatenated():
                         X_tabular=X_posttrauma, y=y_posttrauma,
                         nominal_features=nominal_features,
                         text_feature_column_name=text_feature,
-                        imp_max_iter=50, class_max_iter=10000,
-                        n_components=0, n_repeats=10)
+                        imp_max_iter=5, class_max_iter=1000,
+                        n_components=0, n_repeats=1)
 
     # todo:save train&test results as list and iterate
     save_results_to_csv(output_file=f"{feature_extractor_bert}_LR_conc_train.csv",
