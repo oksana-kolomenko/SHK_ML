@@ -974,6 +974,7 @@ def concat_txt_tab_hgbc(dataset_name, emb_method,
     # separate numerical features
     non_text_columns = list(set(X_tabular.columns) -
                             set(text_features))
+
     print(f"All columns length: {X_tabular.shape}")
     print(f"Non-text columns length: {len(X_tabular[non_text_columns])}")
 
@@ -1060,10 +1061,12 @@ def concat_txt_tab_hgbc(dataset_name, emb_method,
     print(f"Train metrics: {train_metrics}")
     print(f"Test metrics per fold: {metrics_per_fold}")
 
-    return dataset, ml_method, emb_method, concatenation, best_params, n_components, train_metrics, metrics_per_fold
+    return (dataset, ml_method, emb_method, concatenation, best_params,
+            n_components, train_metrics, metrics_per_fold)
 
 
-def concat_tab_rte_hgbc(dataset_name, X_tabular, y, nominal_features, summaries, n_splits=3):
+def concat_tab_rte_hgbc(dataset_name, X_tabular, y, nominal_features,
+                        summaries, n_splits=3):
     dataset = dataset_name
     ml_method = "HistGradientBoosting"
     emb_method = "Random Trees Embedding"
