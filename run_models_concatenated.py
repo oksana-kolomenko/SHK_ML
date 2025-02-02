@@ -1,9 +1,9 @@
 import numpy as np
 
 from csv_saver import save_results_to_csv
-from helpers import (load_labels, load_features, load_summaries, concat_lr_tab_rt_emb, concat_hgbc_rte)
+from helpers import (load_labels, load_features, load_summaries) # , concat_lr_tab_rt_emb, concat_hgbc_rte)
 from bar_plotting import plot_bar_chart
-from helpers import concat_lr_txt_emb, concat_txt_tab_hgbc
+from helpers import concat_lr_txt_emb #, concat_txt_tab_hgbc
 from models import feature_extractor_bert
 from values import Dataset
 
@@ -30,9 +30,45 @@ def run_text_concatenated():
         'smoker',
         'iss_category'
         # iss_score?
+        # number of fractures?
         # others?
     ]
-    feature_extractors = {
+
+    (lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,
+     lr_conc_yesno, lr_best_params, lr_pca_components, lr_conc_train_score,
+     lr_conc_test_scores) = concat_lr_txt_emb(
+        dataset_name=posttrauma_dataset,
+        emb_method="Bert",
+        feature_extractor=feature_extractor_bert,
+        raw_text_summaries=patient_summaries,
+        X_tabular=X_posttrauma, y=y_posttrauma,
+        nominal_features=nominal_features,
+        text_feature_column_name=text_feature,
+        imp_max_iter=50, class_max_iter=10000,
+        n_components=0, n_repeats=10)
+
+    # todo:save train&test results as list and iterate
+    save_results_to_csv(output_file=f"{feature_extractor_bert}_LR_conc_train_02_02.csv",
+                        dataset_name=lr_conc_dataset,
+                        ml_method=lr_conc_ml_method,
+                        emb_method=lr_conc_emb_method,
+                        concatenation=lr_conc_yesno,
+                        best_params=lr_best_params,
+                        pca_n_comp=lr_pca_components,
+                        metrics=lr_conc_train_score,
+                        is_train=True)
+
+    save_results_to_csv(output_file=f"{feature_extractor_bert}_LR_conc_test_02_02.csv",
+                        dataset_name=lr_conc_dataset,
+                        ml_method=lr_conc_ml_method,
+                        emb_method=lr_conc_emb_method,
+                        concatenation=lr_conc_yesno,
+                        best_params=lr_best_params,
+                        pca_n_comp=lr_pca_components,
+                        metrics=lr_conc_test_scores,
+                        is_train=False)
+
+    """feature_extractors = {
         # Clinical Longformer
         # "Clinical-Longformer": feature_extractor_clinical,
 
@@ -83,7 +119,7 @@ def run_text_concatenated():
         # Stella Model
         # "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5 # (not ready)
     }
-
+    """
     """
     (lr_rt_conc_dataset, lr_rt_conc_ml_method, lr_rt_conc_emb_method,
      lr_rt_conc_yesno, lr_rt_best_params, lr_rt_pca_components,
@@ -113,11 +149,12 @@ def run_text_concatenated():
                         pca_n_comp=lr_rt_pca_components,
                         metrics=lr_rt_conc_test_scores,
                         is_train=False)
+    
     """
-
+    """
     # Calculate results for each model
     for model_name, feature_extractor in feature_extractors.items():
-        """conc_lr_txt_emb(feature_extractor=feature_extractor, X=X_posttrauma, y=y_posttrauma, imp_max_iter=5,
+        conc_lr_txt_emb(feature_extractor=feature_extractor, X=X_posttrauma, y=y_posttrauma, imp_max_iter=5,
                         lr_max_iter=1000, n_repeats=1, nominal_features=nominal_features, text_feature=text_feature,
                         raw_text_summaries=patient_summaries)
 
@@ -130,41 +167,7 @@ def run_text_concatenated():
                                       nominal_features=nominal_features,
                                       raw_text_summaries=patient_summaries, text_features=text_features,
                                       y=y_posttrauma, imp_max_iter=5,
-                                      lr_max_iter=1000, n_repeats=1)"""
-
-        (lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,
-         lr_conc_yesno, lr_best_params, lr_pca_components, lr_conc_train_score,
-         lr_conc_test_scores) = concat_lr_txt_emb(
-            dataset_name=posttrauma_dataset,
-            emb_method=model_name,
-            feature_extractor=feature_extractor_bert,
-            raw_text_summaries=patient_summaries,
-            X_tabular=X_posttrauma, y=y_posttrauma,
-            nominal_features=nominal_features,
-            text_feature_column_name=text_feature,
-            imp_max_iter=50, class_max_iter=10000,
-            n_components=0, n_repeats=10)
-
-        # todo:save train&test results as list and iterate
-        save_results_to_csv(output_file=f"{feature_extractor_bert}_LR_conc_train_02_02.csv",
-                            dataset_name=lr_conc_dataset,
-                            ml_method=lr_conc_ml_method,
-                            emb_method=lr_conc_emb_method,
-                            concatenation=lr_conc_yesno,
-                            best_params=lr_best_params,
-                            pca_n_comp=lr_pca_components,
-                            metrics=lr_conc_train_score,
-                            is_train=True)
-
-        save_results_to_csv(output_file=f"{feature_extractor_bert}_LR_conc_test_02_02.csv",
-                            dataset_name=lr_conc_dataset,
-                            ml_method=lr_conc_ml_method,
-                            emb_method=lr_conc_emb_method,
-                            concatenation=lr_conc_yesno,
-                            best_params=lr_best_params,
-                            pca_n_comp=lr_pca_components,
-                            metrics=lr_conc_test_scores,
-                            is_train=False)
+                                      lr_max_iter=1000, n_repeats=1)
 
         (hgbc_conc_dataset, hgbc_conc_ml_method, hgbc_conc_emb_method,
          hgbc_conc_yesno, hgbc_best_params, hgbc_pca_components, hgbc_conc_train_score,
@@ -234,9 +237,9 @@ def run_text_concatenated():
             test_score_medians=test_score_medians_local,
             test_score_mins=test_score_mins_local,
             test_score_maxs=test_score_maxs_local
-        )
+        )"""
 
-
+"""
 def run_rte_concatenated():
     posttrauma_dataset = Dataset.POSTTRAUMA.value
 
@@ -339,3 +342,4 @@ def run_rte_concatenated():
         test_score_mins=test_score_mins_local,
         test_score_maxs=test_score_maxs_local
     )
+    """
