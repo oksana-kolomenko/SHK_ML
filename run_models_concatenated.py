@@ -146,7 +146,7 @@ def run_text_concatenated():
             n_components=0, n_repeats=10)
 
         # todo:save train&test results as list and iterate
-        save_results_to_csv(output_file=f"{feature_extractor_bert}_LR_conc_train.csv",
+        save_results_to_csv(output_file=f"{feature_extractor_bert}_LR_conc_train_02_02.csv",
                             dataset_name=lr_conc_dataset,
                             ml_method=lr_conc_ml_method,
                             emb_method=lr_conc_emb_method,
@@ -156,7 +156,7 @@ def run_text_concatenated():
                             metrics=lr_conc_train_score,
                             is_train=True)
 
-        save_results_to_csv(output_file=f"{feature_extractor_bert}_LR_conc_test.csv",
+        save_results_to_csv(output_file=f"{feature_extractor_bert}_LR_conc_test_02_02.csv",
                             dataset_name=lr_conc_dataset,
                             ml_method=lr_conc_ml_method,
                             emb_method=lr_conc_emb_method,
@@ -180,7 +180,7 @@ def run_text_concatenated():
             n_components=40)
 
         # todo:save train&test results as list and iterate
-        save_results_to_csv(output_file=f"{feature_extractor_bert}_HGBC_conc_train.csv",
+        save_results_to_csv(output_file=f"{feature_extractor_bert}_HGBC_conc_train_02_02.csv",
                             dataset_name=hgbc_conc_dataset,
                             ml_method=hgbc_conc_ml_method,
                             emb_method=hgbc_conc_emb_method,
@@ -190,7 +190,7 @@ def run_text_concatenated():
                             metrics=hgbc_conc_train_score,
                             is_train=True)
 
-        save_results_to_csv(output_file=f"{feature_extractor_bert}_HGBC_conc_test.csv",
+        save_results_to_csv(output_file=f"{feature_extractor_bert}_HGBC_conc_test_02_02.csv",
                             dataset_name=hgbc_conc_dataset,
                             ml_method=hgbc_conc_ml_method,
                             emb_method=hgbc_conc_emb_method,
@@ -228,7 +228,7 @@ def run_text_concatenated():
         test_score_maxs_local = np.array(test_score_maxs_local)
 
         plot_bar_chart(
-            filename=f"{model_name}_conc",
+            filename=f"{model_name}_conc_02_02",
             labels=labels_local,
             train_scores=train_scores_local,
             test_score_medians=test_score_medians_local,
