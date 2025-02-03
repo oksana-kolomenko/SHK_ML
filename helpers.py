@@ -241,7 +241,7 @@ def logistic_regression(dataset_name, X, y, nominal_features, n_repeats=10, n_sp
         ]),
         param_grid={"classifier__C": [2, 10, 50, 250]},
         scoring="neg_log_loss",
-        cv=skf
+        cv=RepeatedStratifiedKFold(n_splits=3)
     )
 
     for train_index, test_index in skf.split(X, y):
@@ -339,7 +339,7 @@ def lr_rt_emb(dataset_name, X, y, nominal_features, n_splits=3, n_components=Non
             "classifier__C": [2, 10] #, 50, 250]
         },
         scoring="neg_log_loss",
-        cv=skf
+        cv=RepeatedStratifiedKFold(n_splits=3)
     )
 
     for train_index, test_index in skf.split(X, y):
@@ -428,7 +428,7 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, raw_text_summaries, 
             ]
         },
         scoring="neg_log_loss",
-        cv=skf
+        cv=RepeatedStratifiedKFold(n_splits=3)
     )
 
     for train_index, test_index in skf.split(raw_text_summaries, y):
@@ -504,7 +504,7 @@ def hgbc(dataset_name, X, y, nominal_features, n_repeats=10, n_splits=3):
         ]),
         param_grid={"hist_gb__min_samples_leaf": [5, 10, 15, 20]},
         scoring="neg_log_loss",
-        cv=skf
+        cv=RepeatedStratifiedKFold(n_splits=3)
     )
 
     # Calculate metrics for each fold
@@ -674,7 +674,7 @@ def hgbc_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y,
                                    "embedding_mean_without_cls_and_sep"]
         },
         scoring="neg_log_loss",
-        cv=skf
+        cv=RepeatedStratifiedKFold(n_splits=3)
         # todo: macht RSKF Unterschied? Bzw. wird jetzt die beste Aggrerg. ausgewält
     )
 
@@ -813,7 +813,7 @@ def concat_lr_txt_emb(dataset_name, emb_method,
             ]
         },
         scoring="neg_log_loss",
-        cv=skf
+        cv=RepeatedStratifiedKFold(n_splits=3)
     )
 
     for train_index, test_index in skf.split(X_tabular, y):
@@ -963,7 +963,7 @@ def concat_lr_tab_rt_emb(dataset_name, X_tabular,
         estimator=pipeline,
         param_grid=param_grid,
         scoring="neg_log_loss",
-        # cv=skf
+        # cv=RepeatedStratifiedKFold(n_splits=3)
         n_jobs=-1
     )
 
@@ -1070,7 +1070,7 @@ def concat_txt_tab_hgbc(dataset_name, emb_method,
             ]
         },
         scoring="neg_log_loss",
-        cv=skf
+        cv=RepeatedStratifiedKFold(n_splits=3)
     )
 
     for train_index, test_index in skf.split(X_tabular, y):
