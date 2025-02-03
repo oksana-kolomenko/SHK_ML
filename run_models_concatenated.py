@@ -34,41 +34,7 @@ def run_text_concatenated():
         # others?
     ]
 
-    (lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,
-     lr_conc_yesno, lr_best_params, lr_pca_components, lr_conc_train_score,
-     lr_conc_test_scores) = concat_lr_txt_emb(
-        dataset_name=posttrauma_dataset,
-        emb_method="Bert",
-        feature_extractor=feature_extractor_bert,
-        raw_text_summaries=patient_summaries,
-        X_tabular=X_posttrauma, y=y_posttrauma,
-        nominal_features=nominal_features,
-        text_feature_column_name=text_feature,
-        imp_max_iter=50, class_max_iter=10000,
-        n_components=0, n_repeats=10)
-
-    # todo:save train&test results as list and iterate
-    save_results_to_csv(output_file=f"{feature_extractor_bert}_LR_conc_train_02_02.csv",
-                        dataset_name=lr_conc_dataset,
-                        ml_method=lr_conc_ml_method,
-                        emb_method=lr_conc_emb_method,
-                        concatenation=lr_conc_yesno,
-                        best_params=lr_best_params,
-                        pca_n_comp=lr_pca_components,
-                        metrics=lr_conc_train_score,
-                        is_train=True)
-
-    save_results_to_csv(output_file=f"{feature_extractor_bert}_LR_conc_test_02_02.csv",
-                        dataset_name=lr_conc_dataset,
-                        ml_method=lr_conc_ml_method,
-                        emb_method=lr_conc_emb_method,
-                        concatenation=lr_conc_yesno,
-                        best_params=lr_best_params,
-                        pca_n_comp=lr_pca_components,
-                        metrics=lr_conc_test_scores,
-                        is_train=False)
-
-    """feature_extractors = {
+    feature_extractors = {
         # Clinical Longformer
         # "Clinical-Longformer": feature_extractor_clinical,
 
@@ -119,7 +85,7 @@ def run_text_concatenated():
         # Stella Model
         # "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5 # (not ready)
     }
-    """
+
     """
     (lr_rt_conc_dataset, lr_rt_conc_ml_method, lr_rt_conc_emb_method,
      lr_rt_conc_yesno, lr_rt_best_params, lr_rt_pca_components,
@@ -151,10 +117,10 @@ def run_text_concatenated():
                         is_train=False)
     
     """
-    """
+
     # Calculate results for each model
     for model_name, feature_extractor in feature_extractors.items():
-        conc_lr_txt_emb(feature_extractor=feature_extractor, X=X_posttrauma, y=y_posttrauma, imp_max_iter=5,
+        """conc_lr_txt_emb(feature_extractor=feature_extractor, X=X_posttrauma, y=y_posttrauma, imp_max_iter=5,
                         lr_max_iter=1000, n_repeats=1, nominal_features=nominal_features, text_feature=text_feature,
                         raw_text_summaries=patient_summaries)
 
@@ -201,27 +167,62 @@ def run_text_concatenated():
                             best_params=hgbc_best_params,
                             pca_n_comp=hgbc_pca_components,
                             metrics=hgbc_conc_test_scores,
+                            is_train=False)"""
+
+        (lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,
+         lr_conc_yesno, lr_best_params, lr_pca_components, lr_conc_train_score,
+         lr_conc_test_scores) = concat_lr_txt_emb(
+            dataset_name=posttrauma_dataset,
+            emb_method=model_name,
+            feature_extractor=feature_extractor,
+            raw_text_summaries=patient_summaries,
+            X_tabular=X_posttrauma, y=y_posttrauma,
+            nominal_features=nominal_features,
+            text_feature_column_name=text_feature,
+            imp_max_iter=50, class_max_iter=10000,
+            n_components=0, n_repeats=10)
+
+        # todo:save train&test results as list and iterate
+        save_results_to_csv(output_file=f"{model_name}_LR_conc_train_03_02.csv",
+                            dataset_name=lr_conc_dataset,
+                            ml_method=lr_conc_ml_method,
+                            emb_method=lr_conc_emb_method,
+                            concatenation=lr_conc_yesno,
+                            best_params=lr_best_params,
+                            pca_n_comp=lr_pca_components,
+                            metrics=lr_conc_train_score,
+                            is_train=True)
+
+        save_results_to_csv(output_file=f"{model_name}_LR_conc_test_03_02.csv",
+                            dataset_name=lr_conc_dataset,
+                            ml_method=lr_conc_ml_method,
+                            emb_method=lr_conc_emb_method,
+                            concatenation=lr_conc_yesno,
+                            best_params=lr_best_params,
+                            pca_n_comp=lr_pca_components,
+                            metrics=lr_conc_test_scores,
                             is_train=False)
 
+        """# geht nicht, da train/test scores jetzt versch. Metriken erhalten
         labels_local = [
             f"{model_name} \n+ LogReg conc.",
-            f"{model_name} \n+ HGBC conc."
+            #f"{model_name} \n+ HGBC conc."
         ]
         train_scores_local = [
             lr_conc_train_score,
-            hgbc_conc_train_score
+            #hgbc_conc_train_score
         ]
         test_score_medians_local = [
             np.median(lr_conc_test_scores),
-            np.median(hgbc_conc_test_scores)
+            #np.median(hgbc_conc_test_scores)
         ]
         test_score_mins_local = [
             np.min(lr_conc_test_scores),
-            np.min(hgbc_conc_test_scores)
+            #np.min(hgbc_conc_test_scores)
         ]
         test_score_maxs_local = [
             np.max(lr_conc_test_scores),
-            np.max(hgbc_conc_test_scores)
+            #np.max(hgbc_conc_test_scores)
         ]
 
         # Convert to arrays

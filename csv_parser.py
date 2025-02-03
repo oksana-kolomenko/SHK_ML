@@ -113,6 +113,10 @@ def category_to_word(category_name, value):
     Smoker
     Injury Severity Score category
     Penetrating injury
+    Days in hospital???
+    iss score?
+    nb of fractures?
+    usw.
     """
 
     if isinstance(value, float):
