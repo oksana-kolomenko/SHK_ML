@@ -877,10 +877,10 @@ def concat_lr_txt_emb(dataset_name, emb_method,
 
 
 # Problem: after RTE there are 40 Features, but when debugging ~ 2000
-def concat_lr_tab_rt_emb(dataset_name, X_tabular,
-                         nominal_features, y, n_repeats,
-                         imp_max_iter, class_max_iter,
-                         n_splits=3):
+def concat_lr_rte(dataset_name, X_tabular,
+                  nominal_features, y, n_repeats,
+                  imp_max_iter, class_max_iter,
+                  n_splits=3):
     dataset = dataset_name
     ml_method = "Logistic Regression"
     emb_method = "Random Trees Embedding"

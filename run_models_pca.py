@@ -13,7 +13,7 @@ from models import feature_extractor_bert, feature_extractor_clinical
 from values import Dataset
 
 
-def run_models_on_txt_emb():
+def run_pca_txt_emb():
     posttrauma_dataset = Dataset.POSTTRAUMA.value
 
     # load features and labels
@@ -72,11 +72,9 @@ def run_models_on_txt_emb():
         # "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5 # (not ready)
     }
 
-    ###### TEXT EMBEDDINGS ######
-
-    # Calculate results for each model
     for model_name, feature_extractor in feature_extractors.items():
 
+        # Die Methoden müssen möglicherweise noch an pca angepasst werden
         # Logistic Regression
         (lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_concatenation, lr_txt_best_params,
          lr_txt_pca_components, lr_txt_train_score, lr_txt_test_scores) = lr_txt_emb(
@@ -109,6 +107,8 @@ def run_models_on_txt_emb():
                             best_params=lr_txt_best_params, pca_n_comp=lr_txt_pca_components,
                             metrics=hgbc_txt_test_scores, is_train=False)
 
+        """
+        # Geht gerade nicht, da scores enthalten mehrere Metrics        
         labels_local = [
             f"{model_name} \n+ Log Reg + PCA",
             f"{model_name} \n+ HGBC + PCA"
@@ -143,4 +143,4 @@ def run_models_on_txt_emb():
             test_score_medians=test_score_medians_local,
             test_score_mins=test_score_mins_local,
             test_score_maxs=test_score_maxs_local
-        )
+        )"""

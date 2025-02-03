@@ -120,21 +120,21 @@ def run_text_concatenated():
 
     # Calculate results for each model
     for model_name, feature_extractor in feature_extractors.items():
-        """conc_lr_txt_emb(feature_extractor=feature_extractor, X=X_posttrauma, y=y_posttrauma, imp_max_iter=5,
-                        lr_max_iter=1000, n_repeats=1, nominal_features=nominal_features, text_feature=text_feature,
-                        raw_text_summaries=patient_summaries)
-
-        
+        """
+        # These two methods were created for test purpose only
         lr_txt_emb_pca_no_pipeline(feature_extractor=feature_extractor,
                                    nominal_features=nominal_features,
                                    raw_text_summaries=patient_summaries, y=y_posttrauma)
-        # Log. Reg. Concatenated (Tab. + Text Embeddings)
+        
         concat_lr_txt_emb_no_pipeline(feature_extractor=feature_extractor, X=X_posttrauma,
                                       nominal_features=nominal_features,
                                       raw_text_summaries=patient_summaries, text_features=text_features,
                                       y=y_posttrauma, imp_max_iter=5,
-                                      lr_max_iter=1000, n_repeats=1)
+                                      lr_max_iter=1000, n_repeats=1) 
+        """
 
+        """
+        # HGBC TXT Concatenation
         (hgbc_conc_dataset, hgbc_conc_ml_method, hgbc_conc_emb_method,
          hgbc_conc_yesno, hgbc_best_params, hgbc_pca_components, hgbc_conc_train_score,
          hgbc_conc_test_scores) = concat_txt_tab_hgbc(
@@ -148,7 +148,6 @@ def run_text_concatenated():
             n_repeats=10,
             n_components=40)
 
-        # todo:save train&test results as list and iterate
         save_results_to_csv(output_file=f"{feature_extractor_bert}_HGBC_conc_train_02_02.csv",
                             dataset_name=hgbc_conc_dataset,
                             ml_method=hgbc_conc_ml_method,
@@ -203,7 +202,8 @@ def run_text_concatenated():
                             metrics=lr_conc_test_scores,
                             is_train=False)
 
-        """# geht nicht, da train/test scores jetzt versch. Metriken erhalten
+        """
+        # Bar chart geht gerade nicht, da train/test scores jetzt verschiedene Metriken enthalten
         labels_local = [
             f"{model_name} \n+ LogReg conc.",
             #f"{model_name} \n+ HGBC conc."
@@ -240,7 +240,9 @@ def run_text_concatenated():
             test_score_maxs=test_score_maxs_local
         )"""
 
+
 """
+# RTE geht gerade nicht, unklar was ist da mit Dimensionen der Embeddings
 def run_rte_concatenated():
     posttrauma_dataset = Dataset.POSTTRAUMA.value
 
@@ -265,7 +267,7 @@ def run_rte_concatenated():
 
     (lr_rt_conc_dataset, lr_rt_conc_ml_method, lr_rt_conc_emb_method,
      lr_rt_conc_yesno, lr_rt_best_params, lr_rt_pca_components,
-     lr_rt_conc_train_score, lr_rt_conc_test_scores) = concat_lr_tab_rt_emb(
+     lr_rt_conc_train_score, lr_rt_conc_test_scores) = concat_lr_rte(
         dataset_name=posttrauma_dataset,
         X_tabular=X_posttrauma, y=y_posttrauma,
         nominal_features=nominal_features,
