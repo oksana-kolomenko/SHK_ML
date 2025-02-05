@@ -178,7 +178,7 @@ def run_text_concatenated():
             X_tabular=X_posttrauma, y=y_posttrauma,
             nominal_features=nominal_features,
             text_feature_column_name=text_feature,
-            imp_max_iter=50, class_max_iter=10000,
+            imp_max_iter=30, class_max_iter=10000,
             n_components=0, n_repeats=10)
 
         # todo:save train&test results as list and iterate

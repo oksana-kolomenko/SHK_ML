@@ -233,9 +233,9 @@ def logistic_regression(dataset_name, X, y, nominal_features, n_repeats=10, n_sp
                     ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
                 ]), nominal_features),
                 ("numerical", Pipeline([
-                                           ("numerical_imputer", IterativeImputer(max_iter=50)),  # todo=5 fürs Testen
-                                           ("numerical_scaler", MinMaxScaler())
-                                       ] + ([pca_step] if pca_step else [])), numerical_features),
+                    ("numerical_imputer", IterativeImputer(max_iter=50)),  # todo=5 fürs Testen
+                    ("numerical_scaler", MinMaxScaler())
+                ] + ([pca_step] if pca_step else [])), numerical_features),
             ])),
             ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=10000))
         ]),
@@ -405,7 +405,7 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, raw_text_summaries, 
     metrics_per_fold = []
     skf = RepeatedStratifiedKFold(n_splits=n_splits,
                                   n_repeats=n_repeats,
-                                  random_state=42)  # macht es Sinn?
+                                  random_state=42)
     pca_components = f"PCA ({n_components} components)" if n_components else "none"
 
     pipeline_steps = [
@@ -905,16 +905,16 @@ def concat_lr_rte(dataset_name, X_tabular,
             # Verarbeitung der tabellarischen Daten
             ("raw", ColumnTransformer([
                 ("nominal", Pipeline([
-                    ("debug_nominal", DebugTransformer(name="Nominal Debug")),
+                    ("debug_nominal", DebugTransformer(name="Nominal Debug")), # 5
                     ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
-                    ("nominal_encoder", OneHotEncoder(handle_unknown="ignore")),
+                    ("nominal_encoder", OneHotEncoder(handle_unknown="ignore")), #14
                     ("debug_nominal_after", DebugTransformer(name="Nominal Debug after"))
                 ]), nominal_features),
                 ("numerical", Pipeline([
                     ("debug_numerical", DebugTransformer(name="Numerical Debug")),
-                    ("numerical_imputer", IterativeImputer(max_iter=imp_max_iter)),
+                    ("numerical_imputer", IterativeImputer(max_iter=imp_max_iter)), # 35
                     ("debug_numerical_after", DebugTransformer(name="Numerical Debug after"))
-                ]), numerical_features),
+                ]), numerical_features),  # 49
             ], remainder="passthrough")),
             # Verarbeitung der RT Embeddings
             ("embeddings", Pipeline([
@@ -943,17 +943,17 @@ def concat_lr_rte(dataset_name, X_tabular,
 
     param_grid = {
         "classifier__C": [2, 10], #, 50, 250],
-        "feature_combiner__embeddings__embedding__n_estimators": [10], #, 100, 1000],
+        "feature_combiner__embeddings__embedding__n_estimators": [10], #, 100, 1000], # todo: mit anderen Parameter (z.B. 100) testen!
         "feature_combiner__embeddings__embedding__max_depth": [2] #, 5] #, 10, 15],
     }
     # Ensure the feature_combiner is fitted before transformation
-    pipeline.named_steps["feature_combiner"].fit(X_tabular, y)
+    pipeline.named_steps["feature_combiner"].fit(X_tabular, y) # ~2000
 
     # Manually transform data for debugging
     X_transformed = pipeline.named_steps["feature_combiner"].transform(X_tabular)
 
     # Print out shape of final transformed features
-    print(f"Final Feature Set Shape (Before Model Training): {X_transformed.shape}")
+    print(f"Final Feature Set Shape (Before Model Training): {X_transformed.shape}") # ~2000
 
     # Check if any feature vector is empty
     if X_transformed.shape[1] == 0:
