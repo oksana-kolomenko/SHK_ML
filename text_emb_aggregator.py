@@ -48,7 +48,7 @@ class EmbeddingAggregator(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X_text):
-        print(f"X_text shape:: {X_text.shape}")
+        #print(f"X_text shape:: {X_text.shape}")
         #print(f"Input to EmbeddingAggregator: {X_text}")
         if isinstance(X_text, pd.DataFrame):
             X_text = X_text.iloc[:, 0].tolist()

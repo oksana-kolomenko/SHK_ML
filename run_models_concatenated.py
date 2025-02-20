@@ -1,10 +1,11 @@
 import numpy as np
 
 from csv_saver import save_results_to_csv
-from helpers import (load_labels, load_features, load_summaries) # , concat_lr_tab_rt_emb, concat_hgbc_rte)
+from helpers import (load_labels, load_features, load_summaries,
+                     concat_lr_rte, concat_hgbc_rte, concat_txt_tab_hgbc)  # , concat_lr_tab_rt_emb, concat_hgbc_rte)
 from bar_plotting import plot_bar_chart
 from helpers import concat_lr_txt_emb #, concat_txt_tab_hgbc
-from models import feature_extractor_bert
+#from models import feature_extractor_bert
 from values import Dataset
 
 
@@ -36,13 +37,13 @@ def run_text_concatenated():
 
     feature_extractors = {
         # Clinical Longformer
-        # "Clinical-Longformer": feature_extractor_clinical,
+        #"Clinical-Longformer": feature_extractor_clinical,
 
         # BERT (half done)
-        "BERT": feature_extractor_bert,
+        #"BERT": feature_extractor_bert,
 
         # ELECTRA (half done)
-        # "ELECTRA-Small": feature_extractor_electra_small,
+        #"ELECTRA-Small": feature_extractor_electra_small,
         # "ELECTRA-Base": feature_extractor_electra_base,
         # "ELECTRA-Large": feature_extractor_electra_large,
 
@@ -86,55 +87,11 @@ def run_text_concatenated():
         # "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5 # (not ready)
     }
 
-    """
-    (lr_rt_conc_dataset, lr_rt_conc_ml_method, lr_rt_conc_emb_method,
-     lr_rt_conc_yesno, lr_rt_best_params, lr_rt_pca_components,
-     lr_rt_conc_train_score, lr_rt_conc_test_scores) = concat_lr_tab_rt_emb(
-        dataset_name=posttrauma_dataset,
-        X_tabular=X_posttrauma, y=y_posttrauma,
-        nominal_features=nominal_features,
-        n_repeats=1, class_max_iter=1000, imp_max_iter=5)
-
-    # todo:save train&test results as list and iterate
-    save_results_to_csv(output_file=f"LR_rte_conc_train.csv",
-                        dataset_name=lr_rt_conc_dataset,
-                        ml_method=lr_rt_conc_ml_method,
-                        emb_method=lr_rt_conc_emb_method,
-                        concatenation=lr_rt_conc_yesno,
-                        best_params=lr_rt_best_params,
-                        pca_n_comp=lr_rt_pca_components,
-                        metrics=lr_rt_conc_train_score,
-                        is_train=True)
-
-    save_results_to_csv(output_file=f"LR_rte_conc_test.csv",
-                        dataset_name=lr_rt_conc_dataset,
-                        ml_method=lr_rt_conc_ml_method,
-                        emb_method=lr_rt_conc_emb_method,
-                        concatenation=lr_rt_conc_yesno,
-                        best_params=lr_rt_best_params,
-                        pca_n_comp=lr_rt_pca_components,
-                        metrics=lr_rt_conc_test_scores,
-                        is_train=False)
-    
-    """
 
     # Calculate results for each model
     for model_name, feature_extractor in feature_extractors.items():
-        """
-        # These two methods were created for test purpose only
-        lr_txt_emb_pca_no_pipeline(feature_extractor=feature_extractor,
-                                   nominal_features=nominal_features,
-                                   raw_text_summaries=patient_summaries, y=y_posttrauma)
-        
-        concat_lr_txt_emb_no_pipeline(feature_extractor=feature_extractor, X=X_posttrauma,
-                                      nominal_features=nominal_features,
-                                      raw_text_summaries=patient_summaries, text_features=text_features,
-                                      y=y_posttrauma, imp_max_iter=5,
-                                      lr_max_iter=1000, n_repeats=1) 
-        """
 
-        """
-        # HGBC TXT Concatenation
+        """# HGBC TXT Concatenation
         (hgbc_conc_dataset, hgbc_conc_ml_method, hgbc_conc_emb_method,
          hgbc_conc_yesno, hgbc_best_params, hgbc_pca_components, hgbc_conc_train_score,
          hgbc_conc_test_scores) = concat_txt_tab_hgbc(
@@ -178,11 +135,10 @@ def run_text_concatenated():
             X_tabular=X_posttrauma, y=y_posttrauma,
             nominal_features=nominal_features,
             text_feature_column_name=text_feature,
-            imp_max_iter=30, class_max_iter=10000,
-            n_components=0, n_repeats=10)
+            imp_max_iter=50, class_max_iter=10000,
+            n_components=None, n_repeats=10)
 
-        # todo:save train&test results as list and iterate
-        save_results_to_csv(output_file=f"{model_name}_LR_conc_train_03_02.csv",
+        save_results_to_csv(output_file=f"{model_name}_LR_conc_train.csv",
                             dataset_name=lr_conc_dataset,
                             ml_method=lr_conc_ml_method,
                             emb_method=lr_conc_emb_method,
@@ -192,7 +148,7 @@ def run_text_concatenated():
                             metrics=lr_conc_train_score,
                             is_train=True)
 
-        save_results_to_csv(output_file=f"{model_name}_LR_conc_test_03_02.csv",
+        save_results_to_csv(output_file=f"{model_name}_LR_conc_test.csv",
                             dataset_name=lr_conc_dataset,
                             ml_method=lr_conc_ml_method,
                             emb_method=lr_conc_emb_method,
@@ -241,7 +197,7 @@ def run_text_concatenated():
         )"""
 
 
-"""
+
 # RTE geht gerade nicht, unklar was ist da mit Dimensionen der Embeddings
 def run_rte_concatenated():
     posttrauma_dataset = Dataset.POSTTRAUMA.value
@@ -270,11 +226,11 @@ def run_rte_concatenated():
      lr_rt_conc_train_score, lr_rt_conc_test_scores) = concat_lr_rte(
         dataset_name=posttrauma_dataset,
         X_tabular=X_posttrauma, y=y_posttrauma,
-        nominal_features=nominal_features,
-        n_repeats=1, class_max_iter=1000, imp_max_iter=5)
+        nominal_features=nominal_features, pca_n_comp=35,
+        n_repeats=10, class_max_iter=10000, imp_max_iter=50)
 
     # todo:save train&test results as list and iterate
-    save_results_to_csv(output_file=f"LR_rte_conc_train.csv",
+    save_results_to_csv(output_file=f"LR_rte_conc_pca_train.csv",
                         dataset_name=lr_rt_conc_dataset,
                         ml_method=lr_rt_conc_ml_method,
                         emb_method=lr_rt_conc_emb_method,
@@ -284,7 +240,7 @@ def run_rte_concatenated():
                         metrics=lr_rt_conc_train_score,
                         is_train=True)
 
-    save_results_to_csv(output_file=f"LR_rte_conc_test.csv",
+    save_results_to_csv(output_file=f"LR_rte_conc_pca_test.csv",
                         dataset_name=lr_rt_conc_dataset,
                         ml_method=lr_rt_conc_ml_method,
                         emb_method=lr_rt_conc_emb_method,
@@ -296,20 +252,22 @@ def run_rte_concatenated():
 
     # HGBC Concatenated (Tab. + RT Embeddings)
     (hgbc_conc_rte_dataset, hgbc_conc_rte_ml_method, hgbc_conc_rte_emb_method,
-     # todo
+    hgbc_rte_conc, hgbc_rte_best_params, hgbc_rte_pca_n_comp,
     hgbc_conc_rte_train_score, hgbc_conc_rte_test_scores) = concat_hgbc_rte(dataset_name=posttrauma_dataset,
                                                                             X_tabular=X_posttrauma,
                                                                             nominal_features=nominal_features,
-                                                                            y=y_posttrauma, pca_n_comp=None)
+                                                                            y=y_posttrauma, pca_n_comp=35)
 
     save_results_to_csv(output_file=f"HGBC_conc_rte_train.csv", dataset_name=hgbc_conc_rte_dataset,
-                        ml_method=hgbc_conc_rte_ml_method, emb_method=hgbc_conc_rte_emb_method, concatenation="no",
-                        metrics=hgbc_conc_rte_train_score, is_train=True)
+                        ml_method=hgbc_conc_rte_ml_method, emb_method=hgbc_conc_rte_emb_method, concatenation=hgbc_rte_conc,
+                        metrics=hgbc_conc_rte_train_score, best_params=hgbc_rte_best_params,
+                        pca_n_comp=hgbc_rte_pca_n_comp, is_train=True)
 
     save_results_to_csv(output_file=f"HGBC_conc_rte_test.csv", dataset_name=hgbc_conc_rte_dataset,
-                        ml_method=hgbc_conc_rte_ml_method, emb_method=hgbc_conc_rte_emb_method, concatenation="no",
-                        metrics=hgbc_conc_rte_test_scores, is_train=False)
-
+                        ml_method=hgbc_conc_rte_ml_method, emb_method=hgbc_conc_rte_emb_method, concatenation=hgbc_rte_conc,
+                        metrics=hgbc_conc_rte_test_scores, best_params=hgbc_rte_best_params,
+                        pca_n_comp=hgbc_rte_pca_n_comp, is_train=False)
+    """
     labels_local = [
         f"LogReg Table + RTE",
         f"HGBC Table + RTE."

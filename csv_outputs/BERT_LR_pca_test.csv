@@ -1,0 +1,4 @@
+Fold,Dataset,ML Method,Embedding Method,Concatenation,Best Parameters,PCA n_components,AUC,AP,Sensitivity,Specificity,Precision,F1,Balanced Accuracy
+0,posttrauma,logistic regression,BERT,no,"{'aggregator__method': 'embedding_cls', 'classifier__C': 2}",PCA (35 components),0.46938775510204084,0.7248619129775026,0.8095238095238095,0.2857142857142857,0.7727272727272727,0.5491949910554561,0.5476190476190477
+1,posttrauma,logistic regression,BERT,no,"{'aggregator__method': 'embedding_cls', 'classifier__C': 2}",PCA (35 components),0.5873015873015873,0.7869796148515646,0.8571428571428571,0.5,0.8571428571428571,0.6785714285714286,0.6785714285714286
+2,posttrauma,logistic regression,BERT,no,"{'aggregator__method': 'embedding_cls', 'classifier__C': 2}",PCA (35 components),0.2857142857142857,0.7351341797682875,0.5238095238095238,0.16666666666666666,0.6875,0.35612082670906203,0.34523809523809523

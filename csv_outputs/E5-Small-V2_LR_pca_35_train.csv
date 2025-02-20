@@ -1,0 +1,2 @@
+Dataset,ML Method,Embedding Method,Concatenation,Best Parameters,PCA n_components,AUC,AP,Sensitivity,Specificity,Precision,F1,Balanced Accuracy
+posttrauma,logistic regression,E5-Small-V2,no,"{'aggregator__method': 'embedding_mean_without_cls_and_sep', 'classifier__C': 2}",PCA (35 components),0.9732664995822891,0.9909587744255104,1.0,0.7368421052631579,0.9264705882352942,0.9051584547767755,0.868421052631579

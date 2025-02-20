@@ -1,0 +1,2 @@
+Dataset,ML Method,Embedding Method,Concatenation,Best Parameters,PCA n_components,AUC,AP,Sensitivity,Specificity,Precision,F1,Balanced Accuracy
+posttrauma,logistic regression,GTE-Base,no,"{'aggregator__method': 'embedding_mean_without_cls_and_sep', 'classifier__C': 2}",PCA (35 components),1.0,1.0,1.0,1.0,1.0,1.0,1.0

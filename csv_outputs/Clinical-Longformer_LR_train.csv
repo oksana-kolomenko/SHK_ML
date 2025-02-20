@@ -1,0 +1,2 @@
+Dataset,ML Method,Embedding Method,Concatenation,Best Parameters,PCA n_components,AUC,AP,Sensitivity,Specificity,Precision,F1,Balanced Accuracy
+posttrauma,logistic regression,Clinical-Longformer,no,"{'aggregator__method': 'embedding_mean_with_cls_and_sep', 'classifier__C': 2}",none,0.9966583124477861,0.9990155677655677,1.0,0.7894736842105263,0.9402985074626866,0.92579185520362,0.8947368421052632

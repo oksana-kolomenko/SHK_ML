@@ -1,0 +1,4 @@
+Fold,Dataset,ML Method,Embedding Method,Concatenation,Best Parameters,PCA n_components,AUC,AP,Sensitivity,Specificity,Precision,F1,Balanced Accuracy
+0,posttrauma,logistic regression,ELECTRA-Base,no,"{'aggregator__method': 'embedding_cls', 'classifier__C': 2}",PCA (35 components),0.5918367346938775,0.7723992032245082,0.8095238095238095,0.42857142857142855,0.8095238095238095,0.6190476190476191,0.6190476190476191
+1,posttrauma,logistic regression,ELECTRA-Base,no,"{'aggregator__method': 'embedding_cls', 'classifier__C': 2}",PCA (35 components),0.6428571428571428,0.8416985807122916,0.9047619047619048,0.5,0.8636363636363636,0.7145877378435518,0.7023809523809523
+2,posttrauma,logistic regression,ELECTRA-Base,no,"{'aggregator__method': 'embedding_cls', 'classifier__C': 2}",PCA (35 components),0.3412698412698413,0.7340297043217068,0.47619047619047616,0.5,0.7692307692307693,0.4441176470588235,0.4880952380952381
