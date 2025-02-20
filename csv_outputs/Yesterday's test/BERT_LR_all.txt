@@ -1,0 +1,40 @@
+embedding size: 768
+Best hyperparameters: {
+'aggregator__method': 'embedding_mean_without_cls_and_sep', 'classifier__C': 2}
+Train metrics: {
+'AUC': np.float64(0.9916457811194654), 
+'AP': np.float64(0.9973260236514048), 
+'Sensitivity': np.float64(1.0), 
+'Specificity': np.float64(0.6842105263157895), 
+'Precision': np.float64(0.9130434782608695), 
+'F1': np.float64(0.8835227272727273), 
+'Balanced Accuracy': np.float64(0.8421052631578947)}
+
+
+Test metrics per fold: [
+{'Fold': 0, 'AUC': np.float64(0.5374149659863945), 
+'AP': np.float64(0.7616764455520393), 
+'Sensitivity': np.float64(0.8571428571428571), 
+'Specificity': np.float64(0.14285714285714285), 
+'Precision': np.float64(0.75), 
+'F1': np.float64(0.49090909090909096), 
+'Balanced Accuracy': np.float64(0.5)},
+ 
+{'Fold': 1, 'AUC': np.float64(0.6428571428571428), 
+'AP': np.float64(0.8536019605568479), 
+'Sensitivity': np.float64(0.9523809523809523), 
+'Specificity': np.float64(0.16666666666666666), 
+'Precision': np.float64(0.8), 
+'F1': np.float64(0.5597826086956521), 
+'Balanced Accuracy': np.float64(0.5595238095238095)}, 
+
+{'Fold': 2, 'AUC': np.float64(0.3015873015873016), 
+'AP': np.float64(0.7382619693456569), 
+'Sensitivity': np.float64(0.6666666666666666), 
+'Specificity': np.float64(0.0), 
+'Precision': np.float64(0.7), 
+'F1': np.float64(0.34146341463414637), 
+'Balanced Accuracy': np.float64(0.3333333333333333)}]
+
+Results saved to BERT_LR_train.csv
+Results saved to BERT_LR_test.csv

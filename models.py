@@ -79,7 +79,7 @@ def create_gte_feature_extractor(model_name):
 #feature_extractor_clinical = create_feature_extractor("yikuan8/Clinical-Longformer")
 
 # BERT
-#feature_extractor_bert = create_feature_extractor("google-bert/bert-base-cased")
+feature_extractor_bert = create_feature_extractor("google-bert/bert-base-cased")
 # feature_extractor_bert = create_feature_extractor("google-bert/distilbert-base-cased")
 
 # ELECTRA small discriminator
@@ -145,7 +145,7 @@ def create_gte_feature_extractor(model_name):
 #feature_extractor_medembed_base_v0_1 = create_feature_extractor("abhinand/MedEmbed-base-v0.1") # custom code
 #
 # MedEmbed-large-v0.1
-feature_extractor_medembed_large_v0_1 = create_feature_extractor("abhinand/MedEmbed-large-v0.1") # custom code
+#feature_extractor_medembed_large_v0_1 = create_feature_extractor("abhinand/MedEmbed-large-v0.1") # custom code
 
 #############
 #### GTE ####
@@ -160,10 +160,10 @@ feature_extractor_medembed_large_v0_1 = create_feature_extractor("abhinand/MedEm
 #feature_extractor_gte_base_en_v1_5 = create_gte_feature_extractor("Alibaba-NLP/gte-base-en-v1.5") # custom code
 
 # gte-large
-feature_extractor_gte_large = create_feature_extractor("thenlper/gte-large")
+#feature_extractor_gte_large = create_feature_extractor("thenlper/gte-large")
 
 # gte-large-en-v1.5
-feature_extractor_gte_large_en_v1_5 = create_gte_feature_extractor("Alibaba-NLP/gte-large-en-v1.5") # custom code
+#feature_extractor_gte_large_en_v1_5 = create_gte_feature_extractor("Alibaba-NLP/gte-large-en-v1.5") # custom code
 
 # stella_en_400M_v5 (SotA)
 # feature_extractor_stella_en_400M_v5 = create_feature_extractor("dunzhang/stella_en_400M_v5")  # [CLS], [SEP] # custom code

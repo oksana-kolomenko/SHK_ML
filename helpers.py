@@ -1,6 +1,5 @@
 import os
 import time
-import xarray
 import numpy as np
 import pandas as pd
 from sklearn.base import TransformerMixin, BaseEstimator
@@ -234,9 +233,9 @@ def logistic_regression(dataset_name, X, y, nominal_features, n_repeats=10, n_sp
                     ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
                 ]), nominal_features),
                 ("numerical", Pipeline([
-                    ("numerical_imputer", IterativeImputer(max_iter=50)),  # todo=5 fürs Testen
-                    ("numerical_scaler", MinMaxScaler())
-                ] + ([pca_step] if pca_step else [])), numerical_features),
+                                           ("numerical_imputer", IterativeImputer(max_iter=50)),  # todo=5 fürs Testen
+                                           ("numerical_scaler", MinMaxScaler())
+                                       ] + ([pca_step] if pca_step else [])), numerical_features),
             ])),
             ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=10000))
         ]),
@@ -401,8 +400,8 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, raw_text_summaries, 
     concatenation = "no"
     metrics_per_fold = []
     skf = StratifiedKFold(n_splits=n_splits,
-                                  shuffle=True,
-                                  random_state=42)
+                          shuffle=True,
+                          random_state=42)
     pca_components = f"PCA ({n_components} components)" if n_components else "none"
 
     pipeline_steps = [
@@ -411,7 +410,7 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, raw_text_summaries, 
     if n_components:
         pipeline_steps.append(("numerical_scaler", StandardScaler()))
         pipeline_steps.append(("pca", PCA(n_components=n_components)))
-        #pipeline_steps.append(("numerical_scaler", MinMaxScaler())) #todo: needed here?
+        # pipeline_steps.append(("numerical_scaler", MinMaxScaler())) #todo: needed here?
     else:
         pipeline_steps.append(("numerical_scaler", MinMaxScaler()))
 
@@ -440,8 +439,8 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, raw_text_summaries, 
         n_features = X_train[0].shape[0] if hasattr(X_train[0], 'shape') else len(X_train[0])
 
         # Zeige die Dimensionen an
-        print(f"Number of samples (train) (n_samples): {n_samples}") #
-        print(f"Number of samples (test) (n_samples): {len(X_test)}") #
+        print(f"Number of samples (train) (n_samples): {n_samples}")  #
+        print(f"Number of samples (test) (n_samples): {len(X_test)}")  #
         print(f"Number of features (n_features): {n_features}")
         print(f"Minimum of samples and features: {min(n_samples, n_features)}")
 
@@ -488,7 +487,7 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, raw_text_summaries, 
         "Balanced Accuracy": balanced_accuracy_score(y, y_train_pred)
     }
 
-    best_params = f"{search.best_params_}" # is only for training data!
+    best_params = f"{search.best_params_}"  # is only for training data!
 
     print(f"embedding size: {len(search.best_estimator_.named_steps['classifier'].coef_[0])}")
     print(f"Best hyperparameters: {search.best_params_}")
@@ -505,8 +504,8 @@ def hgbc(dataset_name, X, y, nominal_features, n_repeats=10, n_splits=3):
     concatenation = "no"
     metrics_per_fold = []
     skf = StratifiedKFold(n_splits=n_splits,
-                                  shuffle=True,
-                                  random_state=42)
+                          shuffle=True,
+                          random_state=42)
 
     # Define GridSearchCV once before the loop
     search = GridSearchCV(
@@ -570,6 +569,7 @@ def hgbc(dataset_name, X, y, nominal_features, n_repeats=10, n_splits=3):
     print(f"Test metrics per fold: {metrics_per_fold}")
 
     return dataset, ml_method, emb_method, best_params, train_metrics, metrics_per_fold
+
 
 """
 def hgbc_ran_tree_emb(dataset_name, X, y, nominal_features, n_splits=3):
@@ -677,7 +677,6 @@ def hgbc_ran_tree_emb(dataset_name, X, y, nominal_features, n_splits=3):
 """
 
 
-
 def hgbc_rte(X, y, nominal_features, n_splits=3):  # todo
     hgbc_rt_emb_test_scores = []
     skf = StratifiedKFold(n_splits=n_splits)
@@ -694,11 +693,11 @@ def hgbc_rte(X, y, nominal_features, n_splits=3):  # todo
                         ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
                     ]), nominal_features),
                     ("numerical", Pipeline([
-                        ("numerical_imputer", IterativeImputer(max_iter=5))#30))
+                        ("numerical_imputer", IterativeImputer(max_iter=5))  # 30))
                     ]), list(set(X_train.columns.values) - set(nominal_features))),
                 ])),
                 ("embedding", RandomTreesEmbedding()),
-                ("hist_gb", HistGradientBoostingClassifier())#categorical_features=categorical_feature_indices))
+                ("hist_gb", HistGradientBoostingClassifier())  # categorical_features=categorical_feature_indices))
             ]),
             param_grid={
                 # extended hyperparameter search for better embedding
@@ -724,17 +723,18 @@ def hgbc_rte(X, y, nominal_features, n_splits=3):  # todo
                     ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
                 ]), nominal_features),
                 ("numerical", Pipeline([
-                    ("numerical_imputer", IterativeImputer(max_iter=5)) #30))
+                    ("numerical_imputer", IterativeImputer(max_iter=5))  # 30))
                 ]), list(set(X_train.columns.values) - set(nominal_features))),
             ])),
             ("embedding", RandomTreesEmbedding()),
-            ("hist_gb", HistGradientBoostingClassifier(categorical_features=nominal_features)) # todo: brauche ich es hier?
+            ("hist_gb", HistGradientBoostingClassifier(categorical_features=nominal_features))
+            # todo: brauche ich es hier?
         ]),
         param_grid={
             # extended hyperparameter search for better embedding
-            "embedding__n_estimators": [10], #, 100, 1000],
-            "embedding__max_depth": [2, 5], #, 10, 15],
-            "hist_gb__min_samples_leaf": [5] #, 10, 15, 20]
+            "embedding__n_estimators": [10],  # , 100, 1000],
+            "embedding__max_depth": [2, 5],  # , 10, 15],
+            "hist_gb__min_samples_leaf": [5]  # , 10, 15, 20]
         },
         scoring="neg_log_loss",
         cv=3
@@ -767,7 +767,7 @@ def hgbc_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y,
     ]
     if n_components:
         pipeline_steps.append(("numerical_scaler", StandardScaler()))
-        pipeline_steps.append(("pca", PCA(n_components=n_components))) # todo: danach skalieren?
+        pipeline_steps.append(("pca", PCA(n_components=n_components)))  # todo: danach skalieren?
 
     pipeline_steps.append(("hist_gb", HistGradientBoostingClassifier()))
 
@@ -1007,7 +1007,7 @@ def concat_lr_rte(dataset_name, X_tabular,
     print(f"Nominal Features: {nominal_features}")
     print(f"Nominal Features len: {len(nominal_features)}")
     print(f"Numerical Features: {numerical_features}")
-    print(f"Numerical Features len: {len (numerical_features)}")
+    print(f"Numerical Features len: {len(numerical_features)}")
     print(f"X_tabular Columns: {list(X_tabular.columns)}")
     print(f"X_tabular Columns len: {len(list(X_tabular.columns))}")
 
@@ -1016,14 +1016,14 @@ def concat_lr_rte(dataset_name, X_tabular,
             # Verarbeitung der tabellarischen Daten
             ("raw", ColumnTransformer([
                 ("nominal", Pipeline([
-                    ("debug_nominal", DebugTransformer(name="Nominal Debug")), # 5
+                    ("debug_nominal", DebugTransformer(name="Nominal Debug")),  # 5
                     ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
-                    ("nominal_encoder", OneHotEncoder(handle_unknown="ignore")), #14
+                    ("nominal_encoder", OneHotEncoder(handle_unknown="ignore")),  # 14
                     ("debug_nominal_after", DebugTransformer(name="Nominal Debug after"))
                 ]), nominal_features),
                 ("numerical", Pipeline([
                     ("debug_numerical", DebugTransformer(name="Numerical Debug")),
-                    ("numerical_imputer", IterativeImputer(max_iter=imp_max_iter)), # 35
+                    ("numerical_imputer", IterativeImputer(max_iter=imp_max_iter)),  # 35
                     ("debug_numerical_after", DebugTransformer(name="Numerical Debug after"))
                 ]), numerical_features),  # 49
             ], remainder="passthrough")),
@@ -1054,21 +1054,22 @@ def concat_lr_rte(dataset_name, X_tabular,
 
     param_grid = {
         "classifier__C": [2, 10, 50, 250],
-        "feature_combiner__embeddings__embedding__n_estimators": [10, 100, 1000], # todo: mit anderen Parameter (z.B. 100) testen!
+        "feature_combiner__embeddings__embedding__n_estimators": [10, 100, 1000],
+        # todo: mit anderen Parameter (z.B. 100) testen!
         "feature_combiner__embeddings__embedding__max_depth": [2, 5, 10, 15],
     }
     # Ensure the feature_combiner is fitted before transformation
-    #pipeline.named_steps["feature_combiner"].fit(X_tabular, y) # ~2000
+    # pipeline.named_steps["feature_combiner"].fit(X_tabular, y) # ~2000
 
     # Manually transform data for debugging
-    #X_transformed = pipeline.named_steps["feature_combiner"].transform(X_tabular)
+    # X_transformed = pipeline.named_steps["feature_combiner"].transform(X_tabular)
 
     # Print out shape of final transformed features
-   # print(f"Final Feature Set Shape (Before Model Training): {X_transformed.shape}") # ~2000
+    # print(f"Final Feature Set Shape (Before Model Training): {X_transformed.shape}") # ~2000
 
     # Check if any feature vector is empty
-   # if X_transformed.shape[1] == 0:
-   #     raise ValueError("🚨 FeatureUnion is not concatenating features correctly! Feature set is empty.")
+    # if X_transformed.shape[1] == 0:
+    #     raise ValueError("🚨 FeatureUnion is not concatenating features correctly! Feature set is empty.")
 
     search = GridSearchCV(
         estimator=pipeline,
@@ -1133,25 +1134,25 @@ def concat_lr_rte(dataset_name, X_tabular,
 
 
 # läuft
-def concat_txt_tab_hgbc(dataset_name, emb_method,
-                        X_tabular, y, text_feature_column_name,
-                        nominal_features, feature_extractor,
-                        raw_text_summaries, n_repeats,
-                        n_components, n_splits=3):
+def concat_txt_hgbc(dataset_name, emb_method,
+                    X_tabular, y, text_feature_column_name,
+                    nominal_features, feature_extractor,
+                    raw_text_summaries, n_repeats,
+                    n_components, n_splits=3):
     dataset = dataset_name
     ml_method = "HistGradientBoostingClassifier"
     emb_method = emb_method
     concatenation = "yes"
     metrics_per_fold = []
     skf = StratifiedKFold(n_splits=n_splits,
-                                  shuffle=True,
-                                  random_state=42)
+                          shuffle=True,
+                          random_state=42)
 
     # add text as a new column
     text_features = [text_feature_column_name]
     X_tabular[text_feature_column_name] = raw_text_summaries
 
-    # separate numerical features
+    # separate non-text features
     non_text_columns = list(set(X_tabular.columns) -
                             set(text_features))
 
@@ -1160,14 +1161,23 @@ def concat_txt_tab_hgbc(dataset_name, emb_method,
 
     categorical_indices = [X_tabular.columns.get_loc(col) for col in nominal_features]
 
+    pca_components = f"PCA ({n_components} components)" \
+        if n_components else "none"
+
+    pipeline_text_steps = [
+        ("embedding_aggregator", EmbeddingAggregator(feature_extractor)),
+        ("debug_text", DebugTransformer(name="Text Debug"))
+    ]
+    if n_components:
+        pipeline_text_steps.append(("numerical_scaler", StandardScaler()))
+        pipeline_text_steps.append(("pca", PCA(n_components=n_components)))
+    else:
+        pipeline_text_steps.append(("numerical_scaler", MinMaxScaler()))
+
     search = GridSearchCV(
         estimator=Pipeline([
             ("transformer", ColumnTransformer([
-                ("text", Pipeline([
-                    ("embedding_aggregator", EmbeddingAggregator(feature_extractor)),
-                    ("debug_text", DebugTransformer(name="Text Debug")),
-                    ("numerical_scaler", MinMaxScaler())
-                ]), text_features)
+                ("text", Pipeline(pipeline_text_steps), text_features)
             ])),
             ("classifier", HistGradientBoostingClassifier(categorical_features=categorical_indices))
         ]),
@@ -1180,11 +1190,11 @@ def concat_txt_tab_hgbc(dataset_name, emb_method,
             ]
         },
         scoring="neg_log_loss",
-        cv=RepeatedStratifiedKFold(n_splits=3)
+        cv=RepeatedStratifiedKFold(n_splits=3, n_repeats=n_repeats)
     )
 
     for train_index, test_index in skf.split(X_tabular, y):
-        # Todo: Problem, if text feature is not in the split then the split have very different sizes
+        # Todo: Problem, if text feature is not in the split then the split have very different sizes: is it a problem?
         X_train, X_test = X_tabular.iloc[train_index], X_tabular.iloc[test_index]
         y_train, y_test = y[train_index], y[test_index]
 
@@ -1246,7 +1256,7 @@ def concat_txt_tab_hgbc(dataset_name, emb_method,
     print(f"Test metrics per fold: {metrics_per_fold}")
 
     return (dataset, ml_method, emb_method, concatenation, best_params,
-            n_components, train_metrics, metrics_per_fold)
+            pca_components, train_metrics, metrics_per_fold)
 
 
 def concat_hgbc_rte(dataset_name, X_tabular, y, nominal_features,
@@ -1260,34 +1270,33 @@ def concat_hgbc_rte(dataset_name, X_tabular, y, nominal_features,
 
     # preprocess table data as usual
     pipeline_table = ("raw", ColumnTransformer([
-                         ("nominal", Pipeline([
-                             ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
-                             ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
-                         ]), nominal_features),
-                         ("numerical", Pipeline([
-                             ("numerical_imputer", IterativeImputer(max_iter=5)) # todo: 30))
-                         ]), list(set(X_tabular.columns.values) - set(nominal_features))),
-                     ], remainder="passthrough"))
+        ("nominal", Pipeline([
+            ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
+            ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
+        ]), nominal_features),
+        ("numerical", Pipeline([
+            ("numerical_imputer", IterativeImputer(max_iter=5))  # todo: 30))
+        ]), list(set(X_tabular.columns.values) - set(nominal_features))),
+    ], remainder="passthrough"))
 
     pipeline_rte = ("embeddings", Pipeline([
-                ("transformer", ColumnTransformer([
-                    ("nominal", Pipeline([
-                        ("debug_nominal_emb", DebugTransformer(name="Nominal Debug Emb after")),
-                        ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
-                        ("nominal_encoder", OneHotEncoder(handle_unknown="ignore")),
-                        ("debug_nominal_emb_after", DebugTransformer(name="Nominal Debug Emb"))
-                    ]), nominal_features),
-                    ("numerical", Pipeline([
-                        ("debug_numerical", DebugTransformer(name="Numerical Debug Emb")),
-                        ("numerical_imputer", IterativeImputer(max_iter=5)), # todo: 30))
-                        ("debug_numerical_after", DebugTransformer(name="Numerical Debug Emb after"))
-                    ]), list(set(X_tabular.columns.values) - set(nominal_features))),
-                ], remainder="passthrough")),
-                ("debug_embedding", DebugTransformer(name="Embedding Debug")),
-                ("embedding", RandomTreesEmbedding(random_state=42)),
-                ("debug_embedding_after", DebugTransformer(name="Embedding Debug after"))
-            ]))
-
+        ("transformer", ColumnTransformer([
+            ("nominal", Pipeline([
+                ("debug_nominal_emb", DebugTransformer(name="Nominal Debug Emb after")),
+                ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
+                ("nominal_encoder", OneHotEncoder(handle_unknown="ignore")),
+                ("debug_nominal_emb_after", DebugTransformer(name="Nominal Debug Emb"))
+            ]), nominal_features),
+            ("numerical", Pipeline([
+                ("debug_numerical", DebugTransformer(name="Numerical Debug Emb")),
+                ("numerical_imputer", IterativeImputer(max_iter=5)),  # todo: 30))
+                ("debug_numerical_after", DebugTransformer(name="Numerical Debug Emb after"))
+            ]), list(set(X_tabular.columns.values) - set(nominal_features))),
+        ], remainder="passthrough")),
+        ("debug_embedding", DebugTransformer(name="Embedding Debug")),
+        ("embedding", RandomTreesEmbedding(random_state=42)),
+        ("debug_embedding_after", DebugTransformer(name="Embedding Debug after"))
+    ]))
 
     param_grid = {
         "hist_gb__min_samples_leaf": [5, 10, 15, 20],
@@ -1301,7 +1310,8 @@ def concat_hgbc_rte(dataset_name, X_tabular, y, nominal_features,
                 pipeline_rte
             ])),
             ("embedding", RandomTreesEmbedding()),
-            ("hist_gb", HistGradientBoostingClassifier(categorical_features=nominal_features)) # todo: brauche ich es hier?
+            ("hist_gb", HistGradientBoostingClassifier(categorical_features=nominal_features))
+            # todo: brauche ich es hier?
         ]),
         param_grid=param_grid,
         scoring="neg_log_loss",
@@ -1490,7 +1500,6 @@ class DebugTransformer(TransformerMixin, BaseEstimator):
             X_transformed = X
         print(f"{self.name}: Output shape {X_transformed.shape}")  # Print after transformation
         return X_transformed
-
 
     # Todo: Comb. mit RTE  | + but test
     # Todo! Wird der beste Aggregierung ausgegeben? | + run both & evaluate
