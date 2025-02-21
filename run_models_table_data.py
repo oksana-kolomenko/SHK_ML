@@ -1,10 +1,8 @@
 import numpy as np
 
 from csv_saver import save_results_to_csv
-from helpers import (load_labels, load_features, lr_rt_emb, hgbc,
-                     logistic_regression, hgbc_rte)  # load_summaries, logistic_regression,
-# hgbc, hgbc_ran_tree_emb)
-from bar_plotting import plot_bar_chart
+from helpers import (load_labels, load_features, hgbc_rte,) #lr_rte, hgbc, logistic_regression, )  # load_summaries, logistic_regression,
+
 from values import Dataset
 
 
@@ -114,13 +112,13 @@ def run_models_on_table_data():
         metrics=hgbc_test_scores,
         output_file="hgbc_test.csv")"""
     #hgbc_rte(X=X_posttrauma, y=y_posttrauma, nominal_features=nominal_features)
-    """    # 4. random trees embedding + hgbc
+    # 4. random trees embedding + hgbc
     (hgbc_rt_dataset, hgbc_rt_ml_method, hgbc_rt_emb_method, hgbc_rte_conc, hgbc_rte_best_params,
-     hgbc_rt_emb_train_score, hgbc_rt_emb_test_scores) = \
+    hgbc_rt_emb_train_score, hgbc_rt_emb_test_scores) = \
         hgbc_rte(dataset_name=posttrauma_dataset, X=X_posttrauma, y=y_posttrauma,
                  nominal_features=nominal_features)
 
-    save_results_to_csv(
+    """ save_results_to_csv(
         dataset_name=hgbc_rt_dataset,
         ml_method=hgbc_rt_ml_method,
         emb_method=hgbc_rt_emb_method,

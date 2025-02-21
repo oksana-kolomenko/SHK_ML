@@ -6,7 +6,7 @@ from sklearn.base import TransformerMixin, BaseEstimator
 
 from sklearn.compose import ColumnTransformer
 from sklearn.decomposition import PCA
-from sklearn.ensemble import RandomTreesEmbedding, HistGradientBoostingClassifier
+from sklearn.ensemble import RandomTreesEmbedding, HistGradientBoostingClassifier, GradientBoostingClassifier
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer, SimpleImputer
 from sklearn.linear_model import LogisticRegression
@@ -296,10 +296,10 @@ def logistic_regression(dataset_name, X, y, nominal_features, n_repeats=10, n_sp
     return dataset, ml_method, emb_method, best_params, pca_components, train_metrics, metrics_per_fold
 
 
-def lr_rt_emb(dataset_name, X, y, nominal_features, n_splits=3, n_components=None):
+def lr_rte(dataset_name, X, y, nominal_features, n_splits=3, n_components=None):
     dataset = dataset_name
     ml_method = "logistic regression"
-    emb_method = "random tree embedding"
+    emb_method = "RTE"
     concatenation = "no"
     pca_components = f"PCA ({n_components} components)" if n_components else "none"
     metrics_per_fold = []
@@ -677,43 +677,12 @@ def hgbc_ran_tree_emb(dataset_name, X, y, nominal_features, n_splits=3):
 """
 
 
-def hgbc_rte(X, y, nominal_features, n_splits=3):  # todo
+def hgbc_rte(dataset_name, X, y, nominal_features, n_splits=3):  # todo
     hgbc_rt_emb_test_scores = []
+    ml_method = "HGBC"
+    emb_method = "RTE"
+    conc = "no"
     skf = StratifiedKFold(n_splits=n_splits)
-    categorical_feature_indices = [X.columns.get_loc(col) for col in nominal_features]
-    for train_index, test_index in skf.split(X, y):
-        X_train, X_test = X.iloc[train_index], X.iloc[test_index]
-        y_train, y_test = y[train_index], y[test_index]
-
-        search = GridSearchCV(
-            estimator=Pipeline([
-                ("transformer", ColumnTransformer([
-                    ("nominal", Pipeline([
-                        ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
-                        ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
-                    ]), nominal_features),
-                    ("numerical", Pipeline([
-                        ("numerical_imputer", IterativeImputer(max_iter=5))  # 30))
-                    ]), list(set(X_train.columns.values) - set(nominal_features))),
-                ])),
-                ("embedding", RandomTreesEmbedding()),
-                ("hist_gb", HistGradientBoostingClassifier())  # categorical_features=categorical_feature_indices))
-            ]),
-            param_grid={
-                # extended hyperparameter search for better embedding
-                "embedding__n_estimators": [10],  # , 100, 1000],
-                "embedding__max_depth": [2, 5],  # , 10, 15],
-                "hist_gb__min_samples_leaf": [5]  # , 10, 15, 20]
-            },
-            scoring="neg_log_loss",
-            cv=3
-        )
-        print(f"X_train size before: {X_train.shape}")
-        X_train_xr = X_train.to_xarray()
-        print(f"X_train size after: {X_train_xr}")
-        print(f"y_train size: {len(y_train)}")
-        search.fit(X_train, y_train)
-        hgbc_rt_emb_test_scores.append(roc_auc_score(y_test, search.predict_proba(X_test)[:, 1]))
 
     search = GridSearchCV(
         estimator=Pipeline([
@@ -723,30 +692,39 @@ def hgbc_rte(X, y, nominal_features, n_splits=3):  # todo
                     ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
                 ]), nominal_features),
                 ("numerical", Pipeline([
-                    ("numerical_imputer", IterativeImputer(max_iter=5))  # 30))
-                ]), list(set(X_train.columns.values) - set(nominal_features))),
+                    ("numerical_imputer", IterativeImputer(max_iter=30))
+                ]), list(set(X.columns.values) - set(nominal_features))),
             ])),
-            ("embedding", RandomTreesEmbedding()),
-            ("hist_gb", HistGradientBoostingClassifier(categorical_features=nominal_features))
+            ("embedding", RandomTreesEmbedding(sparse_output=False, random_state=42)),
+            ("hist_gb", HistGradientBoostingClassifier())
             # todo: brauche ich es hier?
         ]),
         param_grid={
-            # extended hyperparameter search for better embedding
-            "embedding__n_estimators": [10],  # , 100, 1000],
-            "embedding__max_depth": [2, 5],  # , 10, 15],
-            "hist_gb__min_samples_leaf": [5]  # , 10, 15, 20]
+            "embedding__n_estimators": [10, 100, 1000],
+            "embedding__max_depth": [2, 5, 10, 15],
+            "hist_gb__min_samples_leaf": [5, 10, 15, 20]
         },
         scoring="neg_log_loss",
-        cv=3
+        cv=RepeatedStratifiedKFold(n_splits=3)
     )
-    search.fit(X.to_xarray(), y)
+
+    for train_index, test_index in skf.split(X, y):
+        X_train, X_test = X.iloc[train_index], X.iloc[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+
+        print(f"X_train size before: {X_train.shape}")
+        print(f"y_train size: {len(y_train)}")
+        search.fit(X_train, y_train)
+        hgbc_rt_emb_test_scores.append(roc_auc_score(y_test, search.predict_proba(X_test)[:, 1]))
+
+    search.fit(X, y)
+    best_params = f"{search.best_params_}"
     hgbc_rt_emb_train_score = roc_auc_score(y, search.predict_proba(X)[:, 1])
-    print(f"embedding size: {len(search.best_estimator_.named_steps['classifier'].coef_[0])}")
-    print(f"best hyperparameters: {search.best_params_}")
+    print(f"best hyperparameters: {best_params}")
     print(f"lr_ran_tree_emb_train_score: {hgbc_rt_emb_train_score}")
     print(f"lr_ran_tree_emb_test_scores: {hgbc_rt_emb_test_scores}")
 
-    return hgbc_rt_emb_train_score, hgbc_rt_emb_test_scores
+    return dataset_name, ml_method, emb_method, conc, best_params, hgbc_rt_emb_train_score, hgbc_rt_emb_test_scores
 
 
 def hgbc_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y,
@@ -774,10 +752,10 @@ def hgbc_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y,
     search = GridSearchCV(
         estimator=Pipeline(pipeline_steps),
         param_grid={
-            "hist_gb__min_samples_leaf": [5, 10, 15, 20],
-            "aggregator__method": ["embedding_cls",
-                                   "embedding_mean_with_cls_and_sep",
-                                   "embedding_mean_without_cls_and_sep"]
+            "hist_gb__min_samples_leaf": [5, ], #10, 15, 20],
+            "aggregator__method": ["embedding_cls", ]
+                                   #"embedding_mean_with_cls_and_sep",
+                                   #"embedding_mean_without_cls_and_sep"]
         },
         scoring="neg_log_loss",
         cv=RepeatedStratifiedKFold(n_splits=3, n_repeats=n_repeats)
@@ -988,7 +966,6 @@ def concat_lr_txt_emb(dataset_name, emb_method,
     return dataset, ml_method, emb_method, concatenation, best_params, pca_components, train_metrics, metrics_per_fold
 
 
-# Problem: after RTE there are 40 Features, but when debugging ~ 2000
 def concat_lr_rte(dataset_name, X_tabular,
                   nominal_features, y, n_repeats,
                   imp_max_iter, class_max_iter, pca_n_comp,
@@ -1001,15 +978,16 @@ def concat_lr_rte(dataset_name, X_tabular,
     skf = StratifiedKFold(n_splits=n_splits,
                           shuffle=True,
                           random_state=42)
-
+    pca_transformer = PCA(n_components=pca_n_comp) if pca_n_comp is not None else "passthrough"
     numerical_features = list(set(X_tabular.columns) - set(nominal_features))
 
-    print(f"Nominal Features: {nominal_features}")
-    print(f"Nominal Features len: {len(nominal_features)}")
-    print(f"Numerical Features: {numerical_features}")
-    print(f"Numerical Features len: {len(numerical_features)}")
-    print(f"X_tabular Columns: {list(X_tabular.columns)}")
-    print(f"X_tabular Columns len: {len(list(X_tabular.columns))}")
+    num_pipeline_steps = [
+        ("debug_numerical", DebugTransformer(name="Numerical Debug")),
+        ("numerical_imputer", IterativeImputer(max_iter=imp_max_iter)),
+        ("debug_numerical_after", DebugTransformer(name="Numerical Debug after"))
+    ]
+    if pca_n_comp:
+        num_pipeline_steps.append(("scaler", StandardScaler()))
 
     pipeline = Pipeline([
         ("feature_combiner", FeatureUnion([
@@ -1037,14 +1015,13 @@ def concat_lr_rte(dataset_name, X_tabular,
                         ("nominal_encoder", OrdinalEncoder(handle_unknown="use_encoded_value", unknown_value=-1)),
                         ("debug_nominal_emb_after", DebugTransformer(name="Nominal Debug Emb"))
                     ]), nominal_features),
-                    ("numerical", Pipeline([
-                        ("debug_numerical", DebugTransformer(name="Numerical Debug Emb")),
-                        ("numerical_imputer", IterativeImputer(max_iter=imp_max_iter)),
-                        ("debug_numerical_after", DebugTransformer(name="Numerical Debug Emb after"))
-                    ]), numerical_features),
+                    ("numerical", Pipeline(
+                        steps=num_pipeline_steps
+                    ), numerical_features),
                 ], remainder="passthrough")),
                 ("debug_embedding", DebugTransformer(name="Embedding Debug")),
                 ("embedding", RandomTreesEmbedding(random_state=42)),  # check
+                ("pca", pca_transformer),
                 ("debug_embedding_after", DebugTransformer(name="Embedding Debug after"))
             ]))
         ])),
@@ -1058,18 +1035,6 @@ def concat_lr_rte(dataset_name, X_tabular,
         # todo: mit anderen Parameter (z.B. 100) testen!
         "feature_combiner__embeddings__embedding__max_depth": [2, 5, 10, 15],
     }
-    # Ensure the feature_combiner is fitted before transformation
-    # pipeline.named_steps["feature_combiner"].fit(X_tabular, y) # ~2000
-
-    # Manually transform data for debugging
-    # X_transformed = pipeline.named_steps["feature_combiner"].transform(X_tabular)
-
-    # Print out shape of final transformed features
-    # print(f"Final Feature Set Shape (Before Model Training): {X_transformed.shape}") # ~2000
-
-    # Check if any feature vector is empty
-    # if X_transformed.shape[1] == 0:
-    #     raise ValueError("🚨 FeatureUnion is not concatenating features correctly! Feature set is empty.")
 
     search = GridSearchCV(
         estimator=pipeline,
@@ -1078,20 +1043,15 @@ def concat_lr_rte(dataset_name, X_tabular,
         cv=RepeatedStratifiedKFold(n_splits=3, n_repeats=n_repeats)
     )
 
-    # Cross-Validation
     for train_index, test_index in skf.split(X_tabular, y):
-        # Aufteilen der tabellarischen Daten und Embeddings
         X_tab_train, X_tab_test = X_tabular.iloc[train_index], X_tabular.iloc[test_index]
         y_train, y_test = y[train_index], y[test_index]
 
-        # Fit the model
         search.fit(X_tab_train, y_train)
 
-        # Predictions and probabilities
         y_test_pred = search.predict(X_tab_test)
         y_test_pred_proba = search.predict_proba(X_tab_test)[:, 1]
 
-        # Calculate metrics
         tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
         specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
 
@@ -1106,12 +1066,10 @@ def concat_lr_rte(dataset_name, X_tabular,
             "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
         })
 
-        # Train on the full dataset
     search.fit(X_tabular, y)
     y_train_pred = search.predict(X_tabular)
     y_train_pred_proba = search.predict_proba(X_tabular)[:, 1]
 
-    # Calculate training metrics
     train_metrics = {
         "AUC": roc_auc_score(y, y_train_pred_proba),
         "AP": average_precision_score(y, y_train_pred_proba),
@@ -1225,7 +1183,7 @@ def concat_txt_hgbc(dataset_name, emb_method,
         })
 
     print(f"X_tabular len: {len(X_tabular)}")
-    print(f"Text_features len: {len(text_features)}")  # ist = 1 muss aber 82 sein
+    print(f"Text_features len: {len(text_features)}")  # muss 82 sein
     print(f"y len: {len(y)}")
     assert len(X_tabular) == len(y), "Mismatch in training data sizes"
 
@@ -1259,76 +1217,72 @@ def concat_txt_hgbc(dataset_name, emb_method,
             pca_components, train_metrics, metrics_per_fold)
 
 
-def concat_hgbc_rte(dataset_name, X_tabular, y, nominal_features,
-                    pca_n_comp, n_splits=3):
+def concat_hgbc_rte(dataset_name, X_tabular, y, nominal_features, n_repeats,
+                    pca_n_comp, imp_max_iter, n_splits=3):
     dataset = dataset_name
     ml_method = "HistGradientBoosting"
     emb_method = "Random Trees Embedding"
     concatenation = "yes"
     metrics_per_fold = []
     skf = StratifiedKFold(n_splits=n_splits)
+    categorical_indices = [X_tabular.columns.get_loc(col) for col in nominal_features]
+    numerical_features = list(set(X_tabular.columns) - set(nominal_features))
+    pca_transformer = PCA(n_components=pca_n_comp) if pca_n_comp is not None else "passthrough"
 
-    # preprocess table data as usual
-    pipeline_table = ("raw", ColumnTransformer([
-        ("nominal", Pipeline([
-            ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
-            ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
-        ]), nominal_features),
-        ("numerical", Pipeline([
-            ("numerical_imputer", IterativeImputer(max_iter=5))  # todo: 30))
-        ]), list(set(X_tabular.columns.values) - set(nominal_features))),
-    ], remainder="passthrough"))
+    print(f"type of X: {type(X_tabular)}")
+    num_pipeline_steps = [
+        ("debug_numerical", DebugTransformer(name="Numerical Debug")),
+        ("numerical_imputer", IterativeImputer(max_iter=imp_max_iter)),
+        ("debug_numerical_after", DebugTransformer(name="Numerical Debug after"))
+    ]
+    if pca_n_comp:
+        num_pipeline_steps.append(("scaler", StandardScaler()))
 
-    pipeline_rte = ("embeddings", Pipeline([
-        ("transformer", ColumnTransformer([
-            ("nominal", Pipeline([
-                ("debug_nominal_emb", DebugTransformer(name="Nominal Debug Emb after")),
-                ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
-                ("nominal_encoder", OneHotEncoder(handle_unknown="ignore")),
-                ("debug_nominal_emb_after", DebugTransformer(name="Nominal Debug Emb"))
-            ]), nominal_features),
-            ("numerical", Pipeline([
-                ("debug_numerical", DebugTransformer(name="Numerical Debug Emb")),
-                ("numerical_imputer", IterativeImputer(max_iter=5)),  # todo: 30))
-                ("debug_numerical_after", DebugTransformer(name="Numerical Debug Emb after"))
-            ]), list(set(X_tabular.columns.values) - set(nominal_features))),
-        ], remainder="passthrough")),
-        ("debug_embedding", DebugTransformer(name="Embedding Debug")),
-        ("embedding", RandomTreesEmbedding(random_state=42)),
-        ("debug_embedding_after", DebugTransformer(name="Embedding Debug after"))
-    ]))
+    pipeline = Pipeline([
+        ("feature_combiner", FeatureUnion([
+            ("raw", "passthrough"),
+            ("embeddings", Pipeline([
+                ("transformer", ColumnTransformer([
+                    ("nominal", Pipeline([
+                        ("debug_nominal", DebugTransformer(name="Nominal Debug")),
+                        ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
+                        ("nominal_encoder", OneHotEncoder(handle_unknown="ignore")),
+                        ("debug_nominal_after", DebugTransformer(name="Nominal Debug after"))
+                    ]), nominal_features),
+                    ("numerical", Pipeline(
+                        steps=num_pipeline_steps
+                    ), numerical_features)
+                ])),
+                ("debug_embedding", DebugTransformer(name="Embedding Debug")),
+                ("embedding", RandomTreesEmbedding(sparse_output=False, random_state=42)),
+                ("pca", pca_transformer),
+                ("debug_embedding_after", DebugTransformer(name="Embedding Debug after"))
+            ]))
+        ])),
+        ("debug_final", DebugTransformer(name="Final Feature Set")),
+        ("hist_gb", HistGradientBoostingClassifier(random_state=42, categorical_features=categorical_indices))
+    ])
 
     param_grid = {
         "hist_gb__min_samples_leaf": [5, 10, 15, 20],
-        "embedding__n_estimators": [10, 100, 1000],
-        "embedding__max_depth": [2, 5, 10, 15],
+        "feature_combiner__embeddings__embedding__n_estimators": [10, 100, 1000],
+        "feature_combiner__embeddings__embedding__max_depth": [2, 5, 10, 15],
     }
     search = GridSearchCV(
-        estimator=Pipeline([
-            ("feature_combiner", FeatureUnion([
-                pipeline_table,
-                pipeline_rte
-            ])),
-            ("embedding", RandomTreesEmbedding()),
-            ("hist_gb", HistGradientBoostingClassifier(categorical_features=nominal_features))
-            # todo: brauche ich es hier?
-        ]),
+        estimator=pipeline,
         param_grid=param_grid,
         scoring="neg_log_loss",
-        cv=RepeatedStratifiedKFold(n_splits=3)
+        cv=RepeatedStratifiedKFold(n_splits=3, n_repeats=n_repeats)
     )
 
     for train_index, test_index in skf.split(X_tabular, y):
-        # Train-Test-Split für tabellarische und Embedding-Daten
         X_train, X_test = X_tabular.iloc[train_index], X_tabular.iloc[test_index]
         y_train, y_test = y[train_index], y[test_index]
 
-        # todo big TODO
         search.fit(X_train, y_train)
         y_test_pred = search.predict(X_test)
         y_test_pred_proba = search.predict_proba(X_test)[:, 1]
 
-        # Calculate metrics
         tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
         specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
 
@@ -1343,7 +1297,6 @@ def concat_hgbc_rte(dataset_name, X_tabular, y, nominal_features,
             "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
         })
 
-    # Gesamtes Training auf allen Daten
     search.fit(X_tabular, y)
     y_pred = search.predict(X_tabular)
     y_train_pred_proba = search.predict_proba(X_tabular)[:, 1]

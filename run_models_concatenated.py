@@ -198,8 +198,6 @@ def run_text_concatenated():
         )"""
 
 
-
-# RTE geht gerade nicht, unklar was ist da mit Dimensionen der Embeddings
 def run_rte_concatenated():
     posttrauma_dataset = Dataset.POSTTRAUMA.value
 
@@ -223,15 +221,15 @@ def run_rte_concatenated():
     ]
 
     (lr_rt_conc_dataset, lr_rt_conc_ml_method, lr_rt_conc_emb_method,
-     lr_rt_conc_yesno, lr_rt_best_params, lr_rt_pca_components,
-     lr_rt_conc_train_score, lr_rt_conc_test_scores) = concat_lr_rte(
+    lr_rt_conc_yesno, lr_rt_best_params, lr_rt_pca_components,
+    lr_rt_conc_train_score, lr_rt_conc_test_scores) = concat_lr_rte(
         dataset_name=posttrauma_dataset,
         X_tabular=X_posttrauma, y=y_posttrauma,
-        nominal_features=nominal_features, pca_n_comp=35,
+        nominal_features=nominal_features, pca_n_comp=None,
         n_repeats=10, class_max_iter=10000, imp_max_iter=50)
 
     # todo:save train&test results as list and iterate
-    save_results_to_csv(output_file=f"LR_rte_conc_pca_train.csv",
+    save_results_to_csv(output_file=f"LR_rte_conc_train.csv",
                         dataset_name=lr_rt_conc_dataset,
                         ml_method=lr_rt_conc_ml_method,
                         emb_method=lr_rt_conc_emb_method,
@@ -241,7 +239,7 @@ def run_rte_concatenated():
                         metrics=lr_rt_conc_train_score,
                         is_train=True)
 
-    save_results_to_csv(output_file=f"LR_rte_conc_pca_test.csv",
+    save_results_to_csv(output_file=f"LR_rte_conc_test.csv",
                         dataset_name=lr_rt_conc_dataset,
                         ml_method=lr_rt_conc_ml_method,
                         emb_method=lr_rt_conc_emb_method,
@@ -257,17 +255,20 @@ def run_rte_concatenated():
     hgbc_conc_rte_train_score, hgbc_conc_rte_test_scores) = concat_hgbc_rte(dataset_name=posttrauma_dataset,
                                                                             X_tabular=X_posttrauma,
                                                                             nominal_features=nominal_features,
-                                                                            y=y_posttrauma, pca_n_comp=35)
+                                                                            n_repeats=10,
+                                                                            y=y_posttrauma,
+                                                                            imp_max_iter=50,
+                                                                            pca_n_comp=None)
 
     save_results_to_csv(output_file=f"HGBC_conc_rte_train.csv", dataset_name=hgbc_conc_rte_dataset,
-                        ml_method=hgbc_conc_rte_ml_method, emb_method=hgbc_conc_rte_emb_method, concatenation=hgbc_rte_conc,
-                        metrics=hgbc_conc_rte_train_score, best_params=hgbc_rte_best_params,
-                        pca_n_comp=hgbc_rte_pca_n_comp, is_train=True)
+                        ml_method=hgbc_conc_rte_ml_method, emb_method=hgbc_conc_rte_emb_method,
+                        concatenation=hgbc_rte_conc, metrics=hgbc_conc_rte_train_score,
+                        best_params=hgbc_rte_best_params, pca_n_comp=hgbc_rte_pca_n_comp, is_train=True)
 
     save_results_to_csv(output_file=f"HGBC_conc_rte_test.csv", dataset_name=hgbc_conc_rte_dataset,
-                        ml_method=hgbc_conc_rte_ml_method, emb_method=hgbc_conc_rte_emb_method, concatenation=hgbc_rte_conc,
-                        metrics=hgbc_conc_rte_test_scores, best_params=hgbc_rte_best_params,
-                        pca_n_comp=hgbc_rte_pca_n_comp, is_train=False)
+                        ml_method=hgbc_conc_rte_ml_method, emb_method=hgbc_conc_rte_emb_method,
+                        concatenation=hgbc_rte_conc, metrics=hgbc_conc_rte_test_scores,
+                        best_params=hgbc_rte_best_params, pca_n_comp=hgbc_rte_pca_n_comp, is_train=False)
     """
     labels_local = [
         f"LogReg Table + RTE",
