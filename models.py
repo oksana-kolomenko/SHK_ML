@@ -18,16 +18,6 @@ def create_feature_extractor(model_name):
     print("Finished creating a feature extractor.")
     return pipeline("feature-extraction", model=model, tokenizer=tokenizer, device=device)
 
-    """device = 0 if torch.cuda.is_available() else "cpu" # sonst None
-
-    try:
-        # Initialize the pipeline with dynamic device
-        return pipeline("feature-extraction", model=model, tokenizer=tokenizer, device=device)
-    except Exception as e:
-        print(f"Error initializing pipeline with GPU. Falling back to CPU. Error: {e}")
-        # Fallback to CPU if GPU fails
-        return pipeline("feature-extraction", model=model, tokenizer=tokenizer, device="cpu")
-    """
 
 
 def create_gte_feature_extractor(model_name):
@@ -35,7 +25,6 @@ def create_gte_feature_extractor(model_name):
     Creates a feature extractor for a given model,
     Compatible with: some GTE (Alibaba), tbc.
     """
-    # Load tokenizer and model
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModel.from_pretrained(model_name, trust_remote_code=True)
 
@@ -60,16 +49,11 @@ def create_gte_feature_extractor(model_name):
             return_tensors="pt"
         )
 
-        # Move input tensors to the same device as the model
         batch_dict = {key: val.to(device) for key, val in batch_dict.items()}
 
-        # Compute embeddings
         with torch.no_grad():
             outputs = model(**batch_dict)
 
-        # The format of create_feature_extractor expects the embeddings as a list of lists,
-        # where each list is the sequence of token embeddings for a single input text.
-        # Return embeddings for each text as a list of token embeddings
         return outputs.last_hidden_state.cpu().numpy().tolist()
 
     return extract_features
