@@ -39,7 +39,6 @@ class EmbeddingAggregator(BaseEstimator, TransformerMixin):
             embedding = self.feature_extractor(summary)[0][:]
             #print(f"Embedding cls_and_sep shape: {np.array(embedding).shape}")
             embeddings.append(np.mean(embedding, axis=0))
-            # todo: add for others
             # print("Embedding cls_and_sep dimension" + np.mean(embedding, axis=0))
         print(len(embeddings))
         return np.array(embeddings)
