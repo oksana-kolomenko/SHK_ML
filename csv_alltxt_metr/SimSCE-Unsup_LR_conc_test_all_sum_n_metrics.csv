@@ -1,0 +1,4 @@
+Fold,Dataset,ML Method,Embedding Method,Concatenation,Best Parameters,PCA n_components,AUC,AP,Sensitivity,Specificity,Precision,F1,Balanced Accuracy
+0,posttrauma,Logistic Regression,SimSCE-Unsup,yes,"{'classifier__C': 2, 'transformer__text__embedding_aggregator__method': 'embedding_cls'}",none,0.6462585034013606,0.8175461354114508,1.0,0.14285714285714285,0.7777777777777778,0.5625,0.5714285714285714
+1,posttrauma,Logistic Regression,SimSCE-Unsup,yes,"{'classifier__C': 2, 'transformer__text__embedding_aggregator__method': 'embedding_cls'}",none,0.6984126984126984,0.8949926794811707,0.9047619047619048,0.3333333333333333,0.8260869565217391,0.6318181818181818,0.6190476190476191
+2,posttrauma,Logistic Regression,SimSCE-Unsup,yes,"{'classifier__C': 2, 'transformer__text__embedding_aggregator__method': 'embedding_cls'}",none,0.6984126984126985,0.8950521770070643,0.6666666666666666,0.5,0.8235294117647058,0.555921052631579,0.5833333333333333

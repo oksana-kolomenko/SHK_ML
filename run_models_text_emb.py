@@ -3,20 +3,7 @@ import numpy as np
 from csv_saver import save_results_to_csv
 from helpers import load_labels, load_summaries, lr_txt_emb, hgbc_txt_emb
 from bar_plotting import plot_bar_chart
-from models import feature_extractor_bert
-
-""", feature_extractor_simsce_sup, feature_extractor_simsce_unsup, \
-    feature_extractor_e5_small_v2, feature_extractor_e5_base_v2, feature_extractor_e5_large_v2, \
-    feature_extractor_gist_small_embedding_v0, feature_extractor_gist_embedding_v0, \
-    feature_extractor_gist_large_embedding_v0, feature_extractor_medembed_small_v0_1, \
-    feature_extractor_medembed_base_v0_1"""
-
-# from models import feature_extractor_simsce
-# from models import feature_extractor_bge
-
-"""from models import feature_extractor_clinical, feature_extractor_electra_small, feature_extractor_electra_large, \
-    feature_extractor_electra_base, \
-    feature_extractor_bert"""
+from models import feature_extractor_clinical
 from values import Dataset
 
 
@@ -29,15 +16,15 @@ def run_models_on_txt_emb():
 
     feature_extractors = {
         # Clinical Longformer (done)
-        # "Clinical-Longformer": feature_extractor_clinical,
+        "Clinical-Longformer": feature_extractor_clinical,
 
         # BERT (half done)
-        "BERT": feature_extractor_bert,
+        # "BERT": feature_extractor_bert,
 
         # ELECTRA (half done)
-        # "ELECTRA-Small": feature_extractor_electra_small,
-        # "ELECTRA-Base": feature_extractor_electra_base,
-        # "ELECTRA-Large": feature_extractor_electra_large,
+         #"ELECTRA-Small": feature_extractor_electra_small,
+         #"ELECTRA-Base": feature_extractor_electra_base,
+        #"ELECTRA-Large": feature_extractor_electra_large,
 
         # SimSCE (done)
         #"SimSCE-Sup": feature_extractor_simsce_sup,
@@ -49,9 +36,9 @@ def run_models_on_txt_emb():
         #"E5-Large-V2": feature_extractor_e5_large_v2,
 
         # BGE Models (done)
-        # "BGE-Small-EN-v1.5": feature_extractor_bge_small_en_v1_5,
-        # "BGE-Base-EN-v1.5": feature_extractor_bge_base_en_v1_5,
-        # "BGE-Large-EN-v1.5": feature_extractor_bge_large_en_v1_5,
+        #"BGE-Small-EN-v1.5": feature_extractor_bge_small_en_v1_5,
+        #"BGE-Base-EN-v1.5": feature_extractor_bge_base_en_v1_5,
+        #"BGE-Large-EN-v1.5": feature_extractor_bge_large_en_v1_5,
 
         # GIST Models
 
@@ -70,11 +57,11 @@ def run_models_on_txt_emb():
         # "Potion-Base-8M": feature_extractor_potion_base_8M,
 
         # GTE Models
-        # "GTE-Small": feature_extractor_gte_small,  # (done)
-        # "GTE-Base": feature_extractor_gte_base,  # (done)
-        # "GTE-Base-EN-v1.5": feature_extractor_gte_base_en_v1_5, #(ready)
-        # "GTE-Large": feature_extractor_gte_large,  # (done)
-        # "GTE-Large-EN-v1.5": feature_extractor_gte_large_en_v1_5, # (ready)
+        #"GTE-Small": feature_extractor_gte_small,  # (done)
+        #"GTE-Base": feature_extractor_gte_base,  # (done)
+        #"GTE-Base-EN-v1.5": feature_extractor_gte_base_en_v1_5, #(ready)
+        #"GTE-Large": feature_extractor_gte_large,  # (done)
+        #"GTE-Large-EN-v1.5": feature_extractor_gte_large_en_v1_5, # (ready)
 
         # Stella Model
         # "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5 # (not ready)
@@ -86,7 +73,6 @@ def run_models_on_txt_emb():
     for model_name, feature_extractor in feature_extractors.items():
 
         # Logistic Regression
-
         """(lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_conc, lr_txt_best_params,
          lr_txt_pca_components, lr_txt_train_score, lr_txt_test_scores) = lr_txt_emb(
             dataset_name=posttrauma_dataset, n_components=None, emb_method=model_name,
@@ -108,7 +94,7 @@ def run_models_on_txt_emb():
          hgbc_txt_pca_components, hgbc_txt_train_score, hgbc_txt_test_scores) = hgbc_txt_emb(dataset_name=posttrauma_dataset,
                                                                                              emb_method=model_name,
                                                                                              n_components=None,
-                                                                                             n_repeats=1, # todo
+                                                                                             n_repeats=10,
                                                                                              feature_extractor=feature_extractor,
                                                                                              summaries=patient_summaries,
                                                                                              y=y_posttrauma)

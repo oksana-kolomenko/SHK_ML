@@ -79,8 +79,8 @@ def create_gte_feature_extractor(model_name):
 #feature_extractor_clinical = create_feature_extractor("yikuan8/Clinical-Longformer")
 
 # BERT
-feature_extractor_bert = create_feature_extractor("google-bert/bert-base-cased")
-# feature_extractor_bert = create_feature_extractor("google-bert/distilbert-base-cased")
+#feature_extractor_bert = create_feature_extractor("google-bert/bert-base-uncased")
+#feature_extractor_bert = create_feature_extractor("google-bert/distilbert-base-cased")
 
 # ELECTRA small discriminator
 #feature_extractor_electra_small = create_feature_extractor("google/electra-small-discriminator")
@@ -89,7 +89,7 @@ feature_extractor_bert = create_feature_extractor("google-bert/bert-base-cased")
 #feature_extractor_electra_base = create_feature_extractor("google/electra-base-discriminator")
 
 # ELECTRA large discriminator
-#feature_extractor_electra_large = create_feature_extractor("google/electra-large-discriminator")
+feature_extractor_electra_large = create_feature_extractor("google/electra-large-discriminator")
 
 # SimSCE sup
 #feature_extractor_simsce_sup = create_feature_extractor("princeton-nlp/sup-simcse-bert-base-uncased")
@@ -105,7 +105,7 @@ feature_extractor_bert = create_feature_extractor("google-bert/bert-base-cased")
 #feature_extractor_e5_base_v2 = create_feature_extractor("intfloat/e5-base-v2")
 
 # E5-LARGE-V2
-#feature_extractor_e5_large_v2 = create_feature_extractor("intfloat/e5-large-v2")
+feature_extractor_e5_large_v2 = create_feature_extractor("intfloat/e5-large-v2")
 
 
 #############
@@ -133,17 +133,17 @@ feature_extractor_bert = create_feature_extractor("google-bert/bert-base-cased")
 #feature_extractor_gist_embedding_v0 = create_feature_extractor("avsolatorio/GIST-Embedding-v0") # custom code
 
 # bge-large-en-v1.5
-#feature_extractor_bge_large_en_v1_5 = create_feature_extractor("BAAI/bge-large-en-v1.5")
+feature_extractor_bge_large_en_v1_5 = create_feature_extractor("BAAI/bge-large-en-v1.5")
 
 # GIST-large-Embedding-v0
-#feature_extractor_gist_large_embedding_v0 = create_feature_extractor("avsolatorio/GIST-large-Embedding-v0") # custom code
+feature_extractor_gist_large_embedding_v0 = create_feature_extractor("avsolatorio/GIST-large-Embedding-v0") # custom code
 
 # MedEmbed-small-v0.1
 #feature_extractor_medembed_small_v0_1 = create_feature_extractor("abhinand/MedEmbed-small-v0.1") # custom code
 
 # MedEmbed-base-v0.1
 #feature_extractor_medembed_base_v0_1 = create_feature_extractor("abhinand/MedEmbed-base-v0.1") # custom code
-#
+
 # MedEmbed-large-v0.1
 #feature_extractor_medembed_large_v0_1 = create_feature_extractor("abhinand/MedEmbed-large-v0.1") # custom code
 

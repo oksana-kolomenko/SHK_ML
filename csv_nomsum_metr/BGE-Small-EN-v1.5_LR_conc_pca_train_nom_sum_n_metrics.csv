@@ -1,0 +1,2 @@
+Dataset,ML Method,Embedding Method,Concatenation,Best Parameters,PCA n_components,AUC,AP,Sensitivity,Specificity,Precision,F1,Balanced Accuracy
+posttrauma,Logistic Regression,BGE-Small-EN-v1.5,yes,"{'classifier__C': 2, 'transformer__text__embedding_aggregator__method': 'embedding_mean_without_cls_and_sep'}",PCA (35 components),1.0,1.0,1.0,1.0,1.0,1.0,1.0

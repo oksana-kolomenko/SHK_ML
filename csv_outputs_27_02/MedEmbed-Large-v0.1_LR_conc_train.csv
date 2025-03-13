@@ -1,0 +1,2 @@
+Dataset,ML Method,Embedding Method,Concatenation,Best Parameters,PCA n_components,AUC,AP,Sensitivity,Specificity,Precision,F1,Balanced Accuracy
+posttrauma,Logistic Regression,MedEmbed-Large-v0.1,yes,"{'classifier__C': 2, 'transformer__text__embedding_aggregator__method': 'embedding_cls'}",none,1.0,1.0,1.0,1.0,1.0,1.0,1.0

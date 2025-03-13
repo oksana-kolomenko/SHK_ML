@@ -1,5 +1,4 @@
 from pathlib import Path
-
 import pandas as pd
 
 from categories import GenderBirth, Education, Ethnicity, EmploymentStatus, Smoker, \
@@ -8,31 +7,22 @@ from values import values_and_translations, patient_info_categories, categories,
     Classification
 
 
-# Get the current working directory
-# current_directory = os.getcwd()
-# upper_dir = os.path.dirname(os.getcwd())
-# file_path = os.path.join(os.path.dirname(os.getcwd()), 'X.csv')
-# print(file_path)
-file_path = 'X.csv'
-
-
-tab_data = pd.read_csv(file_path)
 values_and_translations_dict = dict(values_and_translations)
 
 
-def create_patient_summaries():
-    df = tab_data
+def create_patient_summaries(tab_data):
+    df_tab_data = pd.read_csv(tab_data)
     summaries = []  # "We want to predict health risks. "
     patient_number = 0
-    for _, row in df.iterrows():
+    for _, row in df_tab_data.iterrows():
         patient_number += 1
         patient_info_n_values = row.to_dict()
         summary = (f"The following is the data for patient number {patient_number}." +
-                   patient_info(patient_info_n_values))
+                   patient_info(patient_info_n_values, tab_data))
         summaries.append(summary)
     return summaries
 
-def patient_info(patient_info_n_values):
+def patient_info(patient_info_n_values, tab_data):
     patient_info_row = dict(patient_info_n_values)
     patient_info_text = ""
 
@@ -158,7 +148,3 @@ def category_to_word(category_name, value):
                 return item.name
     # This should never happen
     return "Category not found"
-
-
-with open('Summaries.txt', 'w') as file:
-    file.write("\n".join(create_patient_summaries()))

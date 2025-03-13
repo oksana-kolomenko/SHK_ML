@@ -1,0 +1,4 @@
+Fold,Dataset,ML Method,Embedding Method,Concatenation,Best Parameters,PCA n_components,AUC,AP,Sensitivity,Specificity,Precision,F1,Balanced Accuracy
+0,posttrauma,HistGradientBoosting,GIST-Large-Embedding-v0,no,"{'aggregator__method': 'embedding_cls', 'hist_gb__min_samples_leaf': 20}",none,0.43537414965986393,0.7492810326944577,0.7142857142857143,0.0,0.6818181818181818,0.3488372093023256,0.35714285714285715
+1,posttrauma,HistGradientBoosting,GIST-Large-Embedding-v0,no,"{'aggregator__method': 'embedding_cls', 'hist_gb__min_samples_leaf': 20}",none,0.33333333333333337,0.6910599477469659,1.0,0.0,0.7777777777777778,0.4375,0.5
+2,posttrauma,HistGradientBoosting,GIST-Large-Embedding-v0,no,"{'aggregator__method': 'embedding_cls', 'hist_gb__min_samples_leaf': 20}",none,0.5317460317460317,0.8119935343251785,0.9047619047619048,0.16666666666666666,0.7916666666666666,0.5333333333333333,0.5357142857142857

@@ -1,2 +1,0 @@
-Dataset,ML Method,Embedding Method,Concatenation,Best Parameters,PCA n_components,AUC,AP,Sensitivity,Specificity,Precision,F1,Balanced Accuracy
-posttrauma,Logistic Regression,Random Trees Embedding,yes,"{'classifier__C': 2, 'feature_combiner__embeddings__embedding__max_depth': 2, 'feature_combiner__embeddings__embedding__n_estimators': 10}",,0.9465329991645781,0.9839940207508973,0.9523809523809523,0.5789473684210527,0.8823529411764706,0.7913486005089059,0.7656641604010025

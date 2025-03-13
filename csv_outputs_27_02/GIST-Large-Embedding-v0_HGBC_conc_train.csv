@@ -1,0 +1,2 @@
+Dataset,ML Method,Embedding Method,Concatenation,Best Parameters,PCA n_components,AUC,AP,Sensitivity,Specificity,Precision,F1,Balanced Accuracy
+posttrauma,HistGradientBoostingClassifier,GIST-Large-Embedding-v0,yes,"{'classifier__min_samples_leaf': 20, 'transformer__text__embedding_aggregator__method': 'embedding_mean_with_cls_and_sep'}",none,1.0,1.0,1.0,1.0,1.0,1.0,1.0

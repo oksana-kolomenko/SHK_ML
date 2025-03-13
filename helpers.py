@@ -25,7 +25,7 @@ from text_emb_aggregator import EmbeddingAggregator
 
 
 # Load features
-def load_features(file_path="X.csv", delimiter=','):
+def load_features(file_path, delimiter=','):
     data = pd.read_csv(file_path, delimiter=delimiter)
     print(f"features: {data}")
     return data
@@ -38,10 +38,10 @@ def load_labels(file_path="y.csv", delimiter=','):
 
 
 # Load features as text summaries (create if doesn't exist)
-def load_summaries():
-    if not os.path.exists("Summaries.txt"):
-        create_patient_summaries()
-    with open("Summaries.txt", "r") as file:
+def load_summaries(file_name):
+    if not os.path.exists(file_name):
+        print("File not found")
+    with open(file_name, "r") as file:
         summaries_list = [line.strip() for line in file.readlines()]
     return summaries_list
 
@@ -239,7 +239,7 @@ def logistic_regression(dataset_name, X, y, nominal_features, n_repeats=10, n_sp
             ])),
             ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=10000))
         ]),
-        param_grid={"classifier__C": [2, 10, 50, 250]},
+        param_grid={"classifier__C": [2, 10]},
         scoring="neg_log_loss",
         cv=RepeatedStratifiedKFold(n_splits=3, n_repeats=n_repeats)
     )
@@ -331,9 +331,9 @@ def lr_rte(dataset_name, X, y, nominal_features, n_splits=3, n_components=None):
             ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=10000))
         ]),
         param_grid={
-            "embedding__n_estimators": [10, 100, 1000],
-            "embedding__max_depth": [2, 5, 10, 15],
-            "classifier__C": [2, 10, 50, 250]
+            "embedding__n_estimators": [10, 100],
+            "embedding__max_depth": [2, 5],
+            "classifier__C": [2, 10]
         },
         scoring="neg_log_loss",
         cv=RepeatedStratifiedKFold(n_splits=3, random_state=42)
@@ -571,73 +571,49 @@ def hgbc(dataset_name, X, y, nominal_features, n_repeats=10, n_splits=3):
     return dataset, ml_method, emb_method, best_params, train_metrics, metrics_per_fold
 
 
-"""
-def hgbc_ran_tree_emb(dataset_name, X, y, nominal_features, n_splits=3):
-    dataset = dataset_name
-    ml_method = "HistGradientBoosting"
-    emb_method = "random tree embedding"
-    concatenation = "no"
+def hgbc_rte(dataset_name, X, y, nominal_features, n_splits=3):
+    ml_method = "HGBC"
+    emb_method = "RTE"
+    conc = "no"
     metrics_per_fold = []
     skf = StratifiedKFold(n_splits=n_splits,
                           shuffle=True,
                           random_state=42)
-    categorical_feature_indices = [X.columns.get_loc(col) for col in nominal_features]
-    dense_transformer = FunctionTransformer(lambda x: x.toarray() if hasattr(x, "toarray") else x)
 
     search = GridSearchCV(
         estimator=Pipeline([
             ("transformer", ColumnTransformer([
                 ("nominal", Pipeline([
                     ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
-                    ("nominal_encoder", OneHotEncoder(handle_unknown="ignore", sparse_output=False))
+                    ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
                 ]), nominal_features),
                 ("numerical", Pipeline([
-                    ("numerical_imputer", IterativeImputer(max_iter=5)) # todo only test!
-                    # TODO: skalieren (nein)
+                    ("numerical_imputer", IterativeImputer(max_iter=30))
                 ]), list(set(X.columns.values) - set(nominal_features))),
-            ] )),
-            #("to_dense", dense_transformer),
-            ("embedding", RandomTreesEmbedding(random_state=42)),
-            ("hist_gb", HistGradientBoostingClassifier(categorical_features=categorical_feature_indices))
+            ])),
+            ("embedding", RandomTreesEmbedding(sparse_output=False, random_state=42)),
+            ("hist_gb", HistGradientBoostingClassifier())
         ]),
         param_grid={
-            "embedding__n_estimators": [10], #, 100, 1000],todo only test!
-            "embedding__max_depth": [2, 5], #, 10, 15],todo only test!
-            "hist_gb__min_samples_leaf": [5] #, 10, 15, 20]todo only test!
+            "embedding__n_estimators": [10, 100],
+            "embedding__max_depth": [2, 5],
+            "hist_gb__min_samples_leaf": [5, 10, 15, 20]
         },
         scoring="neg_log_loss",
-        # cv=RepeatedStratifiedKFold(n_splits=3, random_state=42)
-        cv=StratifiedKFold(n_splits=3, shuffle=True, random_state=42) #todo only test!
+        cv=RepeatedStratifiedKFold(n_splits=3)
     )
 
-    # Metrics for each fold
     for train_index, test_index in skf.split(X, y):
         X_train, X_test = X.iloc[train_index], X.iloc[test_index]
         y_train, y_test = y[train_index], y[test_index]
 
-        # Get the transformer pipeline from GridSearchCV before fitting
-        transformer = search.estimator.named_steps['transformer']
-
-        # Transform X_train and X_test BEFORE calling `search.fit()`
-        X_train_transformed = transformer.fit_transform(X_train)
-        X_test_transformed = transformer.transform(X_test)
-
-        # Convert sparse matrices to dense if necessary
-        if hasattr(X_train_transformed, "toarray"):
-            X_train_transformed = X_train_transformed.toarray()
-        if hasattr(X_test_transformed, "toarray"):
-            X_test_transformed = X_test_transformed.toarray()
-
-        # Now fit GridSearchCV with transformed data
-        search.fit(X_train_transformed, y_train)
-
-        # Fit the model for each fold
-        # search.fit(X_train, y_train)
+        print(f"X_train size before: {X_train.shape}")
+        print(f"y_train size: {len(y_train)}")
+        search.fit(X_train, y_train)
 
         y_test_pred = search.predict(X_test)
         y_test_pred_proba = search.predict_proba(X_test)[:, 1]
 
-        # Calculate metrics
         tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
         specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
 
@@ -652,7 +628,6 @@ def hgbc_ran_tree_emb(dataset_name, X, y, nominal_features, n_splits=3):
             "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
         })
 
-    # Train on the full dataset
     search.fit(X, y)
     y_train_pred = search.predict(X)
     y_train_pred_proba = search.predict_proba(X)[:, 1]
@@ -669,62 +644,12 @@ def hgbc_ran_tree_emb(dataset_name, X, y, nominal_features, n_splits=3):
         "Balanced Accuracy": balanced_accuracy_score(y, y_train_pred)
     }
     best_params = f"{search.best_params_}"
-    print(f"Best hyperparameters: {search.best_params_}")
-    print(f"Train metrics: {train_metrics}")
-    print(f"Test metrics per fold: {metrics_per_fold}")
 
-    return dataset, ml_method, emb_method, concatenation, best_params, train_metrics, metrics_per_fold
-"""
-
-
-def hgbc_rte(dataset_name, X, y, nominal_features, n_splits=3):  # todo
-    hgbc_rt_emb_test_scores = []
-    ml_method = "HGBC"
-    emb_method = "RTE"
-    conc = "no"
-    skf = StratifiedKFold(n_splits=n_splits)
-
-    search = GridSearchCV(
-        estimator=Pipeline([
-            ("transformer", ColumnTransformer([
-                ("nominal", Pipeline([
-                    ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
-                    ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
-                ]), nominal_features),
-                ("numerical", Pipeline([
-                    ("numerical_imputer", IterativeImputer(max_iter=30))
-                ]), list(set(X.columns.values) - set(nominal_features))),
-            ])),
-            ("embedding", RandomTreesEmbedding(sparse_output=False, random_state=42)),
-            ("hist_gb", HistGradientBoostingClassifier())
-            # todo: brauche ich es hier?
-        ]),
-        param_grid={
-            "embedding__n_estimators": [10, 100, 1000],
-            "embedding__max_depth": [2, 5, 10, 15],
-            "hist_gb__min_samples_leaf": [5, 10, 15, 20]
-        },
-        scoring="neg_log_loss",
-        cv=RepeatedStratifiedKFold(n_splits=3)
-    )
-
-    for train_index, test_index in skf.split(X, y):
-        X_train, X_test = X.iloc[train_index], X.iloc[test_index]
-        y_train, y_test = y[train_index], y[test_index]
-
-        print(f"X_train size before: {X_train.shape}")
-        print(f"y_train size: {len(y_train)}")
-        search.fit(X_train, y_train)
-        hgbc_rt_emb_test_scores.append(roc_auc_score(y_test, search.predict_proba(X_test)[:, 1]))
-
-    search.fit(X, y)
-    best_params = f"{search.best_params_}"
     hgbc_rt_emb_train_score = roc_auc_score(y, search.predict_proba(X)[:, 1])
     print(f"best hyperparameters: {best_params}")
     print(f"lr_ran_tree_emb_train_score: {hgbc_rt_emb_train_score}")
-    print(f"lr_ran_tree_emb_test_scores: {hgbc_rt_emb_test_scores}")
 
-    return dataset_name, ml_method, emb_method, conc, best_params, hgbc_rt_emb_train_score, hgbc_rt_emb_test_scores
+    return dataset_name, ml_method, emb_method, conc, best_params, train_metrics, metrics_per_fold
 
 
 def hgbc_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y,
@@ -752,10 +677,10 @@ def hgbc_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y,
     search = GridSearchCV(
         estimator=Pipeline(pipeline_steps),
         param_grid={
-            "hist_gb__min_samples_leaf": [5, ], #10, 15, 20],
-            "aggregator__method": ["embedding_cls", ]
-                                   #"embedding_mean_with_cls_and_sep",
-                                   #"embedding_mean_without_cls_and_sep"]
+            "hist_gb__min_samples_leaf": [5, 10, 15, 20],
+            "aggregator__method": ["embedding_cls",
+                                   "embedding_mean_with_cls_and_sep",
+                                   "embedding_mean_without_cls_and_sep"]
         },
         scoring="neg_log_loss",
         cv=RepeatedStratifiedKFold(n_splits=3, n_repeats=n_repeats)
@@ -859,7 +784,7 @@ def concat_lr_txt_emb(dataset_name, emb_method,
     numerical_features = list(set(X_tabular.columns) -
                               set(nominal_features) -
                               set(text_features))
-
+    print(f"Len numerical features: {len(numerical_features)}")  # muss 41X82
     print(f"Numerical features identified: {numerical_features}")
     print(f"Setting up the pipeline at {time.strftime('%H:%M:%S', time.localtime(time.time()))}")
     print(f"Tabelle Größe {X_tabular.shape}")  # muss 41X82
@@ -877,13 +802,27 @@ def concat_lr_txt_emb(dataset_name, emb_method,
     else:
         pipeline_text_steps.append(("numerical_scaler", MinMaxScaler()))
 
+    def get_nominal_transformer(nominal_features_in_dataset):
+        if nominal_features_in_dataset:
+            return Pipeline([
+                ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
+                ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
+            ])
+        else:
+            return 'passthrough'  # Skip processing for nominal features if they don't exist
+
+    """
+    old, non-generic implementation
+    ("nominal", Pipeline([
+        ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
+        ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
+    ]), nominal_features),
+    """
     search = GridSearchCV(
         estimator=Pipeline([
             ("transformer", ColumnTransformer([
-                ("nominal", Pipeline([
-                    ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
-                    ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
-                ]), nominal_features),
+                # todo: only when X_tabular is metrical! ("nominal", get_nominal_transformer([col for col in nominal_features if col in X_tabular.columns]),
+                #  nominal_features),
                 ("numerical", Pipeline([
                     ("numerical_imputer", IterativeImputer(max_iter=imp_max_iter)),
                     ("numerical_scaler", MinMaxScaler())
@@ -903,7 +842,7 @@ def concat_lr_txt_emb(dataset_name, emb_method,
             ]
         },
         scoring="neg_log_loss",
-        cv=RepeatedStratifiedKFold(n_splits=3)
+        cv=RepeatedStratifiedKFold(n_splits=3, n_repeats=n_repeats)
     )
 
     for train_index, test_index in skf.split(X_tabular, y):
@@ -978,7 +917,7 @@ def concat_lr_rte(dataset_name, X_tabular,
     skf = StratifiedKFold(n_splits=n_splits,
                           shuffle=True,
                           random_state=42)
-    pca_transformer = PCA(n_components=pca_n_comp) if pca_n_comp is not None else "passthrough"
+    pca_transformer = PCA(n_components=pca_n_comp, svd_solver='auto') if pca_n_comp is not None else "passthrough"
     numerical_features = list(set(X_tabular.columns) - set(nominal_features))
 
     num_pipeline_steps = [
@@ -1029,11 +968,11 @@ def concat_lr_rte(dataset_name, X_tabular,
         ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=class_max_iter))
     ])
 
+    # reduced because of small data
     param_grid = {
-        "classifier__C": [2, 10, 50, 250],
-        "feature_combiner__embeddings__embedding__n_estimators": [10, 100, 1000],
-        # todo: mit anderen Parameter (z.B. 100) testen!
-        "feature_combiner__embeddings__embedding__max_depth": [2, 5, 10, 15],
+        "classifier__C": [2, 10],
+        "feature_combiner__embeddings__embedding__n_estimators": [10, 100],
+        "feature_combiner__embeddings__embedding__max_depth": [2, 5],
     }
 
     search = GridSearchCV(
@@ -1116,8 +1055,9 @@ def concat_txt_hgbc(dataset_name, emb_method,
 
     print(f"All columns length: {X_tabular.shape}")
     print(f"Non-text columns length: {len(X_tabular[non_text_columns])}")
+    print(f"Non-text columns shape: {X_tabular[non_text_columns].shape}")
 
-    categorical_indices = [X_tabular.columns.get_loc(col) for col in nominal_features]
+    #categorical_indices = [X_tabular.columns.get_loc(col) for col in nominal_features]
 
     pca_components = f"PCA ({n_components} components)" \
         if n_components else "none"
@@ -1137,7 +1077,7 @@ def concat_txt_hgbc(dataset_name, emb_method,
             ("transformer", ColumnTransformer([
                 ("text", Pipeline(pipeline_text_steps), text_features)
             ])),
-            ("classifier", HistGradientBoostingClassifier(categorical_features=categorical_indices))
+            ("classifier", HistGradientBoostingClassifier()) # not needed when only metrical features categorical_features=categorical_indices))
         ]),
         param_grid={
             "classifier__min_samples_leaf": [5, 10, 15, 20],
@@ -1227,7 +1167,7 @@ def concat_hgbc_rte(dataset_name, X_tabular, y, nominal_features, n_repeats,
     skf = StratifiedKFold(n_splits=n_splits)
     categorical_indices = [X_tabular.columns.get_loc(col) for col in nominal_features]
     numerical_features = list(set(X_tabular.columns) - set(nominal_features))
-    pca_transformer = PCA(n_components=pca_n_comp) if pca_n_comp is not None else "passthrough"
+    pca_transformer = PCA(n_components=pca_n_comp, svd_solver='auto') if pca_n_comp is not None else "passthrough"
 
     print(f"type of X: {type(X_tabular)}")
     num_pipeline_steps = [
@@ -1265,8 +1205,8 @@ def concat_hgbc_rte(dataset_name, X_tabular, y, nominal_features, n_repeats,
 
     param_grid = {
         "hist_gb__min_samples_leaf": [5, 10, 15, 20],
-        "feature_combiner__embeddings__embedding__n_estimators": [10, 100, 1000],
-        "feature_combiner__embeddings__embedding__max_depth": [2, 5, 10, 15],
+        "feature_combiner__embeddings__embedding__n_estimators": [10, 100], # decreased for small data
+        "feature_combiner__embeddings__embedding__max_depth": [2, 5] # decreased for small data
     }
     search = GridSearchCV(
         estimator=pipeline,

@@ -1,2 +1,0 @@
-Dataset,ML Method,Embedding Method,Concatenation,Best Parameters,PCA n_components,AUC,AP,Sensitivity,Specificity,Precision,F1,Balanced Accuracy
-posttrauma,HistGradientBoosting,Random Trees Embedding,yes,"{'feature_combiner__embeddings__embedding__max_depth': 2, 'feature_combiner__embeddings__embedding__n_estimators': 10, 'hist_gb__min_samples_leaf': 5}",,1.0,1.0,1.0,1.0,1.0,1.0,1.0

@@ -1,0 +1,4 @@
+Fold,Dataset,ML Method,Embedding Method,Concatenation,Best Parameters,PCA n_components,AUC,AP,Sensitivity,Specificity,Precision,F1,Balanced Accuracy
+0,posttrauma,Logistic Regression,GIST-Small-Embedding-v0,yes,"{'classifier__C': 2, 'transformer__text__embedding_aggregator__method': 'embedding_cls'}",none,0.5578231292517007,0.839321742209941,0.9047619047619048,0.14285714285714285,0.76,0.5130434782608696,0.5238095238095238
+1,posttrauma,Logistic Regression,GIST-Small-Embedding-v0,yes,"{'classifier__C': 2, 'transformer__text__embedding_aggregator__method': 'embedding_cls'}",none,0.5873015873015874,0.8609549390851914,0.8571428571428571,0.0,0.75,0.4,0.42857142857142855
+2,posttrauma,Logistic Regression,GIST-Small-Embedding-v0,yes,"{'classifier__C': 2, 'transformer__text__embedding_aggregator__method': 'embedding_cls'}",none,0.6111111111111112,0.841248335589768,0.9047619047619048,0.3333333333333333,0.8260869565217391,0.6318181818181818,0.6190476190476191

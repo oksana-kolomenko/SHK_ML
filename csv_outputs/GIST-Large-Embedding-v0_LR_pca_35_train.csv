@@ -1,0 +1,2 @@
+Dataset,ML Method,Embedding Method,Concatenation,Best Parameters,PCA n_components,AUC,AP,Sensitivity,Specificity,Precision,F1,Balanced Accuracy
+posttrauma,logistic regression,GIST-Large-Embedding-v0,no,"{'aggregator__method': 'embedding_mean_without_cls_and_sep', 'classifier__C': 2}",PCA (35 components),0.9933166248955723,0.9979361599993231,0.9841269841269841,0.8947368421052632,0.96875,0.9476484358374122,0.9394319131161236
