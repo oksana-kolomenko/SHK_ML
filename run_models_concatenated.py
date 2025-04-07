@@ -36,13 +36,18 @@ def run_text_concatenated():
     posttrauma_dataset = Dataset.POSTTRAUMA.value
 
     # load features and labels
+    # Conc 1 Paket
     all_summaries = "Summaries.txt"
-    #nominal_summaries = "Summaries_nominal.txt"
-
-    # patient_summaries = load_summaries(all_summaries)
-    #nominal_patient_summaries = load_summaries(nominal_summaries)
     X_posttrauma_all = load_features(file_path="X.csv")
-    #X_posttrauma_metrics = load_features(file_path="X_posttrauma_metrics.csv")
+
+    # Conc 2 Paket
+    # all_summaries = "Summaries.txt"
+    # X_posttrauma_metrics = load_features(file_path="X_posttrauma_metrics.csv")
+
+    # Conc 3 Paket
+    # nominal_summaries = "Summaries_nominal.txt"
+    # X_posttrauma_metrics = load_features(file_path="X_posttrauma_metrics.csv")
+
     y_posttrauma = load_labels()
 
     nominal_features = [
@@ -67,9 +72,8 @@ def run_text_concatenated():
         """
         returns a pipeline 
         """
-        #"all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
-        # Stella Model
-        "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,  # (not ready)
+        # Stella en 400m v5
+        "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
 
         # All MiniLM L6 v2
         #"all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
@@ -178,14 +182,14 @@ def run_text_concatenated():
                             metrics=hgbc_conc_test_scores,
                             is_train=False)
 
-        """(lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,
+        (lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,
          lr_conc_yesno, lr_best_params, lr_pca_components, lr_conc_train_score,
          lr_conc_test_scores) = concat_lr_txt_emb(
             dataset_name=posttrauma_dataset,
             emb_method=model_name,
             feature_extractor=feature_extractor,
-            raw_text_summaries=nominal_patient_summaries,
-            X_tabular=X_posttrauma_metrics, y=y_posttrauma,
+            raw_text_summaries=all_summaries,
+            X_tabular=X_posttrauma_all, y=y_posttrauma,
             nominal_features=nominal_features,
             text_feature_column_name=text_feature,
             imp_max_iter=30, class_max_iter=10000,
@@ -209,7 +213,7 @@ def run_text_concatenated():
                             best_params=lr_best_params,
                             pca_n_comp=lr_pca_components,
                             metrics=lr_conc_test_scores,
-                            is_train=False)"""
+                            is_train=False)
 
         """
         # Bar chart geht gerade nicht, da train/test scores jetzt verschiedene Metriken enthalten

@@ -502,10 +502,10 @@ def hgbc_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y,
     search = GridSearchCV(
         estimator=Pipeline(pipeline_steps),
         param_grid={
-            "hist_gb__min_samples_leaf": [5], #, 10, 15, 20],
-            "aggregator__method": ["embedding_cls"]#,
-                                   #"embedding_mean_with_cls_and_sep",
-                                  # "embedding_mean_without_cls_and_sep"]
+            "hist_gb__min_samples_leaf": [5, 10, 15, 20],
+            "aggregator__method": ["embedding_cls",
+                                   "embedding_mean_with_cls_and_sep",
+                                   "embedding_mean_without_cls_and_sep"]
         },
         scoring="neg_log_loss",
         cv=RepeatedStratifiedKFold(n_splits=3, n_repeats=n_repeats)
