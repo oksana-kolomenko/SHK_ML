@@ -5,8 +5,7 @@ from csv_saver import save_results_to_csv
 from helpers import (load_labels, load_features, load_summaries,
                      concat_lr_rte, concat_hgbc_rte, concat_txt_hgbc,
                      concat_lr_txt_emb)
-from models import (feature_extractor_electra_large, feature_extractor_gist_large_embedding_v0,
-                    feature_extractor_bge_large_en_v1_5, feature_extractor_e5_large_v2, )
+from models import (feature_extractor_clinical, feature_extractor_stella_en_400M_v5)
 
 """from models import feature_extractor_medembed_small_v0_1, feature_extractor_medembed_base_v0_1, \
     feature_extractor_gte_small, feature_extractor_gte_base, feature_extractor_gte_base_en_v1_5, \
@@ -43,7 +42,7 @@ def run_text_concatenated():
     # patient_summaries = load_summaries(all_summaries)
     #nominal_patient_summaries = load_summaries(nominal_summaries)
     X_posttrauma_all = load_features(file_path="X.csv")
-    X_posttrauma_metrics = load_features(file_path="X_posttrauma_metrics.csv")
+    #X_posttrauma_metrics = load_features(file_path="X_posttrauma_metrics.csv")
     y_posttrauma = load_labels()
 
     nominal_features = [
@@ -65,6 +64,30 @@ def run_text_concatenated():
     ]
 
     feature_extractors = {
+        """
+        returns a pipeline 
+        """
+        #"all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
+        # Stella Model
+        "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,  # (not ready)
+
+        # All MiniLM L6 v2
+        #"all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
+
+        # GTR T5 Base
+        #"GTR_T5_Base": feature_extractor_gtr_t5_base,
+
+        # Sentence T5 Base
+        #"sentence_t5_base": feature_extractor_sentence_t5_base,
+
+        # modernbert-embed-base
+        #"modernbert_embed_base": feature_extractor_mbert_embed_base,
+
+        # GTE modernbert base
+        #"gte_modernbert_base": feature_extractor_gte_mbert_base,
+
+        # Ember v1
+        #"ember_v1": feature_extractor_ember_v1
         # Clinical Longformer
         #"Clinical-Longformer": feature_extractor_clinical,
 
@@ -74,7 +97,7 @@ def run_text_concatenated():
         # ELECTRA (half done)
         #"ELECTRA-Small": feature_extractor_electra_small,
         #"ELECTRA-Base": feature_extractor_electra_base,
-        "ELECTRA-Large": feature_extractor_electra_large,
+        #"ELECTRA-Large": feature_extractor_electra_large,
 
         # SimSCE (done)
         #"SimSCE-Sup": feature_extractor_simsce_sup,
@@ -83,17 +106,17 @@ def run_text_concatenated():
         # E5 Models
         #"E5-Small-V2": feature_extractor_e5_small_v2,
         #"E5-Base-V2": feature_extractor_e5_base_v2,
-        "E5-Large-V2": feature_extractor_e5_large_v2,
+        #"E5-Large-V2": feature_extractor_e5_large_v2,
 
         # BGE Models (done)
         #"BGE-Small-EN-v1.5": feature_extractor_bge_small_en_v1_5,
         #"BGE-Base-EN-v1.5": feature_extractor_bge_base_en_v1_5,
-        "BGE-Large-EN-v1.5": feature_extractor_bge_large_en_v1_5,
+        #"BGE-Large-EN-v1.5": feature_extractor_bge_large_en_v1_5,
 
         # GIST Models
         #"GIST-Small-Embedding-v0": feature_extractor_gist_small_embedding_v0,
         #"GIST-Embedding-v0": feature_extractor_gist_embedding_v0,
-        "GIST-Large-Embedding-v0": feature_extractor_gist_large_embedding_v0,
+        #"GIST-Large-Embedding-v0": feature_extractor_gist_large_embedding_v0,
 
         # MedEmbed Models (problem)
         #"MedEmbed-Small-v0.1": feature_extractor_medembed_small_v0_1,  # (problem)"""
@@ -119,6 +142,7 @@ def run_text_concatenated():
 
     # Calculate results for each model
     for model_name, feature_extractor in feature_extractors.items():
+        print("Begin conc methods")
         # HGBC TXT Concatenation
         (hgbc_conc_dataset, hgbc_conc_ml_method, hgbc_conc_emb_method,
          hgbc_conc_yesno, hgbc_best_params, hgbc_pca_components, hgbc_conc_train_score,
@@ -127,10 +151,11 @@ def run_text_concatenated():
             emb_method=model_name,
             feature_extractor=feature_extractor,
             raw_text_summaries=all_summaries,
-            X_tabular=X_posttrauma_metrics, y=y_posttrauma,
+            X_tabular=X_posttrauma_all, y=y_posttrauma,
             nominal_features=nominal_features,
             text_feature_column_name=text_feature,
-            n_repeats=10,
+            #n_repeats=10,
+            n_repeats=1,
             n_components=None)
 
         save_results_to_csv(output_file=f"{model_name}_HGBC_conc_train_all_sum_n_metrics.csv",

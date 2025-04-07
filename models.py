@@ -1,8 +1,9 @@
 from transformers import AutoTokenizer, AutoModel, pipeline
+from sentence_transformers import SentenceTransformer
 import torch
 
 
-def create_feature_extractor(model_name):
+def create_gen_feature_extractor(model_name):
     """
     Creates a feature extractor pipeline for a given model.
     Compatible with: CL, Bert, Electra, SimSce, BGE, some GTE(thenlper), tbc
@@ -18,6 +19,22 @@ def create_feature_extractor(model_name):
     print("Finished creating a feature extractor.")
     return pipeline("feature-extraction", model=model, tokenizer=tokenizer, device=device)
 
+
+def create_stella_feature_extractor(model_name):
+    """
+    Creates a feature extractor pipeline for a given model.
+    Compatible with: CL, Bert, Electra, SimSce, BGE, some GTE(thenlper), tbc
+    """
+    print(f"Starting to create a feature extractor{model_name}.")
+    device = 0 if torch.cuda.is_available() else -1
+    device_name = "GPU" if device == 0 else "CPU"
+    print(f"Selected device: {device_name}")
+
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = SentenceTransformer(model_name, trust_remote_code=True).to("cuda:0" if device == 0 else "cpu")
+
+    print("Finished creating a feature extractor.")
+    return model
 
 
 def create_gte_feature_extractor(model_name):
@@ -60,11 +77,10 @@ def create_gte_feature_extractor(model_name):
 
 
 # Clinical Longformer
-#feature_extractor_clinical = create_feature_extractor("yikuan8/Clinical-Longformer")
+feature_extractor_clinical = create_gen_feature_extractor("yikuan8/Clinical-Longformer")
 
 # BERT
 #feature_extractor_bert = create_feature_extractor("google-bert/bert-base-uncased")
-#feature_extractor_bert = create_feature_extractor("google-bert/distilbert-base-cased")
 
 # ELECTRA small discriminator
 #feature_extractor_electra_small = create_feature_extractor("google/electra-small-discriminator")
@@ -73,7 +89,7 @@ def create_gte_feature_extractor(model_name):
 #feature_extractor_electra_base = create_feature_extractor("google/electra-base-discriminator")
 
 # ELECTRA large discriminator
-feature_extractor_electra_large = create_feature_extractor("google/electra-large-discriminator")
+#feature_extractor_electra_large = create_feature_extractor("google/electra-large-discriminator")
 
 # SimSCE sup
 #feature_extractor_simsce_sup = create_feature_extractor("princeton-nlp/sup-simcse-bert-base-uncased")
@@ -89,7 +105,7 @@ feature_extractor_electra_large = create_feature_extractor("google/electra-large
 #feature_extractor_e5_base_v2 = create_feature_extractor("intfloat/e5-base-v2")
 
 # E5-LARGE-V2
-feature_extractor_e5_large_v2 = create_feature_extractor("intfloat/e5-large-v2")
+#feature_extractor_e5_large_v2 = create_feature_extractor("intfloat/e5-large-v2")
 
 
 #############
@@ -117,10 +133,10 @@ feature_extractor_e5_large_v2 = create_feature_extractor("intfloat/e5-large-v2")
 #feature_extractor_gist_embedding_v0 = create_feature_extractor("avsolatorio/GIST-Embedding-v0") # custom code
 
 # bge-large-en-v1.5
-feature_extractor_bge_large_en_v1_5 = create_feature_extractor("BAAI/bge-large-en-v1.5")
+#feature_extractor_bge_large_en_v1_5 = create_feature_extractor("BAAI/bge-large-en-v1.5")
 
 # GIST-large-Embedding-v0
-feature_extractor_gist_large_embedding_v0 = create_feature_extractor("avsolatorio/GIST-large-Embedding-v0") # custom code
+#feature_extractor_gist_large_embedding_v0 = create_feature_extractor("avsolatorio/GIST-large-Embedding-v0") # custom code
 
 # MedEmbed-small-v0.1
 #feature_extractor_medembed_small_v0_1 = create_feature_extractor("abhinand/MedEmbed-small-v0.1") # custom code
@@ -151,3 +167,28 @@ feature_extractor_gist_large_embedding_v0 = create_feature_extractor("avsolatori
 
 # stella_en_400M_v5 (SotA)
 # feature_extractor_stella_en_400M_v5 = create_feature_extractor("dunzhang/stella_en_400M_v5")  # [CLS], [SEP] # custom code
+
+#########
+## NEW ##
+#########
+
+# All MiniLM L6 v2
+#feature_extractor_all_minilm_l6_v2 = create_feature_extractor('sentence-transformers/all-MiniLM-L6-v2')
+
+# GTR T5 Base
+#feature_extractor_gtr_t5_base = create_feature_extractor('sentence-transformers/gtr-t5-base')
+
+# Sentence T5 Base
+#feature_extractor_sentence_t5_base = create_feature_extractor('sentence-transformers/sentence-t5-base')
+
+# modernbert-embed-base
+#feature_extractor_mbert_embed_base = create_feature_extractor('nomic-ai/modernbert-embed-base')
+
+# GTE modernbert base
+#feature_extractor_gte_mbert_base = create_feature_extractor('Qwen/QwQ-32B')
+
+# Ember v1
+#feature_extractor_ember_v1 = create_feature_extractor('llmrails/ember-v1')
+
+# Stella en 400m v5
+feature_extractor_stella_en_400M_v5 = create_stella_feature_extractor('dunzhang/stella_en_400M_v5')

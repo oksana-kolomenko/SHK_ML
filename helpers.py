@@ -478,6 +478,7 @@ def hgbc_rte(dataset_name, X, y, nominal_features, n_splits=3):
 
 def hgbc_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y,
                  n_components, n_repeats, n_splits=3):
+    print(f"Started: hgbc_txt_emb with {feature_extractor}")
     dataset = dataset_name
     ml_method = "HistGradientBoosting"
     emb_method = emb_method
@@ -501,10 +502,10 @@ def hgbc_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y,
     search = GridSearchCV(
         estimator=Pipeline(pipeline_steps),
         param_grid={
-            "hist_gb__min_samples_leaf": [5, 10, 15, 20],
-            "aggregator__method": ["embedding_cls",
-                                   "embedding_mean_with_cls_and_sep",
-                                   "embedding_mean_without_cls_and_sep"]
+            "hist_gb__min_samples_leaf": [5], #, 10, 15, 20],
+            "aggregator__method": ["embedding_cls"]#,
+                                   #"embedding_mean_with_cls_and_sep",
+                                  # "embedding_mean_without_cls_and_sep"]
         },
         scoring="neg_log_loss",
         cv=RepeatedStratifiedKFold(n_splits=3, n_repeats=n_repeats)
@@ -892,11 +893,11 @@ def concat_txt_hgbc(dataset_name, emb_method,
             ("classifier", HistGradientBoostingClassifier())
         ]),
         param_grid={
-            "classifier__min_samples_leaf": [5, 10, 15, 20],
+            "classifier__min_samples_leaf": [5], #, 10, 15, 20],
             "transformer__text__embedding_aggregator__method": [
                 "embedding_cls",
-                "embedding_mean_with_cls_and_sep",
-                "embedding_mean_without_cls_and_sep"
+                #"embedding_mean_with_cls_and_sep",
+                #"embedding_mean_without_cls_and_sep"
             ]
         },
         scoring="neg_log_loss",

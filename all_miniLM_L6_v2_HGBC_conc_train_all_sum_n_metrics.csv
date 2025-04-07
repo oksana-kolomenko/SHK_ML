@@ -1,0 +1,2 @@
+Dataset,ML Method,Embedding Method,Concatenation,Best Parameters,PCA n_components,AUC,AP,Sensitivity,Specificity,Precision,F1,Balanced Accuracy
+posttrauma,HistGradientBoostingClassifier,all_miniLM_L6_v2,yes,"{'classifier__min_samples_leaf': 5, 'transformer__text__embedding_aggregator__method': 'embedding_cls'}",none,0.5,0.7682926829268293,1.0,0.0,0.7682926829268293,0.43448275862068964,0.5
