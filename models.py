@@ -29,8 +29,9 @@ def create_stella_feature_extractor(model_name):
     device_name = "GPU" if device == 0 else "CPU"
     print(f"Selected device: {device_name}")
 
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModel.from_pretrained(model_name, trust_remote_code=True).to("cuda:0" if device == 0 else "cpu")
+    tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+    model = AutoModel.from_pretrained(model_name, trust_remote_code=True)
+    model = model.to("cuda")
 
     print("Finished creating a feature extractor.")
     return pipeline("feature-extraction", model=model, tokenizer=tokenizer, device=0)
