@@ -31,10 +31,10 @@ def create_stella_feature_extractor(model_name):
     print(f"Selected device: {device_name}")
 
     tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = SentenceTransformer(model_name, trust_remote_code=True).to("cuda:0" if device == 0 else "cpu")
+    model = AutoModel.from_pretrained(model_name, trust_remote_code=True).to("cuda:0" if device == 0 else "cpu")
 
     print("Finished creating a feature extractor.")
-    return model
+    return pipeline("feature-extraction", model=model, tokenizer=tokenizer, device=0)
 
 
 def create_gte_feature_extractor(model_name):
