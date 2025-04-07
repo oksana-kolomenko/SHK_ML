@@ -14,7 +14,7 @@ if __name__ == '__main__':
     #patient_summaries = load_summaries()
     #print(len(patient_summaries))
     #run_models_on_txt_emb()
-    run_pca_txt_emb()
+    #run_pca_txt_emb()
     run_text_concatenated()
     #run_pca_rte()
     #run_models_on_table_data()
