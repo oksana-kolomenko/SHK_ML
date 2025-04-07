@@ -73,7 +73,7 @@ def run_text_concatenated():
         returns a pipeline 
         """
         # Stella en 400m v5
-        "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
+        #"Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
 
         # All MiniLM L6 v2
         #"all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
@@ -93,7 +93,7 @@ def run_text_concatenated():
         # Ember v1
         #"ember_v1": feature_extractor_ember_v1
         # Clinical Longformer
-        #"Clinical-Longformer": feature_extractor_clinical,
+        "Clinical-Longformer": feature_extractor_clinical,
 
         # BERT (half done)
         #"BERT-Base": feature_extractor_bert,
