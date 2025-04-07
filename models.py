@@ -1,5 +1,4 @@
 from transformers import AutoTokenizer, AutoModel, pipeline
-from sentence_transformers import SentenceTransformer
 import torch
 
 
