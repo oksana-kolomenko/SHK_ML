@@ -26,7 +26,7 @@ def run_pca_txt_emb():
 
     # load features and labels
     # Conc 1 Paket
-    all_summaries = "Summaries.txt"
+    all_summaries = load_summaries("Summaries.txt")
     X_posttrauma_all = load_features(file_path="X.csv")
 
     # Conc 2 Paket

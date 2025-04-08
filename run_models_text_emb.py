@@ -11,8 +11,7 @@ def run_models_on_txt_emb():
     posttrauma_dataset = Dataset.POSTTRAUMA.value
 
     # load features and labels
-    all_summaries = "Summaries.txt"
-
+    all_summaries = load_summaries("Summaries.txt")
     y_posttrauma = load_labels()
     print('Starting to create FE')
     feature_extractors = {
@@ -86,7 +85,7 @@ def run_models_on_txt_emb():
     }
 
     ###### TEXT EMBEDDINGS ######
-
+    print(f"len summaries (run mod): {all_summaries}")
     # Calculate results for each model
     for model_name, feature_extractor in feature_extractors.items():
         print("Started For-Loop.")
