@@ -186,7 +186,7 @@ def run_pca_txt_emb():
             n_components=35, n_repeats=10)
 
         # todo:save train&test results as list and iterate
-        save_results_to_csv(output_file=f"{model_name}_LR_conc_pca_train_nom_sum_n_metrics.csv",
+        save_results_to_csv(output_file=f"{model_name}_LR_conc_pca_train_all_sum_all_metrics.csv",
                             dataset_name=lr_conc_dataset,
                             ml_method=lr_conc_ml_method,
                             emb_method=lr_conc_emb_method,
@@ -196,7 +196,7 @@ def run_pca_txt_emb():
                             metrics=lr_conc_train_score,
                             is_train=True)
 
-        save_results_to_csv(output_file=f"{model_name}_LR_conc_pca_test_nom_sum_n_metrics.csv",
+        save_results_to_csv(output_file=f"{model_name}_LR_conc_pca_test_all_sum_all_metrics.csv",
                             dataset_name=lr_conc_dataset,
                             ml_method=lr_conc_ml_method,
                             emb_method=lr_conc_emb_method,
@@ -220,7 +220,7 @@ def run_pca_txt_emb():
             text_feature_column_name=text_feature,
             n_components=35, n_repeats=10)
 
-        save_results_to_csv(output_file=f"{model_name}_HGBC_conc_pca_train_nom_sum_n_metrics.csv",
+        save_results_to_csv(output_file=f"{model_name}_HGBC_conc_pca_train_all_sum_all_metrics.csv",
                             dataset_name=concat_hgbc_dataset,
                             ml_method=concat_hgbc_ml_method,
                             emb_method=concat_hgbc_emb_method,
@@ -230,7 +230,7 @@ def run_pca_txt_emb():
                             metrics=hgbc_conc_train_score,
                             is_train=True)
 
-        save_results_to_csv(output_file=f"{model_name}_HGBC_conc_pca_test_nom_sum_n_metrics.csv",
+        save_results_to_csv(output_file=f"{model_name}_HGBC_conc_pca_test_all_sum_all_metrics.csv",
                             dataset_name=concat_hgbc_dataset,
                             ml_method=concat_hgbc_ml_method,
                             emb_method=concat_hgbc_emb_method,

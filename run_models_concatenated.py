@@ -162,7 +162,7 @@ def run_text_concatenated():
             n_repeats=1,
             n_components=None)
 
-        save_results_to_csv(output_file=f"{model_name}_HGBC_conc_train_all_sum_n_metrics.csv",
+        save_results_to_csv(output_file=f"{model_name}_HGBC_conc_train_all_sum_all_metrics.csv",
                             dataset_name=hgbc_conc_dataset,
                             ml_method=hgbc_conc_ml_method,
                             emb_method=hgbc_conc_emb_method,
@@ -172,7 +172,7 @@ def run_text_concatenated():
                             metrics=hgbc_conc_train_score,
                             is_train=True)
 
-        save_results_to_csv(output_file=f"{model_name}_HGBC_conc_test_all_sum_n_metrics.csv",
+        save_results_to_csv(output_file=f"{model_name}_HGBC_conc_test_all_sum_all_metrics.csv",
                             dataset_name=hgbc_conc_dataset,
                             ml_method=hgbc_conc_ml_method,
                             emb_method=hgbc_conc_emb_method,
@@ -195,7 +195,7 @@ def run_text_concatenated():
             imp_max_iter=30, class_max_iter=10000,
             n_components=None, n_repeats=10)
 
-        save_results_to_csv(output_file=f"{model_name}_LR_conc_train_nom_sum_n_metrics.csv",
+        save_results_to_csv(output_file=f"{model_name}_LR_conc_train_all_sum_all_metrics.csv",
                             dataset_name=lr_conc_dataset,
                             ml_method=lr_conc_ml_method,
                             emb_method=lr_conc_emb_method,
@@ -205,7 +205,7 @@ def run_text_concatenated():
                             metrics=lr_conc_train_score,
                             is_train=True)
 
-        save_results_to_csv(output_file=f"{model_name}_LR_conc_test_nom_sum_n_metrics.csv",
+        save_results_to_csv(output_file=f"{model_name}_LR_conc_test_all_sum_all_metrics.csv",
                             dataset_name=lr_conc_dataset,
                             ml_method=lr_conc_ml_method,
                             emb_method=lr_conc_emb_method,
