@@ -5,7 +5,7 @@ from csv_saver import save_results_to_csv
 from helpers import (load_labels, load_features, load_summaries,
                      concat_lr_rte, concat_hgbc_rte, concat_txt_hgbc,
                      concat_lr_txt_emb)
-from models import (feature_extractor_clinical, feature_extractor_stella_en_400M_v5)
+from models import (feature_extractor_clinical, feature_extractor_stella_en_400M_v5, feature_extractor_all_minilm_l6_v2)
 
 """from models import feature_extractor_medembed_small_v0_1, feature_extractor_medembed_base_v0_1, \
     feature_extractor_gte_small, feature_extractor_gte_base, feature_extractor_gte_base_en_v1_5, \
@@ -76,7 +76,7 @@ def run_text_concatenated():
         #"Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
 
         # All MiniLM L6 v2
-        #"all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
+        "all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
 
         # GTR T5 Base
         #"GTR_T5_Base": feature_extractor_gtr_t5_base,
@@ -93,7 +93,7 @@ def run_text_concatenated():
         # Ember v1
         #"ember_v1": feature_extractor_ember_v1
         # Clinical Longformer
-        "Clinical-Longformer": feature_extractor_clinical,
+        #"Clinical-Longformer": feature_extractor_clinical,
 
         # BERT (half done)
         #"BERT-Base": feature_extractor_bert,

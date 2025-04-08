@@ -173,7 +173,7 @@ feature_extractor_clinical = create_gen_feature_extractor("yikuan8/Clinical-Long
 #########
 
 # All MiniLM L6 v2
-#feature_extractor_all_minilm_l6_v2 = create_feature_extractor('sentence-transformers/all-MiniLM-L6-v2')
+feature_extractor_all_minilm_l6_v2 = create_gen_feature_extractor('sentence-transformers/all-MiniLM-L6-v2')
 
 # GTR T5 Base
 #feature_extractor_gtr_t5_base = create_feature_extractor('sentence-transformers/gtr-t5-base')
@@ -191,4 +191,4 @@ feature_extractor_clinical = create_gen_feature_extractor("yikuan8/Clinical-Long
 #feature_extractor_ember_v1 = create_feature_extractor('llmrails/ember-v1')
 
 # Stella en 400m v5
-feature_extractor_stella_en_400M_v5 = create_stella_feature_extractor('dunzhang/stella_en_400M_v5')
+#feature_extractor_stella_en_400M_v5 = create_stella_feature_extractor('dunzhang/stella_en_400M_v5')
