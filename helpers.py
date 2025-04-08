@@ -510,6 +510,8 @@ def hgbc_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y,
         scoring="neg_log_loss",
         cv=RepeatedStratifiedKFold(n_splits=3, n_repeats=n_repeats)
     )
+    print(f"len of summaries: {len(summaries)}")
+    print(f"len of y: {len(y)}")
 
     for train_index, test_index in skf.split(summaries, y):
         X_train, X_test = [summaries[i] for i in train_index], [summaries[i] for i in test_index]
