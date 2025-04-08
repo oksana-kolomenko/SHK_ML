@@ -90,7 +90,7 @@ def run_models_on_txt_emb():
     for model_name, feature_extractor in feature_extractors.items():
         print("Started For-Loop.")
         # HGBC
-        (hgbc_txt_dataset, hgbc_txt_ml_method, hgbc_txt_emb_method, hgbc_txt_conc, hgbc_txt_best_params,
+        """(hgbc_txt_dataset, hgbc_txt_ml_method, hgbc_txt_emb_method, hgbc_txt_conc, hgbc_txt_best_params,
          hgbc_txt_pca_components, hgbc_txt_train_score, hgbc_txt_test_scores) = hgbc_txt_emb(
             dataset_name=posttrauma_dataset,
             emb_method=model_name,
@@ -108,7 +108,7 @@ def run_models_on_txt_emb():
         save_results_to_csv(output_file=f"{model_name}_HGBC_test.csv", dataset_name=hgbc_txt_dataset,
                             ml_method=hgbc_txt_ml_method, emb_method=hgbc_txt_emb_method, concatenation="no",
                             best_params=hgbc_txt_best_params, pca_n_comp=hgbc_txt_pca_components,
-                            metrics=hgbc_txt_test_scores, is_train=False)
+                            metrics=hgbc_txt_test_scores, is_train=False)"""
         # Logistic Regression
         (lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_conc, lr_txt_best_params,
          lr_txt_pca_components, lr_txt_train_score, lr_txt_test_scores) = lr_txt_emb(
