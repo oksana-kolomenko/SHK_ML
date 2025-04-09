@@ -128,7 +128,7 @@ def run_pca_txt_emb():
         # Die Methoden müssen möglicherweise noch an pca angepasst werden
         # Logistic Regression
         # no concatenation
-        """(lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_concatenation, lr_txt_best_params,
+        (lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_concatenation, lr_txt_best_params,
          lr_txt_pca_components, lr_txt_train_score, lr_txt_test_scores) = lr_txt_emb(
             dataset_name=posttrauma_dataset, n_components=35, emb_method=model_name,
             feature_extractor=feature_extractor, max_iter=10000, n_repeats=10,
@@ -142,16 +142,16 @@ def run_pca_txt_emb():
         save_results_to_csv(output_file=f"{model_name}_LR_pca_test.csv", dataset_name=lr_txt_dataset,
                             ml_method=lr_txt_ml_method, emb_method=lr_txt_emb_method, concatenation=lr_txt_concatenation,
                             best_params=lr_txt_best_params, pca_n_comp=lr_txt_pca_components,
-                            metrics=lr_txt_test_scores, is_train=False)"""
+                            metrics=lr_txt_test_scores, is_train=False)
 
         (hgbc_txt_dataset, hgbc_txt_ml_method, hgbc_txt_emb_method, hgbc_txt_conc, hgbc_best_params, hgbc_pca_comp,
          hgbc_txt_train_score, hgbc_txt_test_scores) \
             = hgbc_txt_emb(dataset_name=posttrauma_dataset, emb_method=model_name, n_components=35,
-                           n_repeats=10, feature_extractor=feature_extractor_gtr_t5_base, summaries=all_summaries,
+                           n_repeats=10, feature_extractor=feature_extractor, summaries=all_summaries,
                            y=y_posttrauma)
 
-        #save_results_to_csv(output_file=f"{model_name}_HGBC_pca_train.csv",
-        save_results_to_csv(output_file=f"GTR_T5_Base_HGBC_pca_train.csv",
+        save_results_to_csv(output_file=f"{model_name}_HGBC_pca_train.csv",
+        #save_results_to_csv(output_file=f"GTR_T5_Base_HGBC_pca_train.csv",
                             dataset_name=hgbc_txt_dataset,
                             ml_method=hgbc_txt_ml_method,
                             emb_method=hgbc_txt_emb_method,
@@ -161,8 +161,8 @@ def run_pca_txt_emb():
                             metrics=hgbc_txt_train_score,
                             is_train=True)
 
-        #save_results_to_csv(output_file=f"{model_name}_HGBC_pca_test.csv",
-        save_results_to_csv(output_file=f"GTR_T5_Base_HGBC_pca_test.csv",
+        save_results_to_csv(output_file=f"{model_name}_HGBC_pca_test.csv",
+        #save_results_to_csv(output_file=f"GTR_T5_Base_HGBC_pca_test.csv",
                             dataset_name=hgbc_txt_dataset,
                             ml_method=hgbc_txt_ml_method,
                             emb_method=hgbc_txt_emb_method,
@@ -174,7 +174,7 @@ def run_pca_txt_emb():
 
         # Logistic Regression
         # concatenation 1
-        (lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,
+        """(lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,
          lr_conc_yesno, lr_best_params, lr_pca_components, lr_conc_train_score,
          lr_conc_test_scores) = concat_lr_txt_emb(
             dataset_name=posttrauma_dataset,
@@ -241,7 +241,7 @@ def run_pca_txt_emb():
                             pca_n_comp=hgbc_pca_components,
                             metrics=hgbc_conc_test_scores,
                             is_train=False)
-
+"""
         # Logistic Regression
         # concatenation 2
         """(lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,
