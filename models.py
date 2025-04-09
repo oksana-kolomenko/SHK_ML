@@ -181,13 +181,13 @@ feature_extractor_clinical = create_gen_feature_extractor("yikuan8/Clinical-Long
 #########
 
 # All MiniLM L6 v2
-feature_extractor_all_minilm_l6_v2 = create_gen_feature_extractor('sentence-transformers/all-MiniLM-L6-v2')
+#feature_extractor_all_minilm_l6_v2 = create_gen_feature_extractor('sentence-transformers/all-MiniLM-L6-v2')
 
 # GTR T5 Base
-feature_extractor_gtr_t5_base = create_gen_feature_extractor('sentence-transformers/gtr-t5-base')
+#feature_extractor_gtr_t5_base = create_gen_feature_extractor('sentence-transformers/gtr-t5-base')
 
 # Sentence T5 Base
-#feature_extractor_sentence_t5_base = create_gen_feature_extractor('sentence-transformers/sentence-t5-base')
+feature_extractor_sentence_t5_base = create_gen_feature_extractor('sentence-transformers/sentence-t5-base')
 
 # modernbert-embed-base
 #feature_extractor_mbert_embed_base = create_gen_feature_extractor('nomic-ai/modernbert-embed-base')
