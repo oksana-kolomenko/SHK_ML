@@ -252,11 +252,11 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, raw_text_summaries, 
     search = GridSearchCV(
         estimator=Pipeline(pipeline_steps),
         param_grid={
-            "classifier__C": [2],#, 10, 50, 250],
+            "classifier__C": [2, 10, 50, 250],
             "aggregator__method": [
                 "embedding_cls",
-                #"embedding_mean_with_cls_and_sep",
-                #"embedding_mean_without_cls_and_sep"
+                "embedding_mean_with_cls_and_sep",
+                "embedding_mean_without_cls_and_sep"
             ]
         },
         scoring="neg_log_loss",
@@ -630,22 +630,6 @@ def concat_lr_txt_emb(dataset_name, emb_method,
     else:
         pipeline_text_steps.append(("numerical_scaler", MinMaxScaler()))
 
-    def get_nominal_transformer(nominal_features_in_dataset):
-        if nominal_features_in_dataset:
-            return Pipeline([
-                ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
-                ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
-            ])
-        else:
-            return 'passthrough'
-
-    """
-    old, non-generic implementation
-    ("nominal", Pipeline([
-        ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
-        ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
-    ]), nominal_features),
-    """
     search = GridSearchCV(
         estimator=Pipeline([
             ("transformer", ColumnTransformer([

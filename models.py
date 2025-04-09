@@ -190,7 +190,7 @@ feature_extractor_all_minilm_l6_v2 = create_gen_feature_extractor('sentence-tran
 #feature_extractor_sentence_t5_base = create_feature_extractor('sentence-transformers/sentence-t5-base')
 
 # modernbert-embed-base
-#feature_extractor_mbert_embed_base = create_gen_feature_extractor('nomic-ai/modernbert-embed-base')
+feature_extractor_mbert_embed_base = create_gen_feature_extractor('nomic-ai/modernbert-embed-base')
 
 # GTE modernbert base
 #feature_extractor_gte_mbert_base = create_gen_feature_extractor('Qwen/QwQ-32B')
