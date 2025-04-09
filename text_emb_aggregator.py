@@ -60,14 +60,16 @@ class EmbeddingAggregator(BaseEstimator, TransformerMixin):
             print("Using sentence-level model (e.g., GTR-T5)")
             return np.array(self.feature_extractor.encode(X_text))
 
-        if self.method == "embedding_cls":
-            return self._embedding_cls(X_text)
-
-        elif self.method == "embedding_mean_with_cls_and_sep":
-            return self._embedding_mean_with_cls_and_sep(X_text)
-
-        elif self.method == "embedding_mean_without_cls_and_sep":
-            return self._embedding_mean_without_cls_and_sep(X_text)
-
         else:
-            raise ValueError("Invalid aggregation method")
+            print("Using token-level model (e.g., BERT-style)")
+            if self.method == "embedding_cls":
+                return self._embedding_cls(X_text)
+
+            elif self.method == "embedding_mean_with_cls_and_sep":
+                return self._embedding_mean_with_cls_and_sep(X_text)
+
+            elif self.method == "embedding_mean_without_cls_and_sep":
+                return self._embedding_mean_without_cls_and_sep(X_text)
+
+            else:
+                raise ValueError("Invalid aggregation method")

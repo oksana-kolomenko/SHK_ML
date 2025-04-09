@@ -232,10 +232,13 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, raw_text_summaries, 
     skf = StratifiedKFold(n_splits=n_splits,
                           shuffle=True,
                           random_state=42)
+    is_sentence_transformer = True #hasattr(feature_extractor, "encode")
     pca_components = f"PCA ({n_components} components)" if n_components else "none"
 
     pipeline_steps = [
-        ("aggregator", EmbeddingAggregator(feature_extractor))
+        ("aggregator", EmbeddingAggregator(feature_extractor=feature_extractor,
+                                           is_sentence_transformer=is_sentence_transformer
+        ))
     ]
     if n_components:
         pipeline_steps.append(("numerical_scaler", StandardScaler()))
@@ -249,11 +252,11 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, raw_text_summaries, 
     search = GridSearchCV(
         estimator=Pipeline(pipeline_steps),
         param_grid={
-            "classifier__C": [2, 10, 50, 250],
+            "classifier__C": [2],#, 10, 50, 250],
             "aggregator__method": [
                 "embedding_cls",
-                "embedding_mean_with_cls_and_sep",
-                "embedding_mean_without_cls_and_sep"
+                #"embedding_mean_with_cls_and_sep",
+                #"embedding_mean_without_cls_and_sep"
             ]
         },
         scoring="neg_log_loss",

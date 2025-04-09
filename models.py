@@ -1,3 +1,4 @@
+from sentence_transformers import SentenceTransformer
 from transformers import AutoTokenizer, AutoModel, pipeline
 import torch
 
@@ -11,6 +12,13 @@ def create_gen_feature_extractor(model_name):
     device = 0 if torch.cuda.is_available() else -1
     device_name = "GPU" if device == 0 else "CPU"
     print(f"Selected device: {device_name}")
+
+    # If the model is compatible with SentenceTransformer (e.g., GTR models)
+    if "sentence-transformers" in model_name or "gtr" in model_name.lower():
+        model = SentenceTransformer(model_name)
+        model = model.to(f"cuda:{device}" if device == 0 else "cpu")
+        print("Loaded as SentenceTransformer model.")
+        return model
 
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModel.from_pretrained(model_name).to("cuda:0" if device == 0 else "cpu")
