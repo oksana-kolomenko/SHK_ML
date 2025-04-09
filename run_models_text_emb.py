@@ -3,7 +3,7 @@ import numpy as np
 from csv_saver import save_results_to_csv
 from helpers import load_labels, load_summaries, lr_txt_emb, hgbc_txt_emb
 from bar_plotting import plot_bar_chart
-from models import feature_extractor_mbert_embed_base, feature_extractor_sentence_t5_base
+from models import feature_extractor_gtr_t5_base
 from values import Dataset
 
 
@@ -69,10 +69,10 @@ def run_models_on_txt_emb():
         #"all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2, # runs
 
         # GTR T5 Base
-        #"GTR_T5_Base": feature_extractor_gtr_t5_base, # func nicht
+        "GTR_T5_Base": feature_extractor_gtr_t5_base, # func nicht
 
         # Sentence T5 Base
-        "sentence_t5_base": feature_extractor_sentence_t5_base,
+        #"sentence_t5_base": feature_extractor_sentence_t5_base,
 
         # modernbert-embed-base
         #"modernbert_embed_base": feature_extractor_mbert_embed_base,
