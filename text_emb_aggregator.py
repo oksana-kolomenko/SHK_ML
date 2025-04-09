@@ -56,20 +56,20 @@ class EmbeddingAggregator(BaseEstimator, TransformerMixin):
         if not all(isinstance(x, str) for x in X_text):
             raise ValueError("All inputs must be strings.")
 
-        if self.is_sentence_transformer:
+        """ if self.is_sentence_transformer:
             print("Using sentence-level model (e.g., GTR-T5)")
             return np.array(self.feature_extractor.encode(X_text))
 
-        else:
-            print("Using token-level model (e.g., BERT-style)")
-            if self.method == "embedding_cls":
+        else:"""
+        print("Using token-level model (e.g., BERT-style)")
+        if self.method == "embedding_cls":
                 return self._embedding_cls(X_text)
 
-            elif self.method == "embedding_mean_with_cls_and_sep":
+        elif self.method == "embedding_mean_with_cls_and_sep":
                 return self._embedding_mean_with_cls_and_sep(X_text)
 
-            elif self.method == "embedding_mean_without_cls_and_sep":
+        elif self.method == "embedding_mean_without_cls_and_sep":
                 return self._embedding_mean_without_cls_and_sep(X_text)
 
-            else:
+        else:
                 raise ValueError("Invalid aggregation method")
