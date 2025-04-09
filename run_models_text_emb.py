@@ -3,7 +3,7 @@ import numpy as np
 from csv_saver import save_results_to_csv
 from helpers import load_labels, load_summaries, lr_txt_emb, hgbc_txt_emb
 from bar_plotting import plot_bar_chart
-from models import feature_extractor_all_minilm_l6_v2
+from models import feature_extractor_all_minilm_l6_v2, feature_extractor_gtr_t5_base
 from values import Dataset
 
 
@@ -63,13 +63,13 @@ def run_models_on_txt_emb():
         # "GTE-Large": feature_extractor_gte_large,  # (done)
         # "GTE-Large-EN-v1.5": feature_extractor_gte_large_en_v1_5, # (ready)
         # Stella Model
-        # "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,  # (not ready)
+        # "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5, # runs only with GPU
 
         # All MiniLM L6 v2
-        "all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
+        #"all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2, # runs
 
         # GTR T5 Base
-        # "GTR_T5_Base": feature_extractor_gtr_t5_base,
+        "GTR_T5_Base": feature_extractor_gtr_t5_base, # func nicht
 
         # Sentence T5 Base
         # "sentence_t5_base": feature_extractor_sentence_t5_base,
@@ -113,7 +113,8 @@ def run_models_on_txt_emb():
         (lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_conc, lr_txt_best_params,
          lr_txt_pca_components, lr_txt_train_score, lr_txt_test_scores) = lr_txt_emb(
             dataset_name=posttrauma_dataset, n_components=None, emb_method=model_name,
-            feature_extractor=feature_extractor, max_iter=10000, n_repeats=10,
+            feature_extractor=feature_extractor, max_iter=100, n_repeats=1,
+            #feature_extractor=feature_extractor, max_iter=10000, n_repeats=10,
             raw_text_summaries=all_summaries, y=y_posttrauma)
 
         save_results_to_csv(output_file=f"{model_name}_LR_train.csv", dataset_name=lr_txt_dataset,
