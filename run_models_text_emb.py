@@ -3,7 +3,7 @@ import numpy as np
 from csv_saver import save_results_to_csv
 from helpers import load_labels, load_summaries, lr_txt_emb, hgbc_txt_emb
 from bar_plotting import plot_bar_chart
-from models import feature_extractor_mbert_embed_base
+from models import feature_extractor_mbert_embed_base, feature_extractor_sentence_t5_base
 from values import Dataset
 
 
@@ -72,10 +72,10 @@ def run_models_on_txt_emb():
         #"GTR_T5_Base": feature_extractor_gtr_t5_base, # func nicht
 
         # Sentence T5 Base
-        # "sentence_t5_base": feature_extractor_sentence_t5_base,
+        "sentence_t5_base": feature_extractor_sentence_t5_base,
 
         # modernbert-embed-base
-        "modernbert_embed_base": feature_extractor_mbert_embed_base,
+        #"modernbert_embed_base": feature_extractor_mbert_embed_base,
 
         # GTE modernbert base
         #"gte_modernbert_base": feature_extractor_gte_mbert_base,
@@ -85,7 +85,7 @@ def run_models_on_txt_emb():
     }
 
     ###### TEXT EMBEDDINGS ######
-    print(f"len summaries (run mod): {all_summaries}")
+    # print(f"len summaries (run mod): {all_summaries}")
     # Calculate results for each model
     for model_name, feature_extractor in feature_extractors.items():
         print("Started For-Loop.")

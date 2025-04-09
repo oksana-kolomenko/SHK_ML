@@ -491,10 +491,13 @@ def hgbc_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y,
                           shuffle=True,
                           random_state=42)
 
+    is_sentence_transformer = True
     pca_components = f"PCA ({n_components} components)" if n_components else "none"
 
     pipeline_steps = [
-        ("aggregator", EmbeddingAggregator(feature_extractor))
+        ("aggregator", EmbeddingAggregator(
+            feature_extractor=feature_extractor,
+            is_sentence_transformer=is_sentence_transformer))
     ]
     if n_components:
         pipeline_steps.append(("numerical_scaler", StandardScaler()))
