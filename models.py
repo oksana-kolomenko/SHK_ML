@@ -14,14 +14,14 @@ def create_gen_feature_extractor(model_name):
     print(f"Selected device: {device_name}")
 
     # If the model is compatible with SentenceTransformer (e.g., GTR models)
-    if "sentence-transformers" in model_name or "gtr" in model_name.lower():
-        model = SentenceTransformer(model_name)
+    if "sentence-transformers" in model_name or "gtr" in model_name.lower() or "modernbert-embed" in model_name.lower():
+        model = SentenceTransformer(model_name, trust_remote_code=True)
         model = model.to(f"cuda:{device}" if device == 0 else "cpu")
         print("Loaded as SentenceTransformer model.")
         return model
 
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModel.from_pretrained(model_name).to("cuda:0" if device == 0 else "cpu")
+    tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+    model = AutoModel.from_pretrained(model_name, trust_remote_code=True).to("cuda:0" if device == 0 else "cpu")
 
     print("Finished creating a feature extractor.")
     return pipeline("feature-extraction", model=model, tokenizer=tokenizer, device=device)
@@ -184,16 +184,16 @@ feature_extractor_clinical = create_gen_feature_extractor("yikuan8/Clinical-Long
 feature_extractor_all_minilm_l6_v2 = create_gen_feature_extractor('sentence-transformers/all-MiniLM-L6-v2')
 
 # GTR T5 Base
-feature_extractor_gtr_t5_base = create_gen_feature_extractor('sentence-transformers/gtr-t5-base')
+#feature_extractor_gtr_t5_base = create_gen_feature_extractor('sentence-transformers/gtr-t5-base')
 
 # Sentence T5 Base
 #feature_extractor_sentence_t5_base = create_feature_extractor('sentence-transformers/sentence-t5-base')
 
 # modernbert-embed-base
-#feature_extractor_mbert_embed_base = create_feature_extractor('nomic-ai/modernbert-embed-base')
+#feature_extractor_mbert_embed_base = create_gen_feature_extractor('nomic-ai/modernbert-embed-base')
 
 # GTE modernbert base
-#feature_extractor_gte_mbert_base = create_feature_extractor('Qwen/QwQ-32B')
+#feature_extractor_gte_mbert_base = create_gen_feature_extractor('Qwen/QwQ-32B')
 
 # Ember v1
 #feature_extractor_ember_v1 = create_feature_extractor('llmrails/ember-v1')
