@@ -232,10 +232,13 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, raw_text_summaries, 
     skf = StratifiedKFold(n_splits=n_splits,
                           shuffle=True,
                           random_state=42)
+    is_sentence_transformer = True #hasattr(feature_extractor, "encode")
     pca_components = f"PCA ({n_components} components)" if n_components else "none"
 
     pipeline_steps = [
-        ("aggregator", EmbeddingAggregator(feature_extractor))
+        ("aggregator", EmbeddingAggregator(feature_extractor=feature_extractor,
+                                           is_sentence_transformer=is_sentence_transformer
+        ))
     ]
     if n_components:
         pipeline_steps.append(("numerical_scaler", StandardScaler()))
@@ -488,10 +491,13 @@ def hgbc_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y,
                           shuffle=True,
                           random_state=42)
 
+    is_sentence_transformer = True
     pca_components = f"PCA ({n_components} components)" if n_components else "none"
 
     pipeline_steps = [
-        ("aggregator", EmbeddingAggregator(feature_extractor))
+        ("aggregator", EmbeddingAggregator(
+            feature_extractor=feature_extractor,
+            is_sentence_transformer=is_sentence_transformer))
     ]
     if n_components:
         pipeline_steps.append(("numerical_scaler", StandardScaler()))
@@ -627,22 +633,6 @@ def concat_lr_txt_emb(dataset_name, emb_method,
     else:
         pipeline_text_steps.append(("numerical_scaler", MinMaxScaler()))
 
-    def get_nominal_transformer(nominal_features_in_dataset):
-        if nominal_features_in_dataset:
-            return Pipeline([
-                ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
-                ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
-            ])
-        else:
-            return 'passthrough'
-
-    """
-    old, non-generic implementation
-    ("nominal", Pipeline([
-        ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
-        ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
-    ]), nominal_features),
-    """
     search = GridSearchCV(
         estimator=Pipeline([
             ("transformer", ColumnTransformer([

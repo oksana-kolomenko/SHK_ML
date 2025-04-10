@@ -4,9 +4,10 @@ import numpy as np
 
 
 class EmbeddingAggregator(BaseEstimator, TransformerMixin):
-    def __init__(self, feature_extractor, method="embedding_cls"):
+    def __init__(self, feature_extractor, method="embedding_cls", is_sentence_transformer=False):
         self.method = method
         self.feature_extractor = feature_extractor
+        self.is_sentence_transformer = is_sentence_transformer
         self.data_ = None
 
     # Create embedding based on [CLS] token
@@ -52,20 +53,23 @@ class EmbeddingAggregator(BaseEstimator, TransformerMixin):
         if isinstance(X_text, pd.DataFrame):
             X_text = X_text.iloc[:, 0].tolist()
 
-        if self.method == "embedding_cls":
-            if not all(isinstance(x, str) for x in X_text):
-                raise ValueError("All inputs to EmbeddingAggregator must be strings.")
-            return self._embedding_cls(X_text)
+        if not all(isinstance(x, str) for x in X_text):
+            raise ValueError("All inputs must be strings.")
 
-        elif self.method == "embedding_mean_with_cls_and_sep":
-            if not all(isinstance(x, str) for x in X_text):
-                raise ValueError("All inputs to EmbeddingAggregator must be strings.")
-            return self._embedding_mean_with_cls_and_sep(X_text)
-
-        elif self.method == "embedding_mean_without_cls_and_sep":
-            if not all(isinstance(x, str) for x in X_text):
-                raise ValueError("All inputs to EmbeddingAggregator must be strings.")
-            return self._embedding_mean_without_cls_and_sep(X_text)
+        if self.is_sentence_transformer:
+            print("Using sentence-level model (e.g., GTR-T5)")
+            return np.array(self.feature_extractor.encode(X_text))
 
         else:
-            raise ValueError("Invalid aggregation method")
+            print("Using token-level model (e.g., BERT-style)")
+            if self.method == "embedding_cls":
+                return self._embedding_cls(X_text)
+
+            elif self.method == "embedding_mean_with_cls_and_sep":
+                return self._embedding_mean_with_cls_and_sep(X_text)
+
+            elif self.method == "embedding_mean_without_cls_and_sep":
+                return self._embedding_mean_without_cls_and_sep(X_text)
+
+            else:
+                raise ValueError("Invalid aggregation method")
