@@ -3,8 +3,7 @@ import numpy as np
 from csv_saver import save_results_to_csv
 from helpers import load_labels, load_summaries, lr_txt_emb, hgbc_txt_emb
 from bar_plotting import plot_bar_chart
-from models import feature_extractor_ember_v1, feature_extractor_gte_mbert_base, feature_extractor_mbert_embed_base, \
-    feature_extractor_stella_en_400M_v5
+from models import feature_extractor_ember_v1, feature_extractor_gte_mbert_base, feature_extractor_mbert_embed_base
 from values import Dataset
 
 
