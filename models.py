@@ -198,4 +198,4 @@ feature_extractor_gte_mbert_base = create_gen_feature_extractor('Qwen/QwQ-32B')
 feature_extractor_ember_v1 = create_gen_feature_extractor('llmrails/ember-v1')
 
 # Stella en 400m v5
-feature_extractor_stella_en_400M_v5 = create_stella_feature_extractor('dunzhang/stella_en_400M_v5')
+#feature_extractor_stella_en_400M_v5 = create_stella_feature_extractor('dunzhang/stella_en_400M_v5')
