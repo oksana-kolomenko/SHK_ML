@@ -881,7 +881,7 @@ def concat_txt_hgbc(dataset_name, emb_method,
         if n_components else "none"
 
     is_sentence_transformer = False
-    if "gtr-t5-base" in emb_method.lower() or "sentence-t5-base" in emb_method.lower() or "modernbert_embed" in emb_method.lower():
+    if "gtr_t5_base" in emb_method.lower() or "sentence_t5_base" in emb_method.lower() or "modernbert_embed" in emb_method.lower():
         is_sentence_transformer = True
 
     pipeline_text_steps = [
