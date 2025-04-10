@@ -1,3 +1,4 @@
+from sentence_transformers import SentenceTransformer
 from transformers import AutoTokenizer, AutoModel, pipeline
 import torch
 
@@ -12,9 +13,16 @@ def create_gen_feature_extractor(model_name):
     device_name = "GPU" if device == 0 else "CPU"
     print(f"Selected device: {device_name}")
 
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModel.from_pretrained(model_name).to("cuda:0" if device == 0 else "cpu")
+    # If the model is compatible with SentenceTransformer (e.g., GTR models)
+    if "gtr-t5-base" in model_name or "sentence-t5-base" in model_name.lower() or "modernbert-embed" in model_name.lower():
+        print("In the if statement")
+        model = SentenceTransformer(model_name, trust_remote_code=True)
+        model = model.to(f"cuda:{device}" if device == 0 else "cpu")
+        print("Loaded as SentenceTransformer model.")
+        return model
 
+    tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+    model = AutoModel.from_pretrained(model_name, trust_remote_code=True).to("cuda:0" if device == 0 else "cpu")
     print("Finished creating a feature extractor.")
     return pipeline("feature-extraction", model=model, tokenizer=tokenizer, device=device)
 
