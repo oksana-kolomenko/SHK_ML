@@ -45,6 +45,7 @@ def load_summaries(file_name):
         summaries_list = [line.strip() for line in file.readlines()]
     return summaries_list
 
+
 def logistic_regression(dataset_name, X, y, nominal_features, n_repeats=10, n_splits=3, n_components=None):
     # for csv format
     dataset = dataset_name
@@ -232,13 +233,16 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, raw_text_summaries, 
     skf = StratifiedKFold(n_splits=n_splits,
                           shuffle=True,
                           random_state=42)
-    is_sentence_transformer = True #hasattr(feature_extractor, "encode")
+    is_sentence_transformer = False
+    if "gtr-t5-base" in emb_method.lower() or "sentence-t5-base" in emb_method.lower() or "modernbert_embed" in emb_method.lower():
+        is_sentence_transformer = True
+
     pca_components = f"PCA ({n_components} components)" if n_components else "none"
 
     pipeline_steps = [
         ("aggregator", EmbeddingAggregator(feature_extractor=feature_extractor,
                                            is_sentence_transformer=is_sentence_transformer
-        ))
+                                           ))
     ]
     if n_components:
         pipeline_steps.append(("numerical_scaler", StandardScaler()))
@@ -490,8 +494,10 @@ def hgbc_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y,
     skf = StratifiedKFold(n_splits=n_splits,
                           shuffle=True,
                           random_state=42)
+    is_sentence_transformer = False
+    if "gtr-t5-base" in emb_method.lower() or "sentence-t5-base" in emb_method.lower() or "modernbert_embed" in emb_method.lower():
+        is_sentence_transformer = True
 
-    is_sentence_transformer = True
     pca_components = f"PCA ({n_components} components)" if n_components else "none"
 
     pipeline_steps = [
@@ -624,8 +630,15 @@ def concat_lr_txt_emb(dataset_name, emb_method,
     pca_components = f"PCA ({n_components} components)" \
         if n_components else "none"
 
+    is_sentence_transformer = False
+    if "gtr-t5-base" in emb_method.lower() or "sentence-t5-base" in emb_method.lower() or "modernbert_embed" in emb_method.lower():
+        is_sentence_transformer = True
+
     pipeline_text_steps = [
-        ("embedding_aggregator", EmbeddingAggregator(feature_extractor)),
+        ("embedding_aggregator", EmbeddingAggregator(
+            feature_extractor=feature_extractor,
+            is_sentence_transformer=is_sentence_transformer
+        )),
     ]
     if n_components:
         pipeline_text_steps.append(("numerical_scaler", StandardScaler()))
@@ -866,9 +879,13 @@ def concat_txt_hgbc(dataset_name, emb_method,
 
     pca_components = f"PCA ({n_components} components)" \
         if n_components else "none"
-
+    is_sentence_transformer = False
+    if "gtr-t5-base" in emb_method.lower() or "sentence-t5-base" in emb_method.lower() or "modernbert_embed" in emb_method.lower():
+        is_sentence_transformer = True
     pipeline_text_steps = [
-        ("embedding_aggregator", EmbeddingAggregator(feature_extractor)),
+        ("embedding_aggregator", EmbeddingAggregator(
+            feature_extractor=feature_extractor,
+            is_sentence_transformer=is_sentence_transformer)),
         ("debug_text", DebugTransformer(name="Text Debug"))
     ]
     if n_components:
@@ -885,11 +902,11 @@ def concat_txt_hgbc(dataset_name, emb_method,
             ("classifier", HistGradientBoostingClassifier())
         ]),
         param_grid={
-            "classifier__min_samples_leaf": [5], #, 10, 15, 20],
+            "classifier__min_samples_leaf": [5],  # , 10, 15, 20],
             "transformer__text__embedding_aggregator__method": [
                 "embedding_cls",
-                #"embedding_mean_with_cls_and_sep",
-                #"embedding_mean_without_cls_and_sep"
+                # "embedding_mean_with_cls_and_sep",
+                # "embedding_mean_without_cls_and_sep"
             ]
         },
         scoring="neg_log_loss",
@@ -1006,8 +1023,8 @@ def concat_hgbc_rte(dataset_name, X_tabular, y, nominal_features, n_repeats,
 
     param_grid = {
         "hist_gb__min_samples_leaf": [5, 10, 15, 20],
-        "feature_combiner__embeddings__embedding__n_estimators": [10, 100], # decreased for small data
-        "feature_combiner__embeddings__embedding__max_depth": [2, 5] # decreased for small data
+        "feature_combiner__embeddings__embedding__n_estimators": [10, 100],  # decreased for small data
+        "feature_combiner__embeddings__embedding__max_depth": [2, 5]  # decreased for small data
     }
     search = GridSearchCV(
         estimator=pipeline,

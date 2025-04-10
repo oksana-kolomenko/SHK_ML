@@ -84,7 +84,7 @@ def create_gte_feature_extractor(model_name):
 
 
 # Clinical Longformer
-feature_extractor_clinical = create_gen_feature_extractor("yikuan8/Clinical-Longformer")
+#feature_extractor_clinical = create_gen_feature_extractor("yikuan8/Clinical-Longformer")
 
 # BERT
 #feature_extractor_bert = create_feature_extractor("google-bert/bert-base-uncased")
@@ -186,7 +186,7 @@ feature_extractor_clinical = create_gen_feature_extractor("yikuan8/Clinical-Long
 #feature_extractor_gtr_t5_base = create_gen_feature_extractor('sentence-transformers/gtr-t5-base')
 
 # Sentence T5 Base
-feature_extractor_sentence_t5_base = create_gen_feature_extractor('sentence-transformers/sentence-t5-base')
+#feature_extractor_sentence_t5_base = create_gen_feature_extractor('sentence-transformers/sentence-t5-base')
 
 # modernbert-embed-base
 #feature_extractor_mbert_embed_base = create_gen_feature_extractor('nomic-ai/modernbert-embed-base')
@@ -195,7 +195,7 @@ feature_extractor_sentence_t5_base = create_gen_feature_extractor('sentence-tran
 #feature_extractor_gte_mbert_base = create_gen_feature_extractor('Qwen/QwQ-32B')
 
 # Ember v1
-#feature_extractor_ember_v1 = create_feature_extractor('llmrails/ember-v1')
+feature_extractor_ember_v1 = create_gen_feature_extractor('llmrails/ember-v1')
 
 # Stella en 400m v5
 #feature_extractor_stella_en_400M_v5 = create_stella_feature_extractor('dunzhang/stella_en_400M_v5')

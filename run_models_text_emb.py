@@ -3,7 +3,7 @@ import numpy as np
 from csv_saver import save_results_to_csv
 from helpers import load_labels, load_summaries, lr_txt_emb, hgbc_txt_emb
 from bar_plotting import plot_bar_chart
-from models import feature_extractor_gtr_t5_base
+from models import feature_extractor_ember_v1
 from values import Dataset
 
 
@@ -62,14 +62,15 @@ def run_models_on_txt_emb():
         # "GTE-Base-EN-v1.5": feature_extractor_gte_base_en_v1_5, #(ready)
         # "GTE-Large": feature_extractor_gte_large,  # (done)
         # "GTE-Large-EN-v1.5": feature_extractor_gte_large_en_v1_5, # (ready)
+
         # Stella Model
-        # "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5, # runs only with GPU
+        #"Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5, # only GPU
 
         # All MiniLM L6 v2
         #"all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2, # runs
 
         # GTR T5 Base
-        "GTR_T5_Base": feature_extractor_gtr_t5_base, # func nicht
+        #"gtr-t5-base": feature_extractor_gtr_t5_base, #
 
         # Sentence T5 Base
         #"sentence_t5_base": feature_extractor_sentence_t5_base,
@@ -81,7 +82,7 @@ def run_models_on_txt_emb():
         #"gte_modernbert_base": feature_extractor_gte_mbert_base,
 
         # Ember v1
-        # "ember_v1": feature_extractor_ember_v1
+        "ember_v1": feature_extractor_ember_v1
     }
 
     ###### TEXT EMBEDDINGS ######
