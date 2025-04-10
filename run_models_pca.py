@@ -4,7 +4,8 @@ from csv_saver import save_results_to_csv
 from helpers import load_labels, load_summaries, load_features, \
     concat_lr_rte, concat_hgbc_rte, concat_lr_txt_emb, concat_txt_hgbc, lr_txt_emb, hgbc_txt_emb
 from models import feature_extractor_all_minilm_l6_v2, feature_extractor_gtr_t5_base, \
-    feature_extractor_sentence_t5_base, feature_extractor_ember_v1
+    feature_extractor_sentence_t5_base, feature_extractor_ember_v1, feature_extractor_mbert_embed_base, \
+    feature_extractor_gte_mbert_base, feature_extractor_stella_en_400M_v5
 
 #from helpers_new import concat_hgbc_txt_emb
 """from models import feature_extractor_medembed_small_v0_1, feature_extractor_medembed_base_v0_1, \
@@ -53,7 +54,7 @@ def run_pca_txt_emb():
 
     feature_extractors = {
         # Stella en 400m v5
-        #"Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
+        "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
 
         # All MiniLM L6 v2
         #"all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
@@ -65,13 +66,13 @@ def run_pca_txt_emb():
         #"sentence_t5_base": feature_extractor_sentence_t5_base,
 
         # modernbert-embed-base
-        #"modernbert_embed_base": feature_extractor_mbert_embed_base,
+        "modernbert_embed_base": feature_extractor_mbert_embed_base,
 
         # GTE modernbert base
-        #"gte_modernbert_base": feature_extractor_gte_mbert_base,
+        "gte_modernbert_base": feature_extractor_gte_mbert_base,
 
         # Ember v1
-        "ember_v1": feature_extractor_ember_v1
+        #"ember_v1": feature_extractor_ember_v1
 
         # Clinical Longformer (done)
         #"Clinical-Longformer": feature_extractor_clinical,
@@ -210,7 +211,7 @@ def run_pca_txt_emb():
                             is_train=False)
 
         # HGBC conc pca
-        """(concat_hgbc_dataset, concat_hgbc_ml_method, concat_hgbc_emb_method,
+        (concat_hgbc_dataset, concat_hgbc_ml_method, concat_hgbc_emb_method,
          hgbc_conc_yesno, hgbc_best_params, hgbc_pca_components, hgbc_conc_train_score,
          hgbc_conc_test_scores) = concat_txt_hgbc(
             dataset_name=posttrauma_dataset,
@@ -240,7 +241,7 @@ def run_pca_txt_emb():
                             best_params=hgbc_best_params,
                             pca_n_comp=hgbc_pca_components,
                             metrics=hgbc_conc_test_scores,
-                            is_train=False)"""
+                            is_train=False)
 
         # Logistic Regression
         # concatenation 2

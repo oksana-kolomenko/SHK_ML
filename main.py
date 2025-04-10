@@ -17,7 +17,7 @@ if __name__ == '__main__':
     #print_special_tokens()
     #text = "Hey, how are you?"
     #print_sentence_embedding(text)
-    #run_models_on_txt_emb()
+    run_models_on_txt_emb()
     run_pca_txt_emb()
     #run_text_concatenated()
     #run_pca_rte()

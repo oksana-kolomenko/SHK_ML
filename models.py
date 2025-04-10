@@ -189,13 +189,13 @@ feature_extractor_gtr_t5_base = create_gen_feature_extractor('sentence-transform
 feature_extractor_sentence_t5_base = create_gen_feature_extractor('sentence-transformers/sentence-t5-base')
 
 # modernbert-embed-base
-#feature_extractor_mbert_embed_base = create_gen_feature_extractor('nomic-ai/modernbert-embed-base')
+feature_extractor_mbert_embed_base = create_gen_feature_extractor('nomic-ai/modernbert-embed-base')
 
 # GTE modernbert base
-#feature_extractor_gte_mbert_base = create_gen_feature_extractor('Qwen/QwQ-32B')
+feature_extractor_gte_mbert_base = create_gen_feature_extractor('Qwen/QwQ-32B')
 
 # Ember v1
 feature_extractor_ember_v1 = create_gen_feature_extractor('llmrails/ember-v1')
 
 # Stella en 400m v5
-#feature_extractor_stella_en_400M_v5 = create_stella_feature_extractor('dunzhang/stella_en_400M_v5')
+feature_extractor_stella_en_400M_v5 = create_stella_feature_extractor('dunzhang/stella_en_400M_v5')
