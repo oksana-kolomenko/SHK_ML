@@ -54,7 +54,7 @@ def run_pca_txt_emb():
 
     feature_extractors = {
         # Stella en 400m v5
-        "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
+        #"Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
 
         # All MiniLM L6 v2
         #"all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
@@ -72,7 +72,7 @@ def run_pca_txt_emb():
         "gte_modernbert_base": feature_extractor_gte_mbert_base,
 
         # Ember v1
-        #"ember_v1": feature_extractor_ember_v1
+        "ember_v1": feature_extractor_ember_v1
 
         # Clinical Longformer (done)
         #"Clinical-Longformer": feature_extractor_clinical,
