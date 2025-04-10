@@ -3,7 +3,8 @@ import numpy as np
 from csv_saver import save_results_to_csv
 from helpers import load_labels, load_summaries, load_features, \
     concat_lr_rte, concat_hgbc_rte, concat_lr_txt_emb, concat_txt_hgbc, lr_txt_emb, hgbc_txt_emb
-from models import feature_extractor_sentence_t5_base
+from models import feature_extractor_all_minilm_l6_v2, feature_extractor_gtr_t5_base, \
+    feature_extractor_sentence_t5_base, feature_extractor_ember_v1
 
 #from helpers_new import concat_hgbc_txt_emb
 """from models import feature_extractor_medembed_small_v0_1, feature_extractor_medembed_base_v0_1, \
@@ -55,10 +56,10 @@ def run_pca_txt_emb():
         #"Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
 
         # All MiniLM L6 v2
-        #"all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
+        "all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
 
         # GTR T5 Base
-        #"GTR_T5_Base": feature_extractor_gtr_t5_base,
+        "GTR_T5_Base": feature_extractor_gtr_t5_base,
 
         # Sentence T5 Base
         "sentence_t5_base": feature_extractor_sentence_t5_base,
@@ -70,7 +71,7 @@ def run_pca_txt_emb():
         #"gte_modernbert_base": feature_extractor_gte_mbert_base,
 
         # Ember v1
-        #"ember_v1": feature_extractor_ember_v1
+        "ember_v1": feature_extractor_ember_v1
 
         # Clinical Longformer (done)
         #"Clinical-Longformer": feature_extractor_clinical,
@@ -142,7 +143,7 @@ def run_pca_txt_emb():
         save_results_to_csv(output_file=f"{model_name}_LR_pca_test.csv", dataset_name=lr_txt_dataset,
                             ml_method=lr_txt_ml_method, emb_method=lr_txt_emb_method, concatenation=lr_txt_concatenation,
                             best_params=lr_txt_best_params, pca_n_comp=lr_txt_pca_components,
-                            metrics=lr_txt_test_scores, is_train=False)"""
+                            metrics=lr_txt_test_scores, is_train=False)
 
         (hgbc_txt_dataset, hgbc_txt_ml_method, hgbc_txt_emb_method, hgbc_txt_conc, hgbc_best_params, hgbc_pca_comp,
          hgbc_txt_train_score, hgbc_txt_test_scores) \
@@ -170,11 +171,11 @@ def run_pca_txt_emb():
                             best_params=hgbc_best_params,
                             pca_n_comp=hgbc_pca_comp,
                             metrics=hgbc_txt_test_scores,
-                            is_train=False)
+                            is_train=False)"""
 
         # Logistic Regression
         # concatenation 1
-        """(lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,
+        (lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,
          lr_conc_yesno, lr_best_params, lr_pca_components, lr_conc_train_score,
          lr_conc_test_scores) = concat_lr_txt_emb(
             dataset_name=posttrauma_dataset,
@@ -241,7 +242,7 @@ def run_pca_txt_emb():
                             pca_n_comp=hgbc_pca_components,
                             metrics=hgbc_conc_test_scores,
                             is_train=False)
-"""
+
         # Logistic Regression
         # concatenation 2
         """(lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,

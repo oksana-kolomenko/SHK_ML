@@ -879,9 +879,11 @@ def concat_txt_hgbc(dataset_name, emb_method,
 
     pca_components = f"PCA ({n_components} components)" \
         if n_components else "none"
+
     is_sentence_transformer = False
     if "gtr-t5-base" in emb_method.lower() or "sentence-t5-base" in emb_method.lower() or "modernbert_embed" in emb_method.lower():
         is_sentence_transformer = True
+
     pipeline_text_steps = [
         ("embedding_aggregator", EmbeddingAggregator(
             feature_extractor=feature_extractor,
@@ -902,11 +904,11 @@ def concat_txt_hgbc(dataset_name, emb_method,
             ("classifier", HistGradientBoostingClassifier())
         ]),
         param_grid={
-            "classifier__min_samples_leaf": [5],  # , 10, 15, 20],
+            "classifier__min_samples_leaf": [5, 10, 15, 20],
             "transformer__text__embedding_aggregator__method": [
                 "embedding_cls",
-                # "embedding_mean_with_cls_and_sep",
-                # "embedding_mean_without_cls_and_sep"
+                "embedding_mean_with_cls_and_sep",
+                "embedding_mean_without_cls_and_sep"
             ]
         },
         scoring="neg_log_loss",
