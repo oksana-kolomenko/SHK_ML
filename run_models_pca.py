@@ -4,7 +4,8 @@ from csv_saver import save_results_to_csv
 from helpers import load_labels, load_summaries, load_features, \
     concat_lr_rte, concat_hgbc_rte, concat_lr_txt_emb, concat_txt_hgbc, lr_txt_emb, hgbc_txt_emb
 from models import feature_extractor_all_minilm_l6_v2, feature_extractor_gtr_t5_base, \
-    feature_extractor_sentence_t5_base, feature_extractor_ember_v1, feature_extractor_stella_en_400M_v5
+    feature_extractor_sentence_t5_base, feature_extractor_ember_v1, feature_extractor_stella_en_400M_v5, \
+    feature_extractor_gte_mbert_base
 
 #from helpers_new import concat_hgbc_txt_emb
 """from models import feature_extractor_medembed_small_v0_1, feature_extractor_medembed_base_v0_1, \
@@ -65,7 +66,7 @@ def run_pca_txt_emb():
         #"sentence_t5_base": feature_extractor_sentence_t5_base,
 
         # modernbert-embed-base
-        "modernbert_embed_base": feature_extractor_mbert_embed_base,
+        # "modernbert_embed_base": feature_extractor_mbert_embed_base,
 
         # GTE modernbert base
         "gte_modernbert_base": feature_extractor_gte_mbert_base,
