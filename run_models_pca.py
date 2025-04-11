@@ -210,7 +210,7 @@ def run_pca_txt_emb():
                             is_train=False)
 
         # HGBC conc pca
-        (concat_hgbc_dataset, concat_hgbc_ml_method, concat_hgbc_emb_method,
+        """(concat_hgbc_dataset, concat_hgbc_ml_method, concat_hgbc_emb_method,
          hgbc_conc_yesno, hgbc_best_params, hgbc_pca_components, hgbc_conc_train_score,
          hgbc_conc_test_scores) = concat_txt_hgbc(
             dataset_name=posttrauma_dataset,
@@ -240,7 +240,7 @@ def run_pca_txt_emb():
                             best_params=hgbc_best_params,
                             pca_n_comp=hgbc_pca_components,
                             metrics=hgbc_conc_test_scores,
-                            is_train=False)
+                            is_train=False)"""
 
         # Logistic Regression
         # concatenation 2
