@@ -495,7 +495,7 @@ def hgbc_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y,
                           shuffle=True,
                           random_state=42)
     is_sentence_transformer = False
-    if "gtr-t5-base" in emb_method.lower() or "sentence-t5-base" in emb_method.lower() or "modernbert_embed" in emb_method.lower():
+    if "gtr_t5_base" in emb_method.lower() or "sentence_t5_base" in emb_method.lower() or "modernbert_embed" in emb_method.lower():
         is_sentence_transformer = True
 
     pca_components = f"PCA ({n_components} components)" if n_components else "none"
@@ -631,7 +631,8 @@ def concat_lr_txt_emb(dataset_name, emb_method,
         if n_components else "none"
 
     is_sentence_transformer = False
-    if "gtr_t5_base" in emb_method.lower() or "sentence_t5_base" in emb_method.lower() or "modernbert_embed" in emb_method.lower():
+    if ("gtr_t5_base" in emb_method.lower() or "sentence_t5_base" in emb_method.lower()
+            or "modernbert_embed" in emb_method.lower()):
         is_sentence_transformer = True
 
     pipeline_text_steps = [
