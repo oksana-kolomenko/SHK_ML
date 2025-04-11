@@ -65,13 +65,13 @@ def run_pca_txt_emb():
         #"sentence_t5_base": feature_extractor_sentence_t5_base,
 
         # modernbert-embed-base
-        #"modernbert_embed_base": feature_extractor_mbert_embed_base,
+        "modernbert_embed_base": feature_extractor_mbert_embed_base,
 
         # GTE modernbert base
-        #"gte_modernbert_base": feature_extractor_gte_mbert_base,
+        "gte_modernbert_base": feature_extractor_gte_mbert_base,
 
         # Ember v1
-        "ember_v1": feature_extractor_ember_v1,
+        #"ember_v1": feature_extractor_ember_v1,
 
         # Clinical Longformer (done)
         #"Clinical-Longformer": feature_extractor_clinical,
@@ -121,7 +121,7 @@ def run_pca_txt_emb():
         #"GTE-Large-EN-v1.5": feature_extractor_gte_large_en_v1_5, # (ready)
 
         # Stella Model
-        "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5 # (not ready)
+        #"Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5 # (not ready)
     }
 
     for model_name, feature_extractor in feature_extractors.items():
