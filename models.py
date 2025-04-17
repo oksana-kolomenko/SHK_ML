@@ -173,7 +173,7 @@ def create_gte_feature_extractor(model_name):
 #feature_extractor_gte_large_en_v1_5 = create_gte_feature_extractor("Alibaba-NLP/gte-large-en-v1.5") # custom code
 
 # stella_en_400M_v5 (SotA)
-# feature_extractor_stella_en_400M_v5 = create_feature_extractor("dunzhang/stella_en_400M_v5")  # [CLS], [SEP] # custom code
+feature_extractor_stella_en_400M_v5 = create_gen_feature_extractor("dunzhang/stella_en_400M_v5")  # [CLS], [SEP] # custom code
 
 #########
 ## NEW ##

@@ -4,7 +4,7 @@ from csv_saver import save_results_to_csv
 from helpers import load_labels, load_summaries, load_features, \
     concat_lr_rte, concat_hgbc_rte, concat_lr_txt_emb, concat_txt_hgbc, lr_txt_emb, hgbc_txt_emb
 from models import feature_extractor_all_minilm_l6_v2, feature_extractor_gtr_t5_base, \
-    feature_extractor_sentence_t5_base, feature_extractor_ember_v1
+    feature_extractor_sentence_t5_base, feature_extractor_ember_v1, feature_extractor_stella_en_400M_v5
 
 #from helpers_new import concat_hgbc_txt_emb
 """from models import feature_extractor_medembed_small_v0_1, feature_extractor_medembed_base_v0_1, \
@@ -53,7 +53,7 @@ def run_pca_txt_emb():
 
     feature_extractors = {
         # Stella en 400m v5
-        #"Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
+        "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
 
         # All MiniLM L6 v2
         #"all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
@@ -71,7 +71,7 @@ def run_pca_txt_emb():
         #"gte_modernbert_base": feature_extractor_gte_mbert_base,
 
         # Ember v1
-        "ember_v1": feature_extractor_ember_v1,
+        #"ember_v1": feature_extractor_ember_v1,
 
         # Clinical Longformer (done)
         #"Clinical-Longformer": feature_extractor_clinical,
@@ -125,14 +125,12 @@ def run_pca_txt_emb():
     }
 
     for model_name, feature_extractor in feature_extractors.items():
-
-        # Die Methoden müssen möglicherweise noch an pca angepasst werden
         # Logistic Regression
-        # no concatenation
         (lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_concatenation, lr_txt_best_params,
          lr_txt_pca_components, lr_txt_train_score, lr_txt_test_scores) = lr_txt_emb(
             dataset_name=posttrauma_dataset, n_components=35, emb_method=model_name,
             feature_extractor=feature_extractor, max_iter=10000, n_repeats=10,
+            #feature_extractor=feature_extractor, max_iter=10, n_repeats=1,
             raw_text_summaries=all_summaries, y=y_posttrauma)
 
         save_results_to_csv(output_file=f"{model_name}_LR_pca_train.csv", dataset_name=lr_txt_dataset,
