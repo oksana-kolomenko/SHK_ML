@@ -20,7 +20,6 @@ from sklearn.metrics import (
     average_precision_score
 )
 
-from csv_parser import create_patient_summaries
 from text_emb_aggregator import EmbeddingAggregator
 
 

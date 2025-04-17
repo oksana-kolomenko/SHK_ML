@@ -22,6 +22,7 @@ def create_patient_summaries(tab_data):
         summaries.append(summary)
     return summaries
 
+
 def patient_info(patient_info_n_values, tab_data):
     patient_info_row = dict(patient_info_n_values)
     patient_info_text = ""
