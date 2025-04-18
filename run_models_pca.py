@@ -31,12 +31,13 @@ def run_pca_txt_emb():
     #X_posttrauma_all = load_features(file_path="X.csv")
 
     # Conc 2 Paket
-    all_summaries = "Summaries.txt"
-    X_posttrauma_metrics = load_features(file_path="X_metrics.csv")
+    #all_summaries = "Summaries.txt"
+    #X_posttrauma_metrics = load_features(file_path="X_metrics.csv")
 
     # Conc 3 Paket
-    # nominal_summaries = "Summaries_nominal.txt"
-    # X_posttrauma_metrics = load_features(file_path="X_posttrauma_metrics.csv")
+    nominal_summaries = "Summaries_nominal.txt"
+    X_posttrauma_metrics = load_features(file_path="X_posttrauma_metrics.csv")
+    conc_art = "_conc_3_"
 
 
     y_posttrauma = load_labels()
@@ -179,7 +180,7 @@ def run_pca_txt_emb():
             dataset_name=posttrauma_dataset,
             emb_method=model_name,
             feature_extractor=feature_extractor,
-            raw_text_summaries=all_summaries,
+            raw_text_summaries=nominal_summaries,
             X_tabular=X_posttrauma_metrics, y=y_posttrauma,
             nominal_features=nominal_features,
             text_feature_column_name=text_feature,
@@ -187,7 +188,7 @@ def run_pca_txt_emb():
             n_components=35, n_repeats=10)
 
         # todo:save train&test results as list and iterate
-        save_results_to_csv(output_file=f"{model_name}_LR_conc_pca_train_all_sum_all_metrics.csv",
+        save_results_to_csv(output_file=f"{model_name}_LR_{conc_art}_pca_train_all_sum_all_metrics.csv",
                             dataset_name=lr_conc_dataset,
                             ml_method=lr_conc_ml_method,
                             emb_method=lr_conc_emb_method,
@@ -197,7 +198,7 @@ def run_pca_txt_emb():
                             metrics=lr_conc_train_score,
                             is_train=True)
 
-        save_results_to_csv(output_file=f"{model_name}_LR_conc_pca_test_all_sum_all_metrics.csv",
+        save_results_to_csv(output_file=f"{model_name}_LR_{conc_art}_pca_test_all_sum_all_metrics.csv",
                             dataset_name=lr_conc_dataset,
                             ml_method=lr_conc_ml_method,
                             emb_method=lr_conc_emb_method,
@@ -214,13 +215,13 @@ def run_pca_txt_emb():
             dataset_name=posttrauma_dataset,
             emb_method=model_name,
             feature_extractor=feature_extractor,
-            raw_text_summaries=all_summaries,
+            raw_text_summaries=nominal_summaries,
             X_tabular=X_posttrauma_metrics, y=y_posttrauma,
             nominal_features=nominal_features,
             text_feature_column_name=text_feature,
             n_components=35, n_repeats=10)
 
-        save_results_to_csv(output_file=f"{model_name}_HGBC_conc_pca_train_all_sum_all_metrics.csv",
+        save_results_to_csv(output_file=f"{model_name}_HGBC_{conc_art}_pca_train_all_sum_all_metrics.csv",
                             dataset_name=concat_hgbc_dataset,
                             ml_method=concat_hgbc_ml_method,
                             emb_method=concat_hgbc_emb_method,
@@ -230,7 +231,7 @@ def run_pca_txt_emb():
                             metrics=hgbc_conc_train_score,
                             is_train=True)
 
-        save_results_to_csv(output_file=f"{model_name}_HGBC_conc_pca_test_all_sum_all_metrics.csv",
+        save_results_to_csv(output_file=f"{model_name}_HGBC_{conc_art}_pca_test_all_sum_all_metrics.csv",
                             dataset_name=concat_hgbc_dataset,
                             ml_method=concat_hgbc_ml_method,
                             emb_method=concat_hgbc_emb_method,
