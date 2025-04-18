@@ -6,3 +6,8 @@ y.csv
 Summaries.txt
 X_excel.xls
 X_excel.xlsx
+__pycache__
+new.py
+Nominal_summaries.txt
+X_metrics.csv
+X_nominal.csv

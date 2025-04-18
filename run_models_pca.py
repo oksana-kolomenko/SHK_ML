@@ -35,8 +35,8 @@ def run_pca_txt_emb():
     #X_posttrauma_metrics = load_features(file_path="X_metrics.csv")
 
     # Conc 3 Paket
-    nominal_summaries = "Summaries_nominal.txt"
-    X_posttrauma_metrics = load_features(file_path="X_posttrauma_metrics.csv")
+    nominal_summaries = "Nominal_summaries.txt"
+    X_posttrauma_metrics = load_features(file_path="X_metrics.csv")
     conc_art = "_conc_3_"
 
 
