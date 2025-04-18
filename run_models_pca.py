@@ -27,12 +27,12 @@ def run_pca_txt_emb():
 
     # load features and labels
     # Conc 1 Paket
-    all_summaries = load_summaries("Summaries.txt")
-    X_posttrauma_all = load_features(file_path="X.csv")
+    #all_summaries = load_summaries("Summaries.txt")
+    #X_posttrauma_all = load_features(file_path="X.csv")
 
     # Conc 2 Paket
-    # all_summaries = "Summaries.txt"
-    # X_posttrauma_metrics = load_features(file_path="X_posttrauma_metrics.csv")
+    all_summaries = "Summaries.txt"
+    X_posttrauma_metrics = load_features(file_path="X_metrics.csv")
 
     # Conc 3 Paket
     # nominal_summaries = "Summaries_nominal.txt"
@@ -56,13 +56,13 @@ def run_pca_txt_emb():
         "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
 
         # All MiniLM L6 v2
-        #"all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
+        "all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
 
         # GTR T5 Base
-        #"GTR_T5_Base": feature_extractor_gtr_t5_base,
+        "GTR_T5_Base": feature_extractor_gtr_t5_base,
 
         # Sentence T5 Base
-        #"sentence_t5_base": feature_extractor_sentence_t5_base,
+        "sentence_t5_base": feature_extractor_sentence_t5_base,
 
         # modernbert-embed-base
         # "modernbert_embed_base": feature_extractor_mbert_embed_base,
@@ -71,7 +71,7 @@ def run_pca_txt_emb():
         #"gte_modernbert_base": feature_extractor_gte_mbert_base,
 
         # Ember v1
-        #"ember_v1": feature_extractor_ember_v1,
+        "ember_v1": feature_extractor_ember_v1,
 
         # Clinical Longformer (done)
         #"Clinical-Longformer": feature_extractor_clinical,
@@ -180,7 +180,7 @@ def run_pca_txt_emb():
             emb_method=model_name,
             feature_extractor=feature_extractor,
             raw_text_summaries=all_summaries,
-            X_tabular=X_posttrauma_all, y=y_posttrauma,
+            X_tabular=X_posttrauma_metrics, y=y_posttrauma,
             nominal_features=nominal_features,
             text_feature_column_name=text_feature,
             imp_max_iter=30, class_max_iter=10000,
@@ -215,7 +215,7 @@ def run_pca_txt_emb():
             emb_method=model_name,
             feature_extractor=feature_extractor,
             raw_text_summaries=all_summaries,
-            X_tabular=X_posttrauma_all, y=y_posttrauma,
+            X_tabular=X_posttrauma_metrics, y=y_posttrauma,
             nominal_features=nominal_features,
             text_feature_column_name=text_feature,
             n_components=35, n_repeats=10)
