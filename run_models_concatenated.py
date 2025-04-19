@@ -46,8 +46,8 @@ def run_text_concatenated():
     # X_posttrauma_metrics = load_features(file_path="X_posttrauma_metrics.csv")
 
     # Conc 3 Paket
-    nominal_summaries = "Summaries_nominal.txt"
-    X_posttrauma_metrics = load_features(file_path="X_posttrauma_metrics.csv")
+    nominal_summaries = "Nominal_summaries.txt"
+    X_posttrauma_metrics = load_features(file_path="X_metrics.csv")
     conc_art = "_conc_3_"
 
     y_posttrauma = load_labels()
