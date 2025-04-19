@@ -5,7 +5,8 @@ from csv_saver import save_results_to_csv
 from helpers import (load_labels, load_features, load_summaries,
                      concat_lr_rte, concat_hgbc_rte, concat_txt_hgbc,
                      concat_lr_txt_emb)
-from models import (feature_extractor_all_minilm_l6_v2, feature_extractor_ember_v1)
+from models import (feature_extractor_all_minilm_l6_v2, feature_extractor_ember_v1, feature_extractor_stella_en_400M_v5,
+                    feature_extractor_sentence_t5_base, feature_extractor_gtr_t5_base)
 
 """from models import feature_extractor_medembed_small_v0_1, feature_extractor_medembed_base_v0_1, \
     feature_extractor_gte_small, feature_extractor_gte_base, feature_extractor_gte_base_en_v1_5, \
@@ -37,16 +38,17 @@ def run_text_concatenated():
 
     # load features and labels
     # Conc 1 Paket
-    all_summaries = load_summaries("Summaries.txt")
-    X_posttrauma_all = load_features(file_path="X.csv")
+    #all_summaries = load_summaries("Summaries.txt")
+    #X_posttrauma_all = load_features(file_path="X.csv")
 
     # Conc 2 Paket
     # all_summaries = "Summaries.txt"
     # X_posttrauma_metrics = load_features(file_path="X_posttrauma_metrics.csv")
 
     # Conc 3 Paket
-    # nominal_summaries = "Summaries_nominal.txt"
-    # X_posttrauma_metrics = load_features(file_path="X_posttrauma_metrics.csv")
+    nominal_summaries = "Summaries_nominal.txt"
+    X_posttrauma_metrics = load_features(file_path="X_posttrauma_metrics.csv")
+    conc_art = "_conc_3_"
 
     y_posttrauma = load_labels()
 
@@ -69,20 +71,18 @@ def run_text_concatenated():
     ]
 
     feature_extractors = {
-        """
-        returns a pipeline 
-        """
+
         # Stella en 400m v5
-        #"Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
+        "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
 
         # All MiniLM L6 v2
-        #"all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
+        "all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
 
         # GTR T5 Base
-        #"GTR_T5_Base": feature_extractor_gtr_t5_base,
+        "GTR_T5_Base": feature_extractor_gtr_t5_base,
 
         # Sentence T5 Base
-        #"sentence_t5_base": feature_extractor_sentence_t5_base,
+        "sentence_t5_base": feature_extractor_sentence_t5_base,
 
         # modernbert-embed-base
         #"modernbert_embed_base": feature_extractor_mbert_embed_base,
@@ -155,15 +155,15 @@ def run_text_concatenated():
             dataset_name=posttrauma_dataset,
             emb_method=model_name,
             feature_extractor=feature_extractor,
-            raw_text_summaries=all_summaries,
-            X_tabular=X_posttrauma_all, y=y_posttrauma,
+            raw_text_summaries=nominal_summaries,
+            X_tabular=X_posttrauma_metrics, y=y_posttrauma,
             nominal_features=nominal_features,
             text_feature_column_name=text_feature,
             n_repeats=10,
             #n_repeats=1,
             n_components=None)
 
-        save_results_to_csv(output_file=f"{model_name}_HGBC_conc_train_all_sum_all_metrics.csv",
+        save_results_to_csv(output_file=f"{model_name}_HGBC{conc_art}train_all_sum_all_metrics.csv",
                             dataset_name=hgbc_conc_dataset,
                             ml_method=hgbc_conc_ml_method,
                             emb_method=hgbc_conc_emb_method,
@@ -173,7 +173,7 @@ def run_text_concatenated():
                             metrics=hgbc_conc_train_score,
                             is_train=True)
 
-        save_results_to_csv(output_file=f"{model_name}_HGBC_conc_test_all_sum_all_metrics.csv",
+        save_results_to_csv(output_file=f"{model_name}_HGBC{conc_art}test_all_sum_all_metrics.csv",
                             dataset_name=hgbc_conc_dataset,
                             ml_method=hgbc_conc_ml_method,
                             emb_method=hgbc_conc_emb_method,
@@ -189,14 +189,14 @@ def run_text_concatenated():
             dataset_name=posttrauma_dataset,
             emb_method=model_name,
             feature_extractor=feature_extractor,
-            raw_text_summaries=all_summaries,
-            X_tabular=X_posttrauma_all, y=y_posttrauma,
+            raw_text_summaries=nominal_summaries,
+            X_tabular=X_posttrauma_metrics, y=y_posttrauma,
             nominal_features=nominal_features,
             text_feature_column_name=text_feature,
             imp_max_iter=30, class_max_iter=10000,
             n_components=None, n_repeats=10)
 
-        save_results_to_csv(output_file=f"{model_name}_LR_conc_train_all_sum_all_metrics.csv",
+        save_results_to_csv(output_file=f"{model_name}_LR{conc_art}train_all_sum_all_metrics.csv",
                             dataset_name=lr_conc_dataset,
                             ml_method=lr_conc_ml_method,
                             emb_method=lr_conc_emb_method,
@@ -206,7 +206,7 @@ def run_text_concatenated():
                             metrics=lr_conc_train_score,
                             is_train=True)
 
-        save_results_to_csv(output_file=f"{model_name}_LR_conc_test_all_sum_all_metrics.csv",
+        save_results_to_csv(output_file=f"{model_name}_LR{conc_art}test_all_sum_all_metrics.csv",
                             dataset_name=lr_conc_dataset,
                             ml_method=lr_conc_ml_method,
                             emb_method=lr_conc_emb_method,

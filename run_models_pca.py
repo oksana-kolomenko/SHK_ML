@@ -27,17 +27,19 @@ def run_pca_txt_emb():
 
     # load features and labels
     # Conc 1 Paket
-    #all_summaries = load_summaries("Summaries.txt")
-    #X_posttrauma_all = load_features(file_path="X.csv")
+    all_summaries = load_summaries("Summaries.txt")
+    X_posttrauma_all = load_features(file_path="X.csv")
+    conc_art = "_conc_1_"
 
     # Conc 2 Paket
     #all_summaries = "Summaries.txt"
     #X_posttrauma_metrics = load_features(file_path="X_metrics.csv")
+    #conc_art = "_conc_2_"
 
     # Conc 3 Paket
-    nominal_summaries = "Nominal_summaries.txt"
-    X_posttrauma_metrics = load_features(file_path="X_metrics.csv")
-    conc_art = "_conc_3_"
+    #nominal_summaries = "Nominal_summaries.txt"
+    #X_posttrauma_metrics = load_features(file_path="X_metrics.csv")
+    #conc_art = "_conc_3_"
 
 
     y_posttrauma = load_labels()
@@ -180,8 +182,8 @@ def run_pca_txt_emb():
             dataset_name=posttrauma_dataset,
             emb_method=model_name,
             feature_extractor=feature_extractor,
-            raw_text_summaries=nominal_summaries,
-            X_tabular=X_posttrauma_metrics, y=y_posttrauma,
+            raw_text_summaries=all_summaries,
+            X_tabular=X_posttrauma_all, y=y_posttrauma,
             nominal_features=nominal_features,
             text_feature_column_name=text_feature,
             imp_max_iter=30, class_max_iter=10000,
@@ -215,8 +217,8 @@ def run_pca_txt_emb():
             dataset_name=posttrauma_dataset,
             emb_method=model_name,
             feature_extractor=feature_extractor,
-            raw_text_summaries=nominal_summaries,
-            X_tabular=X_posttrauma_metrics, y=y_posttrauma,
+            raw_text_summaries=all_summaries,
+            X_tabular=X_posttrauma_all, y=y_posttrauma,
             nominal_features=nominal_features,
             text_feature_column_name=text_feature,
             n_components=35, n_repeats=10)
