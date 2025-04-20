@@ -42,13 +42,14 @@ def run_text_concatenated():
     #X_posttrauma_all = load_features(file_path="X.csv")
 
     # Conc 2 Paket
-    # all_summaries = "Summaries.txt"
-    # X_posttrauma_metrics = load_features(file_path="X_posttrauma_metrics.csv")
+    all_summaries = "Summaries.txt"
+    X_posttrauma_metrics = load_features(file_path="X_metrics.csv")
+    conc_art = "conc_2"
 
     # Conc 3 Paket
-    nominal_summaries = "Nominal_summaries.txt"
-    X_posttrauma_metrics = load_features(file_path="X_metrics.csv")
-    conc_art = "_conc_3_"
+    #nominal_summaries = "Nominal_summaries.txt"
+    #X_posttrauma_metrics = load_features(file_path="X_metrics.csv")
+    #conc_art = "_conc_3_"
 
     y_posttrauma = load_labels()
 
@@ -155,7 +156,7 @@ def run_text_concatenated():
             dataset_name=posttrauma_dataset,
             emb_method=model_name,
             feature_extractor=feature_extractor,
-            raw_text_summaries=nominal_summaries,
+            raw_text_summaries=all_summaries,
             X_tabular=X_posttrauma_metrics, y=y_posttrauma,
             nominal_features=nominal_features,
             text_feature_column_name=text_feature,
@@ -189,7 +190,7 @@ def run_text_concatenated():
             dataset_name=posttrauma_dataset,
             emb_method=model_name,
             feature_extractor=feature_extractor,
-            raw_text_summaries=nominal_summaries,
+            raw_text_summaries=all_summaries,
             X_tabular=X_posttrauma_metrics, y=y_posttrauma,
             nominal_features=nominal_features,
             text_feature_column_name=text_feature,

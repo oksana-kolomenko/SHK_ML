@@ -56,16 +56,16 @@ def run_pca_txt_emb():
 
     feature_extractors = {
         # Stella en 400m v5
-        "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
+        #"Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
 
         # All MiniLM L6 v2
-        "all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
+        #"all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
 
         # GTR T5 Base
-        "GTR_T5_Base": feature_extractor_gtr_t5_base,
+        #"GTR_T5_Base": feature_extractor_gtr_t5_base,
 
         # Sentence T5 Base
-        "sentence_t5_base": feature_extractor_sentence_t5_base,
+        #"sentence_t5_base": feature_extractor_sentence_t5_base,
 
         # modernbert-embed-base
         # "modernbert_embed_base": feature_extractor_mbert_embed_base,
