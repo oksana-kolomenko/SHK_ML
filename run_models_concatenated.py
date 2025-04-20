@@ -38,13 +38,14 @@ def run_text_concatenated():
 
     # load features and labels
     # Conc 1 Paket
-    #all_summaries = load_summaries("Summaries.txt")
-    #X_posttrauma_all = load_features(file_path="X.csv")
+    all_summaries = load_summaries("Summaries.txt")
+    X_posttrauma_all = load_features(file_path="X.csv")
+    conc_art = "conc_1"
 
     # Conc 2 Paket
-    all_summaries = "Summaries.txt"
-    X_posttrauma_metrics = load_features(file_path="X_metrics.csv")
-    conc_art = "conc_2"
+    #all_summaries = "Summaries.txt"
+    #X_posttrauma_metrics = load_features(file_path="X_metrics.csv")
+    #conc_art = "conc_2"
 
     # Conc 3 Paket
     #nominal_summaries = "Nominal_summaries.txt"
@@ -157,7 +158,7 @@ def run_text_concatenated():
             emb_method=model_name,
             feature_extractor=feature_extractor,
             raw_text_summaries=all_summaries,
-            X_tabular=X_posttrauma_metrics, y=y_posttrauma,
+            X_tabular=X_posttrauma_all, y=y_posttrauma,
             nominal_features=nominal_features,
             text_feature_column_name=text_feature,
             n_repeats=10,
@@ -191,7 +192,7 @@ def run_text_concatenated():
             emb_method=model_name,
             feature_extractor=feature_extractor,
             raw_text_summaries=all_summaries,
-            X_tabular=X_posttrauma_metrics, y=y_posttrauma,
+            X_tabular=X_posttrauma_all, y=y_posttrauma,
             nominal_features=nominal_features,
             text_feature_column_name=text_feature,
             imp_max_iter=30, class_max_iter=10000,
