@@ -81,10 +81,10 @@ def run_text_concatenated():
        # "all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
 
         # GTR T5 Base
-        "GTR_T5_Base": feature_extractor_gtr_t5_base,
+        #"GTR_T5_Base": feature_extractor_gtr_t5_base,
 
         # Sentence T5 Base
-        "sentence_t5_base": feature_extractor_sentence_t5_base,
+        #"sentence_t5_base": feature_extractor_sentence_t5_base,
 
         # modernbert-embed-base
         #"modernbert_embed_base": feature_extractor_mbert_embed_base,
