@@ -25,7 +25,7 @@ if __name__ == '__main__':
     #print_sentence_embedding(text)
     #run_models_on_txt_emb()
     run_text_concatenated()
-    run_pca_txt_emb()
+    #run_pca_txt_emb()
     #run_pca_rte()
     #run_models_on_table_data()
     #run()
