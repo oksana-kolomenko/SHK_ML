@@ -598,7 +598,7 @@ def concat_lr_txt_emb(dataset_name, emb_method,
                       feature_extractor, raw_text_summaries,
                       X_tabular, y, nominal_features, text_feature_column_name,
                       imp_max_iter, class_max_iter, n_repeats,
-                      n_components, n_splits=3):
+                      n_components, concatenation, n_splits=3):
     start_time = time.time()
     readable_time = time.strftime("%H:%M:%S", time.localtime(start_time))
     print(f"Starting the concat_lr_txt_emb method {readable_time}")
@@ -606,7 +606,6 @@ def concat_lr_txt_emb(dataset_name, emb_method,
     dataset = dataset_name
     ml_method = "Logistic Regression"
     emb_method = emb_method
-    concatenation = "yes"
     metrics_per_fold = []
     skf = StratifiedKFold(n_splits=n_splits,
                           shuffle=True,
@@ -855,11 +854,10 @@ def concat_txt_hgbc(dataset_name, emb_method,
                     X_tabular, y, text_feature_column_name,
                     nominal_features, feature_extractor,
                     raw_text_summaries, n_repeats,
-                    n_components, n_splits=3):
+                    n_components, concatenation, n_splits=3):
     dataset = dataset_name
     ml_method = "HistGradientBoostingClassifier"
     emb_method = emb_method
-    concatenation = "yes"
     metrics_per_fold = []
     skf = StratifiedKFold(n_splits=n_splits,
                           shuffle=True,
