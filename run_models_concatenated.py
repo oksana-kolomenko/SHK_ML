@@ -162,10 +162,11 @@ def run_text_concatenated():
             nominal_features=nominal_features,
             text_feature_column_name=text_feature,
             n_repeats=10,
+            concatenation=conc_art,
             #n_repeats=1,
             n_components=None)
 
-        save_results_to_csv(output_file=f"{model_name}_HGBC{conc_art}train_all_sum_all_metrics.csv",
+        save_results_to_csv(output_file=f"{model_name}_HGBC{conc_art}train.csv",
                             dataset_name=hgbc_conc_dataset,
                             ml_method=hgbc_conc_ml_method,
                             emb_method=hgbc_conc_emb_method,
@@ -175,7 +176,7 @@ def run_text_concatenated():
                             metrics=hgbc_conc_train_score,
                             is_train=True)
 
-        save_results_to_csv(output_file=f"{model_name}_HGBC{conc_art}test_all_sum_all_metrics.csv",
+        save_results_to_csv(output_file=f"{model_name}_HGBC{conc_art}test.csv",
                             dataset_name=hgbc_conc_dataset,
                             ml_method=hgbc_conc_ml_method,
                             emb_method=hgbc_conc_emb_method,
@@ -196,9 +197,10 @@ def run_text_concatenated():
             nominal_features=nominal_features,
             text_feature_column_name=text_feature,
             imp_max_iter=30, class_max_iter=10000,
+            concatenation=conc_art,
             n_components=None, n_repeats=10)
 
-        save_results_to_csv(output_file=f"{model_name}_LR{conc_art}train_all_sum_all_metrics.csv",
+        save_results_to_csv(output_file=f"{model_name}_LR{conc_art}train.csv",
                             dataset_name=lr_conc_dataset,
                             ml_method=lr_conc_ml_method,
                             emb_method=lr_conc_emb_method,
@@ -208,7 +210,7 @@ def run_text_concatenated():
                             metrics=lr_conc_train_score,
                             is_train=True)
 
-        save_results_to_csv(output_file=f"{model_name}_LR{conc_art}test_all_sum_all_metrics.csv",
+        save_results_to_csv(output_file=f"{model_name}_LR{conc_art}test.csv",
                             dataset_name=lr_conc_dataset,
                             ml_method=lr_conc_ml_method,
                             emb_method=lr_conc_emb_method,
