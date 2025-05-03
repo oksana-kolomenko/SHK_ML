@@ -17,7 +17,9 @@ def create_patient_summaries(tab_data):
     for _, row in df_tab_data.iterrows():
         patient_number += 1
         patient_info_n_values = row.to_dict()
-        summary = (f"The following is the data for patient number {patient_number}." +
+        #summary = (f"The following is the data for patient number {patient_number}." +
+        #           patient_info(patient_info_n_values, tab_data))
+        summary = (f"We want to predict health risks. The following is the data for patient number {patient_number}." +
                    patient_info(patient_info_n_values, tab_data))
         summaries.append(summary)
     return summaries

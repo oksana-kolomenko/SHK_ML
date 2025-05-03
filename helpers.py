@@ -886,7 +886,7 @@ def concat_txt_hgbc(dataset_name, emb_method,
         ("embedding_aggregator", EmbeddingAggregator(
             feature_extractor=feature_extractor,
             is_sentence_transformer=is_sentence_transformer)),
-        ("debug_text", DebugTransformer(name="Text Debug"))
+        #("debug_text", DebugTransformer(name="Text Debug"))
     ]
     if n_components:
         pipeline_text_steps.append(("numerical_scaler", StandardScaler()))
