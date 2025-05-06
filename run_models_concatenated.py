@@ -43,14 +43,14 @@ def run_text_concatenated():
     #conc_art = "conc_1"
 
     # Conc 2 Paket
-    all_summaries = "Summaries.txt"
-    X_posttrauma_metrics = load_features(file_path="X_metrics.csv")
-    conc_art = "conc_2"
+    #all_summaries = "Summaries.txt"
+    #X_posttrauma_metrics = load_features(file_path="X_metrics.csv")
+    #conc_art = "conc_2"
 
     # Conc 3 Paket
-    #nominal_summaries = "Nominal_summaries.txt"
-    #X_posttrauma_metrics = load_features(file_path="X_metrics.csv")
-    #conc_art = "_conc_3_"
+    nominal_summaries = "Nominal_summaries.txt"
+    X_posttrauma_metrics = load_features(file_path="X_metrics.csv")
+    conc_art = "_conc_3_"
 
     y_posttrauma = load_labels()
 
@@ -78,7 +78,7 @@ def run_text_concatenated():
         #"Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
 
         # All MiniLM L6 v2
-        #"all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
+        "all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
 
         # GTR T5 Base
         #"GTR_T5_Base": feature_extractor_gtr_t5_base,
@@ -157,7 +157,7 @@ def run_text_concatenated():
             dataset_name=posttrauma_dataset,
             emb_method=model_name,
             feature_extractor=feature_extractor,
-            raw_text_summaries=all_summaries,
+            raw_text_summaries=nominal_summaries,
             X_tabular=X_posttrauma_metrics, y=y_posttrauma,
             nominal_features=nominal_features,
             text_feature_column_name=text_feature,
@@ -192,7 +192,7 @@ def run_text_concatenated():
             dataset_name=posttrauma_dataset,
             emb_method=model_name,
             feature_extractor=feature_extractor,
-            raw_text_summaries=all_summaries,
+            raw_text_summaries= nominal_summaries,
             X_tabular=X_posttrauma_metrics, y=y_posttrauma,
             nominal_features=nominal_features,
             text_feature_column_name=text_feature,
