@@ -8,7 +8,7 @@ class EmbeddingAggregator(BaseEstimator, TransformerMixin):
         self.method = method
         self.feature_extractor = feature_extractor
         self.is_sentence_transformer = is_sentence_transformer
-        self.data_ = None
+        #self.data_ = None
 
     # Create embedding based on [CLS] token
     def _embedding_cls(self, text_features):

@@ -3,7 +3,7 @@
 import time
 import numpy as np
 
-from csv_parser import create_patient_summaries
+from csv_parser import create_patient_summaries, csv_to_kv_textfile
 from dummy import print_special_tokens, print_sentence_embedding
 from helpers import load_summaries
 from run_models_pca import run_pca_txt_emb
@@ -25,6 +25,8 @@ if __name__ == '__main__':
         for summary in new_patient_summaries:
             f.write(summary + "\n")
     print(f"Patient summaries written")"""
+
+    #csv_to_kv_textfile(input_csv_path="X.csv", output_txt_path="KV_all_summaries.txt")
 
     #print(len(patient_summaries))
     #print_special_tokens()
