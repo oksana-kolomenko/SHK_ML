@@ -23,7 +23,14 @@ from values import Dataset
 
 
 def run_pca_txt_emb():
-    posttrauma_dataset = Dataset.POSTTRAUMA.value
+    #posttrauma_dataset = Dataset.POSTTRAUMA.value
+    cybersecurity_dataset = Dataset.CYBERSECURITY.value
+
+    # load features and labels
+    # posttrauma_summaries = load_summaries("Summaries.txt")
+    cybersecurity_summaries = load_summaries("cybersecurity_nominal_summaries.txt")
+    # posttrauma_summaries = load_summaries("Summaries.txt")
+    y_cybersecurity = load_labels("y_cybersecurity_intrusion_data.csv")
 
     # load features and labels
     # Conc 1 Paket
@@ -32,9 +39,9 @@ def run_pca_txt_emb():
     #conc_art = "_conc_1_"
 
     # Conc 2 Paket
-    all_summaries = "Summaries.txt"
-    X_posttrauma_metrics = load_features(file_path="X_metrics.csv")
-    conc_art = "_conc_2_"
+    #all_summaries = "Summaries.txt"
+    #X_posttrauma_metrics = load_features(file_path="X_metrics.csv")
+    #conc_art = "_conc_2_"
 
     # Conc 3 Paket
     #nominal_summaries = "Nominal_summaries.txt"
@@ -56,19 +63,19 @@ def run_pca_txt_emb():
 
     feature_extractors = {
         # Stella en 400m v5
-        #"Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
+        "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
 
         # All MiniLM L6 v2
-        #"all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
+        "all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
 
         # GTR T5 Base
-        #"GTR_T5_Base": feature_extractor_gtr_t5_base,
+        "GTR_T5_Base": feature_extractor_gtr_t5_base,
 
         # Sentence T5 Base
-        #"sentence_t5_base": feature_extractor_sentence_t5_base,
+        "sentence_t5_base": feature_extractor_sentence_t5_base,
 
         # modernbert-embed-base
-        # "modernbert_embed_base": feature_extractor_mbert_embed_base,
+        #"modernbert_embed_base": feature_extractor_mbert_embed_base,
 
         # GTE modernbert base
         #"gte_modernbert_base": feature_extractor_gte_mbert_base,
@@ -215,11 +222,11 @@ def run_pca_txt_emb():
         (concat_hgbc_dataset, concat_hgbc_ml_method, concat_hgbc_emb_method,
          hgbc_conc_yesno, hgbc_best_params, hgbc_pca_components, hgbc_conc_train_score,
          hgbc_conc_test_scores) = concat_txt_hgbc(
-            dataset_name=posttrauma_dataset,
+            dataset_name=cybersecurity_dataset,
             emb_method=model_name,
             feature_extractor=feature_extractor,
-            raw_text_summaries=all_summaries,
-            X_tabular=X_posttrauma_metrics, y=y_posttrauma,
+            raw_text_summaries=cybersecurity_summaries,
+            X_tabular=X_cybersecurity, y=y_cybersecurity,
             nominal_features=nominal_features,
             text_feature_column_name=text_feature,
             concatenation=conc_art,

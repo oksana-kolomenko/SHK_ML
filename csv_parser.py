@@ -25,6 +25,26 @@ def create_patient_summaries(tab_data):
     return summaries
 
 
+def create_general_summaries(tab_data):
+    df_tab_data = pd.read_csv(tab_data)
+    summaries = []
+    line_number = 0
+
+    for _, row in df_tab_data.iterrows():
+        line_number += 1
+        summary = f"The following is the data for sample number {line_number}: "
+
+        details = []
+        for col in df_tab_data.columns:
+            value = row[col]
+            details.append(f"{col} is {value}")
+
+        summary += "; ".join(details) + "."
+        summaries.append(summary)
+
+    return summaries
+
+
 def csv_to_kv_textfile(input_csv_path, output_txt_path):
     df = pd.read_csv(input_csv_path)
 

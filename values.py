@@ -3,6 +3,7 @@ from enum import Enum
 
 class Dataset(Enum):
     POSTTRAUMA = "posttrauma"
+    CYBERSECURITY = "cybersecurity"
 
 
 class Classification(Enum):

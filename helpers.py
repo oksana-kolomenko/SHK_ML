@@ -31,7 +31,7 @@ def load_features(file_path, delimiter=','):
 
 
 # Load labels
-def load_labels(file_path="y.csv", delimiter=','):
+def load_labels(file_path, delimiter=','):
     data = pd.read_csv(file_path, delimiter=delimiter)
     return np.array(data.values.ravel())
 
