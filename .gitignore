@@ -13,7 +13,7 @@ Nominal_summaries.txt
 KV_all_summaries.txt
 X_metrics.csv
 X_nominal.csv
-cybersecurity_disease_summaries.txt
+cybersecurity_nominal_summaries.txt
 X_cybersecurity_intrusion_data.csv
 y_cybersecurity_intrusion_data.csv
 lung_disease_summaries.txt
