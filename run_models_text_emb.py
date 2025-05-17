@@ -9,14 +9,13 @@ from values import Dataset
 
 
 def run_models_on_txt_emb():
-    #posttrauma_dataset = Dataset.POSTTRAUMA.value
-    cybersecurity_dataset = Dataset.CYBERSECURITY.value
+    # posttrauma_dataset = Dataset.POSTTRAUMA.value
+    # posttrauma_summaries = load_summaries("Summaries.txt")
 
-    # load features and labels
-    #posttrauma_summaries = load_summaries("Summaries.txt")
+    cybersecurity_dataset = Dataset.CYBERSECURITY.value
     cybersecurity_summaries = load_summaries("cybersecurity_nominal_summaries.txt")
-    #posttrauma_summaries = load_summaries("Summaries.txt")
     y_cybersecurity = load_labels("y_cybersecurity_intrusion_data.csv")
+
     print('Starting to create FE')
     feature_extractors = {
         # Clinical Longformer (done)
@@ -68,7 +67,7 @@ def run_models_on_txt_emb():
         # "GTE-Large-EN-v1.5": feature_extractor_gte_large_en_v1_5, # (ready)
 
         # Stella Model
-        "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5, # only GPU
+        #"Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5, # only GPU
 
         # All MiniLM L6 v2
         "all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2, # runs
