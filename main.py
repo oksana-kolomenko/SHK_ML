@@ -6,7 +6,9 @@ import numpy as np
 from csv_parser import create_patient_summaries, csv_to_kv_textfile, create_general_summaries
 from dummy import print_special_tokens, print_sentence_embedding
 from helpers import load_summaries
-from run_models_pca import run_pca_txt_emb
+#from run_models_text_emb import run_models_on_txt_emb
+
+#from run_models_pca import run_pca_txt_emb
 
 #from dummy import test
 #from run_models_table_data import run_models_on_table_data
@@ -27,10 +29,16 @@ if __name__ == '__main__':
     print(f"Patient summaries written")"""
 
     """nominal_cybersecurity_summaries = create_general_summaries("X_cybersecurity_intrusion_data.csv")
-    with open("cybersecurity_nominal_summaries.txt", "w", encoding="utf-8") as f:
+    with open("cybersecurity_summaries.txt", "w", encoding="utf-8") as f:
         for summary in nominal_cybersecurity_summaries:
             f.write(summary + "\n")
     print(f"Cybsecurity summaries written")"""
+
+    """nominal_ld_summaries = create_general_summaries("X_lung_disease_data.csv")
+    with open("lung_disease_nominal_summaries.txt", "w", encoding="utf-8") as f:
+        for summary in nominal_ld_summaries:
+            f.write(summary + "\n")
+    print(f"Lung disease summaries written")"""
 
     #csv_to_kv_textfile(input_csv_path="X.csv", output_txt_path="KV_all_summaries.txt")
 

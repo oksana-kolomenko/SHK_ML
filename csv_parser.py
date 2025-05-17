@@ -33,10 +33,13 @@ def create_general_summaries(tab_data):
     for _, row in df_tab_data.iterrows():
         line_number += 1
         summary = f"The following is the data for sample number {line_number}: "
+        #summary = f"We want to predict whether patients will recover from their lung disease. The following is the data for patient number {line_number}: "
 
         details = []
         for col in df_tab_data.columns:
             value = row[col]
+            if pd.isna(value) or value == '':
+                continue  # Skip missing or empty values
             details.append(f"{col} is {value}")
 
         summary += "; ".join(details) + "."

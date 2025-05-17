@@ -13,7 +13,7 @@ def run_models_on_txt_emb():
     # posttrauma_summaries = load_summaries("Summaries.txt")
 
     cybersecurity_dataset = Dataset.CYBERSECURITY.value
-    cybersecurity_summaries = load_summaries("cybersecurity_nominal_summaries.txt")
+    cybersecurity_summaries = load_summaries("cybersecurity_summaries.txt")
     y_cybersecurity = load_labels("y_cybersecurity_intrusion_data.csv")
 
     print('Starting to create FE')
@@ -116,10 +116,15 @@ def run_models_on_txt_emb():
         # Logistic Regression
         (lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_conc, lr_txt_best_params,
          lr_txt_pca_components, lr_txt_train_score, lr_txt_test_scores) = lr_txt_emb(
-            dataset_name=cybersecurity_dataset, n_components=None, emb_method=model_name,
+            dataset_name=cybersecurity_dataset,
+            n_components=None,
+            emb_method=model_name,
             #feature_extractor=feature_extractor, max_iter=100, n_repeats=1,
-            feature_extractor=feature_extractor, max_iter=10000, n_repeats=10,
-            raw_text_summaries=cybersecurity_summaries, y=y_cybersecurity)
+            feature_extractor=feature_extractor,
+            max_iter=10000,
+            n_repeats=10,
+            raw_text_summaries=cybersecurity_summaries,
+            y=y_cybersecurity)
 
         save_results_to_csv(output_file=f"{model_name}_LR_train_{cybersecurity_dataset}.csv", dataset_name=lr_txt_dataset,
                             ml_method=lr_txt_ml_method, emb_method=lr_txt_emb_method, concatenation=lr_txt_conc,
