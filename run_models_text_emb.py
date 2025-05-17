@@ -14,7 +14,7 @@ def run_models_on_txt_emb():
 
     # load features and labels
     #posttrauma_summaries = load_summaries("Summaries.txt")
-    cybersecurity_summaries = load_summaries("cybersecurity_nominal_summaries.txt")
+    cybersecurity_summaries = load_summaries("cybersecurity_nominal_summaries")
     #posttrauma_summaries = load_summaries("Summaries.txt")
     y_cybersecurity = load_labels("y_cybersecurity_intrusion_data.csv")
     print('Starting to create FE')
