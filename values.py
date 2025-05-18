@@ -4,6 +4,18 @@ from enum import Enum
 class Dataset(Enum):
     POSTTRAUMA = "posttrauma"
     CYBERSECURITY = "cybersecurity"
+    LUNG_DISEASE = "lung_disease"
+
+
+class Textstyle(Enum):
+    """
+    0 = No explanation sentence, miss null values;
+    1 = With explanation sentence, miss null values;
+    2 =
+    """
+    ONE = "one"
+    TWO = "two"
+    THREE = "three"
 
 
 class Classification(Enum):

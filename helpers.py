@@ -15,34 +15,11 @@ from sklearn.preprocessing import OneHotEncoder, MinMaxScaler, OrdinalEncoder, S
     FunctionTransformer  # , OrdinalEncoder
 # from sklearn.base import TransformerMixin, BaseEstimator
 from sklearn.model_selection import StratifiedKFold, GridSearchCV, RepeatedStratifiedKFold
-from sklearn.metrics import (
-    roc_auc_score, recall_score, precision_score, f1_score, balanced_accuracy_score, confusion_matrix,
-    average_precision_score
-)
+from sklearn.metrics import (roc_auc_score, recall_score, precision_score, f1_score,
+                             balanced_accuracy_score, confusion_matrix, average_precision_score)
 
+from csv_parser import create_patient_summaries, create_general_summaries
 from text_emb_aggregator import EmbeddingAggregator
-
-
-# Load features
-def load_features(file_path, delimiter=','):
-    data = pd.read_csv(file_path, delimiter=delimiter)
-    print(f"features: {data}")
-    return data
-
-
-# Load labels
-def load_labels(file_path, delimiter=','):
-    data = pd.read_csv(file_path, delimiter=delimiter)
-    return np.array(data.values.ravel())
-
-
-# Load features as text summaries (create if doesn't exist)
-def load_summaries(file_name):
-    if not os.path.exists(file_name):
-        print("File not found")
-    with open(file_name, "r") as file:
-        summaries_list = [line.strip() for line in file.readlines()]
-    return summaries_list
 
 
 def logistic_regression(dataset_name, X, y, nominal_features, n_repeats=10, n_splits=3, n_components=None):
@@ -886,7 +863,7 @@ def concat_txt_hgbc(dataset_name, emb_method,
         ("embedding_aggregator", EmbeddingAggregator(
             feature_extractor=feature_extractor,
             is_sentence_transformer=is_sentence_transformer)),
-        #("debug_text", DebugTransformer(name="Text Debug"))
+        # ("debug_text", DebugTransformer(name="Text Debug"))
     ]
     if n_components:
         pipeline_text_steps.append(("numerical_scaler", StandardScaler()))
