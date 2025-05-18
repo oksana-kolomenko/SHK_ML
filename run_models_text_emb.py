@@ -99,7 +99,8 @@ def run_models_on_txt_emb():
             dataset_name=cybersecurity_dataset,
             emb_method=model_name,
             n_components=None,
-            n_repeats=10,
+            #n_repeats=10,
+            n_repeats=1,
             feature_extractor=feature_extractor,
             summaries=cybersecurity_summaries,
             y=y_cybersecurity)
