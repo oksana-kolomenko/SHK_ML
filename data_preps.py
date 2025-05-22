@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 from csv_parser import patient_info
-from values import Dataset, Textstyle
+from values import DatasetName, Textstyle
 
 
 # Load features
@@ -37,15 +37,15 @@ def write_summary(file_name, summaries):
 
 
 def create_summary(dataset_name, table_file, summaries_file, text_style):
-    if dataset_name == Dataset.POSTTRAUMA.value:
+    if dataset_name == DatasetName.POSTTRAUMA.value:
         all_patient_summaries = create_patient_summaries(table_file, text_style)
         write_summary(file_name=summaries_file, summaries=all_patient_summaries)
 
-    elif dataset_name == Dataset.CYBERSECURITY.value:
+    elif dataset_name == DatasetName.CYBERSECURITY.value:
         all_cybersecurity_summaries = create_general_summaries(table_file, text_style)
         write_summary(file_name=summaries_file, summaries=all_cybersecurity_summaries)
 
-    elif dataset_name == Dataset.LUNG_DISEASE.value:
+    elif dataset_name == DatasetName.LUNG_DISEASE.value:
         all_ld_summaries = create_general_summaries(table_file, text_style)
         write_summary(file_name=summaries_file, summaries=all_ld_summaries)
 

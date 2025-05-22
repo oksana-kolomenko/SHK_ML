@@ -17,7 +17,7 @@ from models import (feature_extractor_all_minilm_l6_v2, feature_extractor_ember_
 
 #from models import (feature_extractor_gte_large, feature_extractor_medembed_large_v0_1, feature_extractor_gte_large_en_v1_5)
 
-from values import Dataset
+from values import DatasetName
 
 
 def extract_features_to_csv(input_csv, nominal_features):
@@ -34,7 +34,7 @@ def extract_features_to_csv(input_csv, nominal_features):
 
 
 def run_text_concatenated():
-    posttrauma_dataset = Dataset.POSTTRAUMA.value
+    posttrauma_dataset = DatasetName.POSTTRAUMA.value
 
     # load features and labels
     # Conc 1 Paket
@@ -268,7 +268,7 @@ def run_text_concatenated():
 
 
 def run_rte_concatenated():
-    posttrauma_dataset = Dataset.POSTTRAUMA.value
+    posttrauma_dataset = DatasetName.POSTTRAUMA.value
 
     # load features and labels
     X_posttrauma = load_features()

@@ -1,18 +1,19 @@
 import numpy as np
 
 from csv_saver import save_results_to_csv
-from helpers import load_labels, load_summaries, lr_txt_emb, hgbc_txt_emb
+from data_preps import load_summaries, load_labels
+from helpers import lr_txt_emb, hgbc_txt_emb
 from bar_plotting import plot_bar_chart
 from models import feature_extractor_ember_v1, feature_extractor_stella_en_400M_v5, feature_extractor_all_minilm_l6_v2, \
     feature_extractor_gtr_t5_base, feature_extractor_sentence_t5_base
-from values import Dataset
+from values import DatasetName
 
 
 def run_models_on_txt_emb():
     # posttrauma_dataset = Dataset.POSTTRAUMA.value
     # posttrauma_summaries = load_summaries("Summaries.txt")
 
-    cybersecurity_dataset = Dataset.CYBERSECURITY.value
+    cybersecurity_dataset = DatasetName.CYBERSECURITY.value
     cybersecurity_summaries = load_summaries("cybersecurity_summaries.txt")
     y_cybersecurity = load_labels("y_cybersecurity_intrusion_data.csv")
 

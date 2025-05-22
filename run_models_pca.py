@@ -1,8 +1,8 @@
 import numpy as np
 
 from csv_saver import save_results_to_csv
-from helpers import load_labels, load_summaries, load_features, \
-    concat_lr_rte, concat_hgbc_rte, concat_lr_txt_emb, concat_txt_hgbc, lr_txt_emb, hgbc_txt_emb
+from data_preps import load_features, load_labels, load_summaries
+from helpers import concat_lr_rte, concat_hgbc_rte, concat_lr_txt_emb, concat_txt_hgbc, lr_txt_emb, hgbc_txt_emb
 from models import feature_extractor_all_minilm_l6_v2, feature_extractor_gtr_t5_base, \
     feature_extractor_sentence_t5_base, feature_extractor_ember_v1, feature_extractor_stella_en_400M_v5
 
@@ -19,24 +19,27 @@ from models import feature_extractor_all_minilm_l6_v2, feature_extractor_gtr_t5_
 """
 # from models import (feature_extractor_gte_large, feature_extractor_medembed_large_v0_1, feature_extractor_gte_large_en_v1_5)
 
-from values import Dataset
+from values import DatasetName
 
 
 def run_pca_txt_emb():
-    #posttrauma_dataset = Dataset.POSTTRAUMA.value
-    cybersecurity_dataset = Dataset.CYBERSECURITY.value
+    #dataset = Dataset.POSTTRAUMA.value
+    X = load_features("X_cybersecurity_intrusion_data.csv")
+    y = load_labels("y_cybersecurity_intrusion_data.csv")
+    summaries = load_summaries("cybersecurity_nominal_summaries.txt")
 
-    # load features and labels
-    # posttrauma_summaries = load_summaries("Summaries.txt")
-    cybersecurity_summaries = load_summaries("cybersecurity_nominal_summaries.txt")
-    # posttrauma_summaries = load_summaries("Summaries.txt")
-    y_cybersecurity = load_labels("y_cybersecurity_intrusion_data.csv")
+
+    # === CYBERSECURITY ===
+    dataset = DatasetName.CYBERSECURITY.value
+    X = load_features("X_cybersecurity_intrusion_data.csv")
+    y = load_labels("y_cybersecurity_intrusion_data.csv")
+    summaries = load_summaries("cybersecurity_nominal_summaries.txt")
 
     # load features and labels
     # Conc 1 Paket
     #all_summaries = load_summaries("Summaries.txt")
     #X_posttrauma_all = load_features(file_path="X.csv")
-    #conc_art = "_conc_1_"
+    conc_art = "_conc_1_"
 
     # Conc 2 Paket
     #all_summaries = "Summaries.txt"
@@ -49,7 +52,7 @@ def run_pca_txt_emb():
     #conc_art = "_conc_3_"
 
 
-    y_posttrauma = load_labels()
+    #y_posttrauma = load_labels()
 
     nominal_features = [
         'gender_birth',
@@ -428,7 +431,7 @@ def run_pca_txt_emb():
         )"""
 
 def run_pca_rte():
-    posttrauma_dataset = Dataset.POSTTRAUMA.value
+    posttrauma_dataset = DatasetName.POSTTRAUMA.value
     patient_summaries = load_summaries()
     y_posttrauma = load_labels()
     X_posttrauma = load_features()
