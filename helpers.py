@@ -180,14 +180,35 @@ def lr_rte(dataset_name, X, y, nominal_features, pca):
         scoring="neg_log_loss",
         cv=RepeatedStratifiedKFold(n_splits=n_splits, n_repeats=n_repeats, random_state=42)
     )
+    if dataset_name == DatasetName.POSTTRAUMA.value:
+        for train_index, test_index in skf.split(X, y):
+            X_train, X_test = X.iloc[train_index], X.iloc[test_index]
+            y_train, y_test = y[train_index], y[test_index]
 
-    for train_index, test_index in skf.split(X, y):
-        X_train, X_test = X.iloc[train_index], X.iloc[test_index]
-        y_train, y_test = y[train_index], y[test_index]
+            print(f"Log Reg rte test fitting... ")
 
-        print(f"Log Reg rte test fitting... ")
+            # Fit the model for each fold
+            search.fit(X_train, y_train)
 
-        # Fit the model for each fold
+            y_test_pred = search.predict(X_test)
+            y_test_pred_proba = search.predict_proba(X_test)[:, 1]
+
+            # Calculate metrics
+            tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
+            specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
+
+            metrics_per_fold.append({
+                "Fold": len(metrics_per_fold),
+                "AUC": roc_auc_score(y_test, y_test_pred_proba),
+                "AP": average_precision_score(y_test, y_test_pred_proba),
+                "Sensitivity": recall_score(y_test, y_test_pred, pos_label=1),
+                "Specificity": specificity,
+                "Precision": precision_score(y_test, y_test_pred, zero_division=0),
+                "F1": f1_score(y_test, y_test_pred, average='macro'),
+                "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
+            })
+    elif dataset_name == DatasetName.CYBERSECURITY.value or dataset_name == DatasetName.LUNG_DISEASE.value:
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
         search.fit(X_train, y_train)
 
         y_test_pred = search.predict(X_test)
@@ -207,6 +228,9 @@ def lr_rte(dataset_name, X, y, nominal_features, pca):
             "F1": f1_score(y_test, y_test_pred, average='macro'),
             "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
         })
+
+    else:
+        print(f"Unknown dataset {dataset_name}")
 
     # Train the final model on the full dataset
     print(f"Log reg rte train fitting... ")

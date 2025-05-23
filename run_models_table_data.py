@@ -33,8 +33,7 @@ def run_models_on_table_data():
     nominal_features = [
         'encryption_used',
         'browser_type',
-        'protocol_type',
-        'session_id'
+        'protocol_type'
     ]
 
     # === LUNG DISEASE ===
