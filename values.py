@@ -1,8 +1,97 @@
+from dataclasses import dataclass
 from enum import Enum
 
 
-class Dataset(Enum):
+class DatasetName(Enum):
     POSTTRAUMA = "posttrauma"
+    CYBERSECURITY = "cybersecurity"
+    LUNG_DISEASE = "lung_disease"
+
+
+@dataclass
+class DatasetConfig:
+    pca: int
+    n_repeats: int
+    splits: int
+    # text_style: str  # or use Enum
+    # use_feature_scaling: bool
+
+
+# Configuration map
+DATASET_CONFIGS = {
+    DatasetName.POSTTRAUMA.value: DatasetConfig(
+        pca=35,
+        n_repeats=10,
+        splits=3
+        #text_style="one",
+        #use_feature_scaling=True,
+    ),
+    DatasetName.CYBERSECURITY.value: DatasetConfig(
+        pca=50,
+        n_repeats=1,
+        splits=5
+        #text_style="two",
+        #use_feature_scaling=False,
+    ),
+    DatasetName.LUNG_DISEASE.value: DatasetConfig(
+        pca=50,
+        n_repeats=1,
+        splits=5
+        #text_style="three",
+        #use_feature_scaling=True,
+    )
+}
+
+
+class MLMethod(Enum):
+    LOGREG = "LogReg"
+    HGBC = "HGBC"
+
+
+@dataclass
+class MLMethodConfig:
+    pca: int
+    n_repeats: int
+    splits: int
+    # text_style: str  # or use Enum
+    # use_feature_scaling: bool
+
+
+# Configuration map
+DATASET_CONFIGS = {
+    DatasetName.POSTTRAUMA.value: DatasetConfig(
+        pca=35,
+        n_repeats=10,
+        splits=3
+        #text_style="one",
+        #use_feature_scaling=True,
+    ),
+    DatasetName.CYBERSECURITY.value: DatasetConfig(
+        pca=50,
+        n_repeats=1,
+        splits=5
+        #text_style="two",
+        #use_feature_scaling=False,
+    ),
+    DatasetName.LUNG_DISEASE.value: DatasetConfig(
+        pca=50,
+        n_repeats=1,
+        splits=5
+        #text_style="three",
+        #use_feature_scaling=True,
+    )
+}
+
+
+class Textstyle(Enum):
+    """
+    0 = No explanation sentence, miss null values;
+    1 = With explanation sentence, miss null values;
+    2 =
+    """
+    ONE = "one"
+    TWO = "two"
+    THREE = "three"
 
 
 class Classification(Enum):

@@ -10,34 +10,6 @@ from values import values_and_translations, patient_info_categories, categories,
 values_and_translations_dict = dict(values_and_translations)
 
 
-def create_patient_summaries(tab_data):
-    df_tab_data = pd.read_csv(tab_data)
-    summaries = []  # "We want to predict health risks. "
-    patient_number = 0
-    for _, row in df_tab_data.iterrows():
-        patient_number += 1
-        patient_info_n_values = row.to_dict()
-        #summary = (f"The following is the data for patient number {patient_number}." +
-        #           patient_info(patient_info_n_values, tab_data))
-        summary = (f"We want to predict health risks. The following is the data for patient number {patient_number}." +
-                   patient_info(patient_info_n_values, tab_data))
-        summaries.append(summary)
-    return summaries
-
-
-def csv_to_kv_textfile(input_csv_path, output_txt_path):
-    df = pd.read_csv(input_csv_path)
-
-    with open(output_txt_path, "w", encoding="utf-8") as f:
-        for _, row in df.iterrows():
-            # Format each row as key:value ; key:value
-            line = " ; ".join(f"{col}:{row[col]}" for col in df.columns)
-            f.write(line + "\n")
-
-    print(f"Text file created: {output_txt_path}")
-
-
-
 def patient_info(patient_info_n_values, tab_data):
     patient_info_row = dict(patient_info_n_values)
     patient_info_text = ""

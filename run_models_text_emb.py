@@ -1,18 +1,22 @@
 import numpy as np
 
 from csv_saver import save_results_to_csv
-from helpers import load_labels, load_summaries, lr_txt_emb, hgbc_txt_emb
+from data_preps import load_summaries, load_labels
+from helpers import lr_txt_emb, hgbc_txt_emb
 from bar_plotting import plot_bar_chart
-from models import feature_extractor_ember_v1, feature_extractor_stella_en_400M_v5
-from values import Dataset
+from models import feature_extractor_ember_v1, feature_extractor_stella_en_400M_v5, feature_extractor_all_minilm_l6_v2, \
+    feature_extractor_gtr_t5_base, feature_extractor_sentence_t5_base
+from values import DatasetName
 
 
 def run_models_on_txt_emb():
-    posttrauma_dataset = Dataset.POSTTRAUMA.value
+    # posttrauma_dataset = Dataset.POSTTRAUMA.value
+    # posttrauma_summaries = load_summaries("Summaries.txt")
 
-    # load features and labels
-    all_summaries = load_summaries("Summaries.txt")
-    y_posttrauma = load_labels()
+    cybersecurity_dataset = DatasetName.CYBERSECURITY.value
+    cybersecurity_summaries = load_summaries("cybersecurity_summaries.txt")
+    y_cybersecurity = load_labels("y_cybersecurity_intrusion_data.csv")
+
     print('Starting to create FE')
     feature_extractors = {
         # Clinical Longformer (done)
@@ -64,17 +68,16 @@ def run_models_on_txt_emb():
         # "GTE-Large-EN-v1.5": feature_extractor_gte_large_en_v1_5, # (ready)
 
         # Stella Model
-
-        "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5, # only GPU
+        #"Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5, # only GPU
 
         # All MiniLM L6 v2
-        #"all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2, # runs
+        "all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2, # runs
 
         # GTR T5 Base
-        #"gtr-t5-base": feature_extractor_gtr_t5_base, #
+        "gtr-t5-base": feature_extractor_gtr_t5_base, #
 
         # Sentence T5 Base
-        #"sentence_t5_base": feature_extractor_sentence_t5_base,
+        "sentence_t5_base": feature_extractor_sentence_t5_base,
 
         # modernbert-embed-base
         #"modernbert_embed_base": feature_extractor_mbert_embed_base,
@@ -94,37 +97,42 @@ def run_models_on_txt_emb():
         # HGBC
         (hgbc_txt_dataset, hgbc_txt_ml_method, hgbc_txt_emb_method, hgbc_txt_conc, hgbc_txt_best_params,
          hgbc_txt_pca_components, hgbc_txt_train_score, hgbc_txt_test_scores) = hgbc_txt_emb(
-            dataset_name=posttrauma_dataset,
+            dataset_name=cybersecurity_dataset,
             emb_method=model_name,
             n_components=None,
             n_repeats=10,
             feature_extractor=feature_extractor,
-            summaries=all_summaries,
-            y=y_posttrauma)
+            summaries=cybersecurity_summaries,
+            y=y_cybersecurity)
 
-        save_results_to_csv(output_file=f"{model_name}_HGBC_train.csv", dataset_name=hgbc_txt_dataset,
+        save_results_to_csv(output_file=f"{model_name}_HGBC_train_{cybersecurity_dataset}.csv", dataset_name=hgbc_txt_dataset,
                             ml_method=hgbc_txt_ml_method, emb_method=hgbc_txt_emb_method, concatenation="no",
                             best_params=hgbc_txt_best_params, pca_n_comp=hgbc_txt_pca_components,
                             metrics=hgbc_txt_train_score, is_train=True)
 
-        save_results_to_csv(output_file=f"{model_name}_HGBC_test.csv", dataset_name=hgbc_txt_dataset,
+        save_results_to_csv(output_file=f"{model_name}_HGBC_test{cybersecurity_dataset}.csv", dataset_name=hgbc_txt_dataset,
                             ml_method=hgbc_txt_ml_method, emb_method=hgbc_txt_emb_method, concatenation="no",
                             best_params=hgbc_txt_best_params, pca_n_comp=hgbc_txt_pca_components,
                             metrics=hgbc_txt_test_scores, is_train=False)
         # Logistic Regression
         (lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_conc, lr_txt_best_params,
          lr_txt_pca_components, lr_txt_train_score, lr_txt_test_scores) = lr_txt_emb(
-            dataset_name=posttrauma_dataset, n_components=None, emb_method=model_name,
+            dataset_name=cybersecurity_dataset,
+            n_components=None,
+            emb_method=model_name,
             #feature_extractor=feature_extractor, max_iter=100, n_repeats=1,
-            feature_extractor=feature_extractor, max_iter=10000, n_repeats=10,
-            raw_text_summaries=all_summaries, y=y_posttrauma)
+            feature_extractor=feature_extractor,
+            max_iter=10000,
+            n_repeats=10,
+            raw_text_summaries=cybersecurity_summaries,
+            y=y_cybersecurity)
 
-        save_results_to_csv(output_file=f"{model_name}_LR_train.csv", dataset_name=lr_txt_dataset,
+        save_results_to_csv(output_file=f"{model_name}_LR_train_{cybersecurity_dataset}.csv", dataset_name=lr_txt_dataset,
                             ml_method=lr_txt_ml_method, emb_method=lr_txt_emb_method, concatenation=lr_txt_conc,
                             best_params=lr_txt_best_params, pca_n_comp=lr_txt_pca_components,
                             metrics=lr_txt_train_score, is_train=True)
 
-        save_results_to_csv(output_file=f"{model_name}_LR_test.csv", dataset_name=lr_txt_dataset,
+        save_results_to_csv(output_file=f"{model_name}_LR_test_{cybersecurity_dataset}.csv", dataset_name=lr_txt_dataset,
                             ml_method=lr_txt_ml_method, emb_method=lr_txt_emb_method, concatenation=lr_txt_conc,
                             best_params=lr_txt_best_params, pca_n_comp=lr_txt_pca_components,
                             metrics=lr_txt_test_scores, is_train=False)

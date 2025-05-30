@@ -1,22 +1,15 @@
 import numpy as np
 
 from csv_saver import save_results_to_csv
-from helpers import (load_labels, load_features, hgbc_rte,
-                     hgbc,
-                     logistic_regression,
-                     lr_rte, )  # lr_rte, hgbc, logistic_regression, )  # load_summaries, logistic_regression,
+from data_preps import load_features, load_labels
+from helpers import (hgbc_rte, hgbc, logistic_regression, lr_rte)
 
-from values import Dataset
+from values import DatasetName
 
 
 def run_models_on_table_data():
-    posttrauma_dataset = Dataset.POSTTRAUMA.value
-
-    # load features and labels
-    X_posttrauma = load_features()
-    y_posttrauma = load_labels()
-
-    # define nominal features
+    """
+    dataset = DatasetName.POSTTRAUMA.value
     nominal_features = [
         'gender_birth',
         'ethnic_group',
@@ -24,21 +17,45 @@ def run_models_on_table_data():
         'working_at_baseline',
         'penetrating_injury'
     ]
-
     categorical_features = [
         'smoker',
         'iss_category'
         # iss_score?
         # others?
     ]
+    """
+
+    # === CYBERSECURITY ===
+    dataset = DatasetName.CYBERSECURITY.value
+    X = load_features(file_path="X_cybersecurity_intrusion_data.csv")
+    y = load_labels(file_path="y_cybersecurity_intrusion_data.csv")
+
+    nominal_features = [
+        'encryption_used',
+        'browser_type',
+        'protocol_type'
+    ]
+
+
+    # === LUNG DISEASE ===
+    """dataset = DatasetName.LUNG_DISEASE.value
+    X = load_features(file_path="X_lung_disease_data.csv")
+    y = load_labels(file_path="y_lung_disease_data.csv")
+    
+    nominal_features = [
+        "Gender",
+        "Smoking Status",
+        "Disease Type",
+        "Treatment Type"
+    ]"""
 
     # TABLE DATA #
 
     # 1. logistic regression (no embedding), dataset: posttrauma
     (log_reg_dataset, log_reg_ml_method, log_reg_emb_method, log_reg_best_params,
      log_reg_pca_comp, log_reg_train_score, log_reg_test_scores) = \
-        logistic_regression(dataset_name=posttrauma_dataset, X=X_posttrauma, y=y_posttrauma,  # test
-                            nominal_features=nominal_features)
+        logistic_regression(dataset_name=dataset, X=X, y=y,  # test
+                            nominal_features=nominal_features, pca=False)
 
     save_results_to_csv(
         dataset_name=log_reg_dataset,
@@ -49,7 +66,7 @@ def run_models_on_table_data():
         concatenation="no",
         is_train=True,
         metrics=log_reg_train_score,
-        output_file="csv_outputs/new_baseline/log_reg_train.csv")
+        output_file=f"{dataset}_log_reg_train.csv")
 
     save_results_to_csv(
         dataset_name=log_reg_dataset,
@@ -60,13 +77,11 @@ def run_models_on_table_data():
         concatenation="no",
         is_train=False,
         metrics=log_reg_test_scores,
-        output_file="csv_outputs/new_baseline/log_reg_test.csv")
-
+        output_file=f"{dataset}_log_reg_test.csv")
 
     # 2. log reg + random trees embedding
     (lr_rt_dataset, lr_rt_ml_method, lr_rt_emb_method, lr_rt_concatenation, lr_rte_best_params, lr_rte_train_score,
-     log_reg_rt_emb_test_scores) = lr_rte(dataset_name=posttrauma_dataset, X=X_posttrauma, y=y_posttrauma,
-                                             nominal_features=nominal_features)
+     log_reg_rt_emb_test_scores) = lr_rte(dataset_name=dataset, X=X, y=y, nominal_features=nominal_features, pca=False)
     save_results_to_csv(
         dataset_name=lr_rt_dataset,
         concatenation=lr_rt_concatenation,
@@ -76,7 +91,7 @@ def run_models_on_table_data():
         ml_method=lr_rt_ml_method,
         best_params=lr_rte_best_params,
         pca_n_comp="None",
-        output_file="csv_outputs/new_baseline/lr_rte_train.csv")
+        output_file=f"{dataset}_lr_rte_train.csv")
 
     save_results_to_csv(
         dataset_name=lr_rt_dataset,
@@ -87,11 +102,11 @@ def run_models_on_table_data():
         ml_method=lr_rt_ml_method,
         best_params=lr_rte_best_params,
         pca_n_comp="None",
-        output_file="csv_outputs/new_baseline/lr_rte_test.csv")
-    
+        output_file=f"{dataset}_lr_rte_test.csv")
+
     # 3. hgbc (no embedding)
-    hgbc_dataset, hgbc_ml_method, hgbc_emb_method, hgbc_best_params, hgbc_train_score, hgbc_test_scores = \
-        hgbc(dataset_name=posttrauma_dataset, X=X_posttrauma, y=y_posttrauma, nominal_features=nominal_features)
+    hgbc_dataset, hgbc_ml_method, hgbc_emb_method, conc, hgbc_best_params, hgbc_train_score, hgbc_test_scores = \
+        hgbc(dataset_name=dataset, X=X, y=y, nominal_features=nominal_features)
 
     save_results_to_csv(
         dataset_name=hgbc_dataset,
@@ -99,10 +114,10 @@ def run_models_on_table_data():
         emb_method=hgbc_emb_method,
         pca_n_comp="none",
         best_params=hgbc_best_params,
-        concatenation="no",
+        concatenation=conc,
         is_train=True,
         metrics=hgbc_train_score,
-        output_file="csv_outputs/new_baseline/hgbc_train.csv")
+        output_file=f"{dataset}_hgbc_train.csv")
 
     save_results_to_csv(
         dataset_name=hgbc_dataset,
@@ -110,16 +125,16 @@ def run_models_on_table_data():
         emb_method=hgbc_emb_method,
         pca_n_comp="none",
         best_params=hgbc_best_params,
-        concatenation="no",
+        concatenation=conc,
         is_train=False,
         metrics=hgbc_test_scores,
-        output_file="csv_outputs/new_baseline/hgbc_test.csv")
+        output_file=f"{dataset}_hgbc_test.csv")
 
-    #hgbc_rte(X=X_posttrauma, y=y_posttrauma, nominal_features=nominal_features)
+    # hgbc_rte(X=X_posttrauma, y=y_posttrauma, nominal_features=nominal_features)
     # 4. random trees embedding + hgbc
     (hgbc_rt_dataset, hgbc_rt_ml_method, hgbc_rt_emb_method, hgbc_rte_conc, hgbc_rte_best_params,
-    hgbc_rt_emb_train_score, hgbc_rt_emb_test_scores) = \
-        hgbc_rte(dataset_name=posttrauma_dataset, X=X_posttrauma, y=y_posttrauma,
+     hgbc_rt_emb_train_score, hgbc_rt_emb_test_scores) = \
+        hgbc_rte(dataset_name=dataset, X=X, y=y,
                  nominal_features=nominal_features)
 
     save_results_to_csv(
@@ -131,7 +146,7 @@ def run_models_on_table_data():
         concatenation=hgbc_rte_conc,
         is_train=True,
         metrics=hgbc_rt_emb_train_score,
-        output_file="csv_outputs/HGBC_rte_train.csv")
+        output_file=f"{dataset}_HGBC_rte_train.csv")
 
     save_results_to_csv(
         dataset_name=hgbc_rt_dataset,
@@ -142,7 +157,7 @@ def run_models_on_table_data():
         concatenation=hgbc_rte_conc,
         is_train=False,
         metrics=hgbc_rt_emb_test_scores,
-        output_file="csv_outputs/HGBC_rte_test.csv")
+        output_file=f"{dataset}_HGBC_rte_test.csv")
     """
     labels_local = [
         # f"Logistic Regression",

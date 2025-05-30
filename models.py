@@ -83,6 +83,77 @@ def create_gte_feature_extractor(model_name):
     return extract_features
 
 
+# E5-SMALL-V2
+feature_extractor_e5_small_v2 = create_gen_feature_extractor("intfloat/e5-small-v2")
+
+# E5-BASE-V2
+feature_extractor_e5_base_v2 = create_gen_feature_extractor("intfloat/e5-base-v2")
+
+# E5-LARGE-V2
+#feature_extractor_e5_large_v2 = create_gen_feature_extractor("intfloat/e5-large-v2")
+
+# bge-small-en-v1.5
+#feature_extractor_bge_small_en_v1_5 = create_gen_feature_extractor("BAAI/bge-small-en-v1.5")
+
+# GIST-small-Embedding-v0
+#feature_extractor_gist_small_embedding_v0 = create_gen_feature_extractor("avsolatorio/GIST-small-Embedding-v0") # custom code
+
+# bge-base-en-v1.5
+#feature_extractor_bge_base_en_v1_5 = create_gen_feature_extractor("BAAI/bge-base-en-v1.5")
+
+# GIST-Embedding-v0
+#feature_extractor_gist_embedding_v0 = create_gen_feature_extractor("avsolatorio/GIST-Embedding-v0") # custom code
+
+# bge-large-en-v1.5
+#feature_extractor_bge_large_en_v1_5 = create_gen_feature_extractor("BAAI/bge-large-en-v1.5")
+
+# GIST-large-Embedding-v0
+#feature_extractor_gist_large_embedding_v0 = create_gen_feature_extractor("avsolatorio/GIST-large-Embedding-v0")
+
+# gte-small
+#feature_extractor_gte_small = create_gen_feature_extractor("thenlper/gte-small")
+
+# gte-base
+#feature_extractor_gte_base = create_gen_feature_extractor("thenlper/gte-base")
+
+# gte-base-en-v1.5
+#feature_extractor_gte_base_en_v1_5 = create_gte_feature_extractor("Alibaba-NLP/gte-base-en-v1.5")
+
+# gte-large
+#feature_extractor_gte_large = create_gen_feature_extractor("thenlper/gte-large")
+
+# stella_en_400M_v5 (SotA)
+feature_extractor_stella_en_400M_v5 = create_gen_feature_extractor("dunzhang/stella_en_400M_v5")
+
+# All MiniLM L6 v2
+feature_extractor_all_minilm_l6_v2 = create_gen_feature_extractor('sentence-transformers/all-MiniLM-L6-v2')
+
+# GTR T5 Base
+feature_extractor_gtr_t5_base = create_gen_feature_extractor('sentence-transformers/gtr-t5-base')
+
+# Sentence T5 Base
+feature_extractor_sentence_t5_base = create_gen_feature_extractor('sentence-transformers/sentence-t5-base')
+
+# Ember v1
+feature_extractor_ember_v1 = create_gen_feature_extractor('llmrails/ember-v1')
+
+# modernbert-embed-base
+# feature_extractor_mbert_embed_base = create_gen_feature_extractor('nomic-ai/modernbert-embed-base')
+
+# GTE modernbert base
+#feature_extractor_gte_mbert_base = create_gen_feature_extractor('Qwen/QwQ-32B')
+
+####################################
+
+# MedEmbed-small-v0.1
+#feature_extractor_medembed_small_v0_1 = create_feature_extractor("abhinand/MedEmbed-small-v0.1") # custom code
+
+# MedEmbed-base-v0.1
+#feature_extractor_medembed_base_v0_1 = create_feature_extractor("abhinand/MedEmbed-base-v0.1") # custom code
+
+# MedEmbed-large-v0.1
+#feature_extractor_medembed_large_v0_1 = create_feature_extractor("abhinand/MedEmbed-large-v0.1") # custom code
+
 # Clinical Longformer
 #feature_extractor_clinical = create_gen_feature_extractor("yikuan8/Clinical-Longformer")
 
@@ -104,98 +175,14 @@ def create_gte_feature_extractor(model_name):
 # SimSCE unsup
 #feature_extractor_simsce_unsup = create_feature_extractor("princeton-nlp/unsup-simcse-bert-base-uncased")
 
-# ?
-# E5-SMALL-V2
-#feature_extractor_e5_small_v2 = create_feature_extractor("intfloat/e5-small-v2")
+# gte-large-en-v1.5
+#feature_extractor_gte_large_en_v1_5 = create_gte_feature_extractor("Alibaba-NLP/gte-large-en-v1.5")
 
-# E5-BASE-V2
-#feature_extractor_e5_base_v2 = create_feature_extractor("intfloat/e5-base-v2")
-
-# E5-LARGE-V2
-#feature_extractor_e5_large_v2 = create_feature_extractor("intfloat/e5-large-v2")
-
-
-#############
-#### BGE ####
-#############
 # potion-base-2M
-#feature_extractor_potion_base_2M = create_feature_extractor("minishlab/potion-base-2M") # custom code
+#feature_extractor_potion_base_2M = create_feature_extractor("minishlab/potion-base-2M")
 
 # potion-base-4M
-#feature_extractor_potion_base_4M = create_feature_extractor("minishlab/potion-base-4M") # custom code
+#feature_extractor_potion_base_4M = create_feature_extractor("minishlab/potion-base-4M")
 
 # potion-base-8M
-# feature_extractor_potion_base_8M = create_feature_extractor("minishlab/potion-base-8M") # custom code
-
-# bge-small-en-v1.5
-#feature_extractor_bge_small_en_v1_5 = create_feature_extractor("BAAI/bge-small-en-v1.5")
-
-# GIST-small-Embedding-v0
-#feature_extractor_gist_small_embedding_v0 = create_feature_extractor("avsolatorio/GIST-small-Embedding-v0") # custom code
-
-# bge-base-en-v1.5
-#feature_extractor_bge_base_en_v1_5 = create_feature_extractor("BAAI/bge-base-en-v1.5")
-
-# GIST-Embedding-v0
-#feature_extractor_gist_embedding_v0 = create_feature_extractor("avsolatorio/GIST-Embedding-v0") # custom code
-
-# bge-large-en-v1.5
-#feature_extractor_bge_large_en_v1_5 = create_feature_extractor("BAAI/bge-large-en-v1.5")
-
-# GIST-large-Embedding-v0
-#feature_extractor_gist_large_embedding_v0 = create_feature_extractor("avsolatorio/GIST-large-Embedding-v0") # custom code
-
-# MedEmbed-small-v0.1
-#feature_extractor_medembed_small_v0_1 = create_feature_extractor("abhinand/MedEmbed-small-v0.1") # custom code
-
-# MedEmbed-base-v0.1
-#feature_extractor_medembed_base_v0_1 = create_feature_extractor("abhinand/MedEmbed-base-v0.1") # custom code
-
-# MedEmbed-large-v0.1
-#feature_extractor_medembed_large_v0_1 = create_feature_extractor("abhinand/MedEmbed-large-v0.1") # custom code
-
-#############
-#### GTE ####
-#############
-# gte-small
-#feature_extractor_gte_small = create_feature_extractor("thenlper/gte-small")
-
-# gte-base
-#feature_extractor_gte_base = create_feature_extractor("thenlper/gte-base")
-
-# gte-base-en-v1.5
-#feature_extractor_gte_base_en_v1_5 = create_gte_feature_extractor("Alibaba-NLP/gte-base-en-v1.5") # custom code
-
-# gte-large
-#feature_extractor_gte_large = create_feature_extractor("thenlper/gte-large")
-
-# gte-large-en-v1.5
-#feature_extractor_gte_large_en_v1_5 = create_gte_feature_extractor("Alibaba-NLP/gte-large-en-v1.5") # custom code
-
-# stella_en_400M_v5 (SotA)
-feature_extractor_stella_en_400M_v5 = create_gen_feature_extractor("dunzhang/stella_en_400M_v5")  # [CLS], [SEP] # custom code
-
-#########
-## NEW ##
-#########
-
-# All MiniLM L6 v2
-feature_extractor_all_minilm_l6_v2 = create_gen_feature_extractor('sentence-transformers/all-MiniLM-L6-v2')
-
-# GTR T5 Base
-feature_extractor_gtr_t5_base = create_gen_feature_extractor('sentence-transformers/gtr-t5-base')
-
-# Sentence T5 Base
-feature_extractor_sentence_t5_base = create_gen_feature_extractor('sentence-transformers/sentence-t5-base')
-
-# modernbert-embed-base
-# feature_extractor_mbert_embed_base = create_gen_feature_extractor('nomic-ai/modernbert-embed-base')
-
-# GTE modernbert base
-#feature_extractor_gte_mbert_base = create_gen_feature_extractor('Qwen/QwQ-32B')
-
-# Ember v1
-feature_extractor_ember_v1 = create_gen_feature_extractor('llmrails/ember-v1')
-
-# Stella en 400m v5
-#feature_extractor_stella_en_400M_v5 = create_stella_feature_extractor('dunzhang/stella_en_400M_v5')
+# feature_extractor_potion_base_8M = create_feature_extractor("minishlab/potion-base-8M")

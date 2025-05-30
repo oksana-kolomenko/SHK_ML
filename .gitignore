@@ -13,3 +13,10 @@ Nominal_summaries.txt
 KV_all_summaries.txt
 X_metrics.csv
 X_nominal.csv
+cybersecurity_summaries.txt
+lung_disease_summaries.txt
+X_cybersecurity_intrusion_data.csv
+y_cybersecurity_intrusion_data.csv
+lung_disease_summaries.txt
+X_lung_disease_data.csv
+y_lung_disease_data.csv
