@@ -4,7 +4,7 @@ from csv_saver import save_results_to_csv
 from data_preps import load_features, load_labels, load_summaries
 from helpers import concat_lr_rte, concat_hgbc_rte, concat_lr_txt_emb, concat_txt_hgbc, lr_txt_emb, hgbc_txt_emb
 from models import feature_extractor_all_minilm_l6_v2, feature_extractor_gtr_t5_base, \
-    feature_extractor_sentence_t5_base, feature_extractor_ember_v1, feature_extractor_stella_en_400M_v5, \
+    feature_extractor_sentence_t5_base, feature_extractor_ember_v1, \
     feature_extractor_e5_small_v2, feature_extractor_e5_base_v2
 
 #from helpers_new import concat_hgbc_txt_emb
@@ -66,7 +66,7 @@ def run_pca_txt_emb():
 
     feature_extractors = {
         # Stella en 400m v5
-        "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
+        #"Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
 
         # All MiniLM L6 v2
         "all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
