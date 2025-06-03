@@ -93,10 +93,10 @@ feature_extractor_e5_base_v2 = create_gen_feature_extractor("intfloat/e5-base-v2
 #feature_extractor_e5_large_v2 = create_gen_feature_extractor("intfloat/e5-large-v2")
 
 # bge-small-en-v1.5
-#feature_extractor_bge_small_en_v1_5 = create_gen_feature_extractor("BAAI/bge-small-en-v1.5")
+feature_extractor_bge_small_en_v1_5 = create_gen_feature_extractor("BAAI/bge-small-en-v1.5")
 
 # GIST-small-Embedding-v0
-#feature_extractor_gist_small_embedding_v0 = create_gen_feature_extractor("avsolatorio/GIST-small-Embedding-v0") # custom code
+feature_extractor_gist_small_embedding_v0 = create_gen_feature_extractor("avsolatorio/GIST-small-Embedding-v0") # custom code
 
 # bge-base-en-v1.5
 #feature_extractor_bge_base_en_v1_5 = create_gen_feature_extractor("BAAI/bge-base-en-v1.5")
@@ -111,7 +111,7 @@ feature_extractor_e5_base_v2 = create_gen_feature_extractor("intfloat/e5-base-v2
 #feature_extractor_gist_large_embedding_v0 = create_gen_feature_extractor("avsolatorio/GIST-large-Embedding-v0")
 
 # gte-small
-#feature_extractor_gte_small = create_gen_feature_extractor("thenlper/gte-small")
+feature_extractor_gte_small = create_gen_feature_extractor("thenlper/gte-small")
 
 # gte-base
 #feature_extractor_gte_base = create_gen_feature_extractor("thenlper/gte-base")
