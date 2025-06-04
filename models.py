@@ -123,7 +123,7 @@ feature_extractor_gte_small = create_gen_feature_extractor("thenlper/gte-small")
 #feature_extractor_gte_large = create_gen_feature_extractor("thenlper/gte-large")
 
 # stella_en_400M_v5 (SotA)
-# feature_extractor_stella_en_400M_v5 = create_gen_feature_extractor("dunzhang/stella_en_400M_v5")
+feature_extractor_stella_en_400M_v5 = create_gen_feature_extractor("dunzhang/stella_en_400M_v5")
 
 # All MiniLM L6 v2
 feature_extractor_all_minilm_l6_v2 = create_gen_feature_extractor('sentence-transformers/all-MiniLM-L6-v2')
