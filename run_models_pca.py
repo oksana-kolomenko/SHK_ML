@@ -6,7 +6,8 @@ from helpers import concat_lr_rte, concat_hgbc_rte, concat_lr_txt_emb, concat_tx
 from models import feature_extractor_all_minilm_l6_v2, feature_extractor_gtr_t5_base, \
     feature_extractor_sentence_t5_base, feature_extractor_ember_v1, \
     feature_extractor_e5_small_v2, feature_extractor_e5_base_v2, feature_extractor_gte_small, \
-    feature_extractor_bge_small_en_v1_5, feature_extractor_gist_small_embedding_v0, feature_extractor_stella_en_400M_v5
+    feature_extractor_bge_small_en_v1_5, feature_extractor_gist_small_embedding_v0, feature_extractor_stella_en_400M_v5, \
+    feature_extractor_bge_base_en_v1_5
 
 #from helpers_new import concat_hgbc_txt_emb
 """from models import feature_extractor_medembed_small_v0_1, feature_extractor_medembed_base_v0_1, \
@@ -67,7 +68,7 @@ def run_pca_txt_emb():
 
     feature_extractors = {
         # Stella en 400m v5
-        "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
+        #"Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
 
         # All MiniLM L6 v2
         # "all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
@@ -88,7 +89,7 @@ def run_pca_txt_emb():
 
         # BGE Models (done)
         "BGE-Small-EN-v1.5": feature_extractor_bge_small_en_v1_5,
-        #"BGE-Base-EN-v1.5": feature_extractor_bge_base_en_v1_5,
+        "BGE-Base-EN-v1.5": feature_extractor_bge_base_en_v1_5,
         #"BGE-Large-EN-v1.5": feature_extractor_bge_large_en_v1_5,
 
         # GIST Models

@@ -99,7 +99,7 @@ feature_extractor_bge_small_en_v1_5 = create_gen_feature_extractor("BAAI/bge-sma
 feature_extractor_gist_small_embedding_v0 = create_gen_feature_extractor("avsolatorio/GIST-small-Embedding-v0") # custom code
 
 # bge-base-en-v1.5
-#feature_extractor_bge_base_en_v1_5 = create_gen_feature_extractor("BAAI/bge-base-en-v1.5")
+feature_extractor_bge_base_en_v1_5 = create_gen_feature_extractor("BAAI/bge-base-en-v1.5")
 
 # GIST-Embedding-v0
 #feature_extractor_gist_embedding_v0 = create_gen_feature_extractor("avsolatorio/GIST-Embedding-v0") # custom code
