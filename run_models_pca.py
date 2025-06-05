@@ -74,10 +74,10 @@ def run_pca_txt_emb():
         # "all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
 
         # GTR T5 Base
-        "GTR_T5_Base": feature_extractor_gtr_t5_base,
+        #"GTR_T5_Base": feature_extractor_gtr_t5_base,
 
         # Sentence T5 Base
-        "sentence_t5_base": feature_extractor_sentence_t5_base,
+        #"sentence_t5_base": feature_extractor_sentence_t5_base,
 
         # Ember v1
         "ember_v1": feature_extractor_ember_v1,
