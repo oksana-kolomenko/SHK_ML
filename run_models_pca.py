@@ -84,7 +84,7 @@ def run_pca_txt_emb():
 
         # E5 Models
         # "E5-Small-V2": feature_extractor_e5_small_v2,
-        "E5-Base-V2": feature_extractor_e5_base_v2,
+        #"E5-Base-V2": feature_extractor_e5_base_v2,
         #"E5-Large-V2": feature_extractor_e5_large_v2,
 
         # BGE Models (done)
