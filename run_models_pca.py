@@ -80,7 +80,7 @@ def run_pca_txt_emb():
         #"sentence_t5_base": feature_extractor_sentence_t5_base,
 
         # Ember v1
-        "ember_v1": feature_extractor_ember_v1,
+        #"ember_v1": feature_extractor_ember_v1,
 
         # E5 Models
         # "E5-Small-V2": feature_extractor_e5_small_v2,
