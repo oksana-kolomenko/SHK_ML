@@ -41,6 +41,12 @@ def run_pca_txt_emb():
     summaries = load_summaries("cybersecurity_summaries.txt")
     conc_art = "_conc_1_"
 
+    nominal_features = [
+        'encryption_used',
+        'browser_type',
+        'protocol_type'
+    ]
+
     # Conc 2 Paket
     #all_summaries = "Summaries.txt"
     #X_posttrauma_metrics = load_features(file_path="X_metrics.csv")
@@ -56,13 +62,14 @@ def run_pca_txt_emb():
 
     #y_posttrauma = load_labels()
 
+    """    
     nominal_features = [
         'gender_birth',
         'ethnic_group',
         'education_age',
         'working_at_baseline',
         'penetrating_injury'
-    ]
+    ]"""
 
     text_feature = 'text'
 
@@ -88,8 +95,8 @@ def run_pca_txt_emb():
         #"E5-Large-V2": feature_extractor_e5_large_v2,
 
         # BGE Models (done)
-        "BGE-Small-EN-v1.5": feature_extractor_bge_small_en_v1_5,
-        "BGE-Base-EN-v1.5": feature_extractor_bge_base_en_v1_5,
+        "BGE-Small-EN-v1.5": feature_extractor_bge_small_en_v1_5, 
+        #"BGE-Base-EN-v1.5": feature_extractor_bge_base_en_v1_5,
         #"BGE-Large-EN-v1.5": feature_extractor_bge_large_en_v1_5,
 
         # GIST Models
@@ -143,11 +150,10 @@ def run_pca_txt_emb():
 
     for model_name, feature_extractor in feature_extractors.items():
         # Logistic Regression
-        (lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_concatenation, lr_txt_best_params,
+        """(lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_concatenation, lr_txt_best_params,
          lr_txt_pca_components, lr_txt_train_score, lr_txt_test_scores) = lr_txt_emb(
             dataset_name=dataset, emb_method=model_name,
             feature_extractor=feature_extractor, max_iter=10000,
-            #feature_extractor=feature_extractor, max_iter=10, n_repeats=1,
             raw_text_summaries=summaries, y=y, pca=True)
 
         save_results_to_csv(output_file=f"{dataset}_{model_name}_LR_pca_train.csv", dataset_name=lr_txt_dataset,
@@ -169,7 +175,6 @@ def run_pca_txt_emb():
                            y=y, pca=True)
 
         save_results_to_csv(output_file=f"{dataset}_{model_name}_HGBC_pca_train.csv",
-        #save_results_to_csv(output_file=f"GTR_T5_Base_HGBC_pca_train.csv",
                             dataset_name=hgbc_txt_dataset,
                             ml_method=hgbc_txt_ml_method,
                             emb_method=hgbc_txt_emb_method,
@@ -180,7 +185,6 @@ def run_pca_txt_emb():
                             is_train=True)
 
         save_results_to_csv(output_file=f"{dataset}_{model_name}_HGBC_pca_test.csv",
-        #save_results_to_csv(output_file=f"GTR_T5_Base_HGBC_pca_test.csv",
                             dataset_name=hgbc_txt_dataset,
                             ml_method=hgbc_txt_ml_method,
                             emb_method=hgbc_txt_emb_method,
@@ -188,7 +192,7 @@ def run_pca_txt_emb():
                             best_params=hgbc_best_params,
                             pca_n_comp=hgbc_pca_comp,
                             metrics=hgbc_txt_test_scores,
-                            is_train=False)
+                            is_train=False)"""
 
         # Logistic Regression
         # concatenation 1

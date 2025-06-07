@@ -882,18 +882,46 @@ def concat_lr_txt_emb(dataset_name, emb_method,
         scoring="neg_log_loss",
         cv=RepeatedStratifiedKFold(n_splits=n_splits, n_repeats=n_repeats)
     )
+    # === Evaluation ===
+    if dataset_name == DatasetName.POSTTRAUMA.value:
+        for train_index, test_index in skf.split(X_tabular, y):
+            X_train, X_test = X_tabular.iloc[train_index], X_tabular.iloc[test_index]
+            y_train, y_test = y[train_index], y[test_index]
 
-    for train_index, test_index in skf.split(X_tabular, y):
-        X_train, X_test = X_tabular.iloc[train_index], X_tabular.iloc[test_index]
-        y_train, y_test = y[train_index], y[test_index]
+            search.fit(X_train, y_train)
 
+            y_test_pred = search.predict(X_test)
+            y_test_pred_proba = search.predict_proba(X_test)[:, 1]
+
+            tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
+            specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
+
+            metrics_per_fold.append({
+                "Fold": len(metrics_per_fold),
+                "AUC": roc_auc_score(y_test, y_test_pred_proba),
+                "AP": average_precision_score(y_test, y_test_pred_proba),
+                "Sensitivity": recall_score(y_test, y_test_pred, pos_label=1),
+                "Specificity": specificity,
+                "Precision": precision_score(y_test, y_test_pred, zero_division=0),
+                "F1": f1_score(y_test, y_test_pred, average='macro'),
+                "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
+            })
+    elif dataset_name == DatasetName.CYBERSECURITY.value or dataset_name == DatasetName.LUNG_DISEASE.value:
+        X_train, X_test, y_train, y_test = train_test_split(raw_text_summaries, y, test_size=0.2, random_state=42)
+
+        print(f"Train size: {len(X_train)}, Test size: {len(X_test)}")
+
+        # Fit and evaluate
         search.fit(X_train, y_train)
 
         y_test_pred = search.predict(X_test)
         y_test_pred_proba = search.predict_proba(X_test)[:, 1]
 
+        # Calculate metrics
         tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
         specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
+        best_param = f"Best params for this fold: {search.best_params_}"
+        print(best_param)
 
         metrics_per_fold.append({
             "Fold": len(metrics_per_fold),
@@ -1136,22 +1164,51 @@ def concat_txt_hgbc(dataset_name, emb_method,
         cv=RepeatedStratifiedKFold(n_splits=n_splits, n_repeats=n_repeats)
     )
 
-    for train_index, test_index in skf.split(X_tabular, y):
-        X_train, X_test = X_tabular.iloc[train_index], X_tabular.iloc[test_index]
-        y_train, y_test = y[train_index], y[test_index]
+    # === Evaluation ===
+    if dataset_name == DatasetName.POSTTRAUMA.value:
+        for train_index, test_index in skf.split(X_tabular, y):
+            X_train, X_test = X_tabular.iloc[train_index], X_tabular.iloc[test_index]
+            y_train, y_test = y[train_index], y[test_index]
 
-        print(f"Length of X_tab_train: {len(X_train)}")
-        print(f"Length of y_train: {len(y_train)}")
+            print(f"Length of X_tab_train: {len(X_train)}")
+            print(f"Length of y_train: {len(y_train)}")
 
-        assert len(X_train) == len(y_train), "Mismatch in training data sizes"
+            assert len(X_train) == len(y_train), "Mismatch in training data sizes"
 
+            search.fit(X_train, y_train)
+
+            y_test_pred = search.predict(X_test)
+            y_test_pred_proba = search.predict_proba(X_test)[:, 1]
+
+            tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
+            specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
+
+            metrics_per_fold.append({
+                "Fold": len(metrics_per_fold),
+                "AUC": roc_auc_score(y_test, y_test_pred_proba),
+                "AP": average_precision_score(y_test, y_test_pred_proba),
+                "Sensitivity": recall_score(y_test, y_test_pred, pos_label=1),
+                "Specificity": specificity,
+                "Precision": precision_score(y_test, y_test_pred, zero_division=0),
+                "F1": f1_score(y_test, y_test_pred, average='macro'),
+                "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
+            })
+    elif dataset_name == DatasetName.CYBERSECURITY.value or dataset_name == DatasetName.LUNG_DISEASE.value:
+        X_train, X_test, y_train, y_test = train_test_split(raw_text_summaries, y, test_size=0.2, random_state=42)
+
+        print(f"Train size: {len(X_train)}, Test size: {len(X_test)}")
+
+        # Fit and evaluate
         search.fit(X_train, y_train)
 
         y_test_pred = search.predict(X_test)
         y_test_pred_proba = search.predict_proba(X_test)[:, 1]
 
+        # Calculate metrics
         tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
         specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
+        best_param = f"Best params for this fold: {search.best_params_}"
+        print(best_param)
 
         metrics_per_fold.append({
             "Fold": len(metrics_per_fold),
