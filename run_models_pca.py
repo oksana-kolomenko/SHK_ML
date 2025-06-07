@@ -95,7 +95,7 @@ def run_pca_txt_emb():
         #"E5-Large-V2": feature_extractor_e5_large_v2,
 
         # BGE Models (done)
-        "BGE-Small-EN-v1.5": feature_extractor_bge_small_en_v1_5, 
+        #"BGE-Small-EN-v1.5": feature_extractor_bge_small_en_v1_5,
         #"BGE-Base-EN-v1.5": feature_extractor_bge_base_en_v1_5,
         #"BGE-Large-EN-v1.5": feature_extractor_bge_large_en_v1_5,
 
@@ -150,7 +150,7 @@ def run_pca_txt_emb():
 
     for model_name, feature_extractor in feature_extractors.items():
         # Logistic Regression
-        """(lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_concatenation, lr_txt_best_params,
+        (lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_concatenation, lr_txt_best_params,
          lr_txt_pca_components, lr_txt_train_score, lr_txt_test_scores) = lr_txt_emb(
             dataset_name=dataset, emb_method=model_name,
             feature_extractor=feature_extractor, max_iter=10000,
@@ -192,11 +192,11 @@ def run_pca_txt_emb():
                             best_params=hgbc_best_params,
                             pca_n_comp=hgbc_pca_comp,
                             metrics=hgbc_txt_test_scores,
-                            is_train=False)"""
+                            is_train=False)
 
         # Logistic Regression
         # concatenation 1
-        (lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,
+        """(lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,
          lr_conc_yesno, lr_best_params, lr_pca_components, lr_conc_train_score,
          lr_conc_test_scores) = concat_lr_txt_emb(
             dataset_name=dataset,
@@ -260,7 +260,7 @@ def run_pca_txt_emb():
                             best_params=hgbc_best_params,
                             pca_n_comp=hgbc_pca_components,
                             metrics=hgbc_conc_test_scores,
-                            is_train=False)
+                            is_train=False)"""
 
         # Logistic Regression
         # concatenation 2
