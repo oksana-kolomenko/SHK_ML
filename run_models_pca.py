@@ -100,7 +100,7 @@ def run_pca_txt_emb():
         #"BGE-Large-EN-v1.5": feature_extractor_bge_large_en_v1_5,
 
         # GIST Models
-        "GIST-Small-Embedding-v0": feature_extractor_gist_small_embedding_v0,
+        #"GIST-Small-Embedding-v0": feature_extractor_gist_small_embedding_v0,
         #"GIST-Embedding-v0": feature_extractor_gist_embedding_v0,
         #"GIST-Large-Embedding-v0": feature_extractor_gist_large_embedding_v0,
 
