@@ -78,7 +78,7 @@ def run_pca_txt_emb():
         #"Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
 
         # All MiniLM L6 v2
-        # "all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
+        "all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
 
         # GTR T5 Base
         #"GTR_T5_Base": feature_extractor_gtr_t5_base,
@@ -90,8 +90,8 @@ def run_pca_txt_emb():
         #"ember_v1": feature_extractor_ember_v1,
 
         # E5 Models
-        # "E5-Small-V2": feature_extractor_e5_small_v2,
-        #"E5-Base-V2": feature_extractor_e5_base_v2,
+        "E5-Small-V2": feature_extractor_e5_small_v2,
+        "E5-Base-V2": feature_extractor_e5_base_v2,
         #"E5-Large-V2": feature_extractor_e5_large_v2,
 
         # BGE Models (done)
@@ -118,7 +118,7 @@ def run_pca_txt_emb():
         # Stella Model
         #"Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
 
-        ######################
+        ####### jetzt nicht ################
         # Clinical Longformer (done)
         # "Clinical-Longformer": feature_extractor_clinical,
 
