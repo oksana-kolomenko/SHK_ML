@@ -735,22 +735,52 @@ def hgbc_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y, pca)
     print(f"len of summaries: {len(summaries)}")
     print(f"len of y: {len(y)}")
 
-    for train_index, test_index in skf.split(summaries, y):
-        X_train, X_test = [summaries[i] for i in train_index], [summaries[i] for i in test_index]
-        y_train, y_test = y[train_index], y[test_index]
+    # === Evaluation ===
+    if dataset_name == DatasetName.POSTTRAUMA.value:
+        for train_index, test_index in skf.split(summaries, y):
+            X_train, X_test = [summaries[i] for i in train_index], [summaries[i] for i in test_index]
+            y_train, y_test = y[train_index], y[test_index]
 
-        X_train, X_test = np.array(X_train), np.array(X_test)
+            X_train, X_test = np.array(X_train), np.array(X_test)
 
-        search.fit(
-            np.array(X_train),
-            y_train
-        )
+            search.fit(
+                np.array(X_train),
+                y_train
+            )
+            y_test_pred = search.predict(X_test)
+            y_test_pred_proba = search.predict_proba(X_test)[:, 1]
+
+            # Calculate metrics
+            tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
+            specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
+
+            metrics_per_fold.append({
+                "Fold": len(metrics_per_fold),
+                "AUC": roc_auc_score(y_test, y_test_pred_proba),
+                "AP": average_precision_score(y_test, y_test_pred_proba),
+                "Sensitivity": recall_score(y_test, y_test_pred, pos_label=1),
+                "Specificity": specificity,
+                "Precision": precision_score(y_test, y_test_pred, zero_division=0),
+                "F1": f1_score(y_test, y_test_pred, average='macro'),
+                "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
+            })
+
+    elif dataset_name == DatasetName.CYBERSECURITY.value or dataset_name == DatasetName.LUNG_DISEASE.value:
+        X_train, X_test, y_train, y_test = train_test_split(summaries, y, test_size=0.2, random_state=42)
+
+        print(f"Train size: {len(X_train)}, Test size: {len(X_test)}")
+
+        # Fit and evaluate
+        search.fit(np.array(X_train), y_train)
+
         y_test_pred = search.predict(X_test)
         y_test_pred_proba = search.predict_proba(X_test)[:, 1]
 
         # Calculate metrics
         tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
         specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
+        best_param = f"Best params for this fold: {search.best_params_}"
+        print(best_param)
 
         metrics_per_fold.append({
             "Fold": len(metrics_per_fold),
