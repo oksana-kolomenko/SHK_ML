@@ -21,6 +21,35 @@ from text_emb_aggregator import EmbeddingAggregator
 from values import DATASET_CONFIGS, DatasetName
 
 
+def calc_metrics(y, y_pred, y_pred_proba):
+    tn, fp, fn, tp = confusion_matrix(y, y_pred).ravel()
+    specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
+
+    metrics = {
+        "AUC": roc_auc_score(y, y_pred_proba),
+        "AP": average_precision_score(y, y_pred_proba),
+        "Sensitivity": recall_score(y, y_pred, pos_label=1),
+        "Specificity": specificity,
+        "Precision": precision_score(y, y_pred, zero_division=0),
+        "F1": f1_score(y, y_pred, average='macro'),
+        "Balanced Accuracy": balanced_accuracy_score(y, y_pred)
+    }
+
+    return metrics
+
+
+def train(search, X_train, y_train, X_test, y_test):
+    search.fit(X_train, y_train)
+
+    y_test_pred = search.predict(X_test)
+    y_test_pred_proba = search.predict_proba(X_test)[:, 1]
+
+    metrics = calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba)
+
+    return metrics
+
+
+
 def logistic_regression(dataset_name, X, y, nominal_features, pca):
     y = pd.Series(y)
 
@@ -42,13 +71,11 @@ def logistic_regression(dataset_name, X, y, nominal_features, pca):
         y = y.to_numpy()
 
     config = DATASET_CONFIGS[dataset_name]
-    n_splits = config.splits
-    n_components = config.pca if pca else None
-    n_repeats = config.n_repeats
+    n_splits, n_repeats, n_components = config.splits, config.n_repeats, config.pca if pca else None
 
-    ml_method = "logistic regression"
-    emb_method = "none"
-    pca_components = f"PCA ({n_components} components)" if pca else "none"
+    ml_method, emb_method, concatenation, pca_components =\
+        "logistic regression", "none", "no", f"PCA ({n_components} components)" if pca else "none"
+
     metrics_per_fold = []
     skf = StratifiedKFold(n_splits=n_splits,
                           shuffle=True,
@@ -88,20 +115,8 @@ def logistic_regression(dataset_name, X, y, nominal_features, pca):
             y_test_pred = search.predict(X_test)
             y_test_pred_proba = search.predict_proba(X_test)[:, 1]
 
-            # Calculate metrics
-            tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
-            specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
-
-            metrics_per_fold.append({
-                "Fold": len(metrics_per_fold),
-                "AUC": roc_auc_score(y_test, y_test_pred_proba),
-                "AP": average_precision_score(y_test, y_test_pred_proba),
-                "Sensitivity": recall_score(y_test, y_test_pred, pos_label=1),
-                "Specificity": specificity,
-                "Precision": precision_score(y_test, y_test_pred, zero_division=0),
-                "F1": f1_score(y_test, y_test_pred, average='macro'),
-                "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
-            })
+            metrics_per_fold.append(
+                calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba))
 
     elif dataset_name == DatasetName.CYBERSECURITY.value or dataset_name == DatasetName.LUNG_DISEASE.value:
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -110,20 +125,8 @@ def logistic_regression(dataset_name, X, y, nominal_features, pca):
         y_test_pred = search.predict(X_test)
         y_test_pred_proba = search.predict_proba(X_test)[:, 1]
 
-        # Calculate metrics
-        tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
-        specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
-
-        metrics_per_fold.append({
-            "Fold": len(metrics_per_fold),
-            "AUC": roc_auc_score(y_test, y_test_pred_proba),
-            "AP": average_precision_score(y_test, y_test_pred_proba),
-            "Sensitivity": recall_score(y_test, y_test_pred, pos_label=1),
-            "Specificity": specificity,
-            "Precision": precision_score(y_test, y_test_pred, zero_division=0),
-            "F1": f1_score(y_test, y_test_pred, average='macro'),
-            "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
-        })
+        metrics_per_fold.append(
+            calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba))
 
     else:
         print(f"Unknown dataset {dataset_name}")
@@ -134,16 +137,7 @@ def logistic_regression(dataset_name, X, y, nominal_features, pca):
     y_train_pred_proba = search.predict_proba(X)[:, 1]
 
     # Training metrics
-    train_metrics = {
-        "AUC": roc_auc_score(y, y_train_pred_proba),
-        "AP": average_precision_score(y, y_train_pred_proba),
-        "Sensitivity": recall_score(y, y_train_pred, pos_label=1),
-        "Specificity": confusion_matrix(y, y_train_pred).ravel()[0] / (
-                confusion_matrix(y, y_train_pred).ravel()[0] + confusion_matrix(y, y_train_pred).ravel()[1]),
-        "Precision": precision_score(y, y_train_pred, zero_division=0),
-        "F1": f1_score(y, y_train_pred, average='macro'),
-        "Balanced Accuracy": balanced_accuracy_score(y, y_train_pred)
-    }
+    train_metrics = calc_metrics(y=y, y_pred=y_train_pred, y_pred_proba=y_train_pred_proba)
 
     best_params = f"{search.best_params_}"
 
@@ -152,7 +146,7 @@ def logistic_regression(dataset_name, X, y, nominal_features, pca):
     print(f"Train metrics: {train_metrics}")
     print(f"Test metrics per fold: {metrics_per_fold}")
 
-    return dataset_name, ml_method, emb_method, best_params, pca_components, train_metrics, metrics_per_fold
+    return dataset_name, ml_method, emb_method, concatenation, best_params, pca_components, train_metrics, metrics_per_fold
 
 
 def lr_rte(dataset_name, X, y, nominal_features, pca):
@@ -230,20 +224,9 @@ def lr_rte(dataset_name, X, y, nominal_features, pca):
             y_test_pred = search.predict(X_test)
             y_test_pred_proba = search.predict_proba(X_test)[:, 1]
 
-            # Calculate metrics
-            tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
-            specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
+            metrics_per_fold.append(
+                calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba))
 
-            metrics_per_fold.append({
-                "Fold": len(metrics_per_fold),
-                "AUC": roc_auc_score(y_test, y_test_pred_proba),
-                "AP": average_precision_score(y_test, y_test_pred_proba),
-                "Sensitivity": recall_score(y_test, y_test_pred, pos_label=1),
-                "Specificity": specificity,
-                "Precision": precision_score(y_test, y_test_pred, zero_division=0),
-                "F1": f1_score(y_test, y_test_pred, average='macro'),
-                "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
-            })
     elif dataset_name == DatasetName.CYBERSECURITY.value or dataset_name == DatasetName.LUNG_DISEASE.value:
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
         search.fit(X_train, y_train)
@@ -251,20 +234,8 @@ def lr_rte(dataset_name, X, y, nominal_features, pca):
         y_test_pred = search.predict(X_test)
         y_test_pred_proba = search.predict_proba(X_test)[:, 1]
 
-        # Calculate metrics
-        tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
-        specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
-
-        metrics_per_fold.append({
-            "Fold": len(metrics_per_fold),
-            "AUC": roc_auc_score(y_test, y_test_pred_proba),
-            "AP": average_precision_score(y_test, y_test_pred_proba),
-            "Sensitivity": recall_score(y_test, y_test_pred, pos_label=1),
-            "Specificity": specificity,
-            "Precision": precision_score(y_test, y_test_pred, zero_division=0),
-            "F1": f1_score(y_test, y_test_pred, average='macro'),
-            "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
-        })
+        metrics_per_fold.append(
+            calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba))
 
     else:
         print(f"Unknown dataset {dataset_name}")
@@ -276,16 +247,8 @@ def lr_rte(dataset_name, X, y, nominal_features, pca):
     y_train_pred_proba = search.predict_proba(X)[:, 1]
 
     # Training metrics
-    train_metrics = {
-        "AUC": roc_auc_score(y, y_train_pred_proba),
-        "AP": average_precision_score(y, y_train_pred_proba),
-        "Sensitivity": recall_score(y, y_train_pred, pos_label=1),
-        "Specificity": confusion_matrix(y, y_train_pred).ravel()[0] / (
-                confusion_matrix(y, y_train_pred).ravel()[0] + confusion_matrix(y, y_train_pred).ravel()[1]),
-        "Precision": precision_score(y, y_train_pred, zero_division=0),
-        "F1": f1_score(y, y_train_pred, average='macro'),
-        "Balanced Accuracy": balanced_accuracy_score(y, y_train_pred)
-    }
+    train_metrics = calc_metrics(y=y, y_pred=y_train_pred, y_pred_proba=y_train_pred_proba)
+
     best_params = f"{search.best_params_}"
     print(f"Embedding size: {len(search.best_estimator_.named_steps['classifier'].coef_[0])}")
     print(f"Best hyperparameters: {search.best_params_}")
@@ -368,22 +331,11 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, raw_text_summaries, 
             y_test_pred = search.predict(X_test)
             y_test_pred_proba = search.predict_proba(X_test)[:, 1]
 
-            # Calculate metrics
-            tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
-            specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
             best_param = f"Best params for this fold: {search.best_params_}"
             print(best_param)
 
-            metrics_per_fold.append({
-                "Fold": len(metrics_per_fold),
-                "AUC": roc_auc_score(y_test, y_test_pred_proba),
-                "AP": average_precision_score(y_test, y_test_pred_proba),
-                "Sensitivity": recall_score(y_test, y_test_pred, pos_label=1),
-                "Specificity": specificity,
-                "Precision": precision_score(y_test, y_test_pred, zero_division=0),
-                "F1": f1_score(y_test, y_test_pred, average='macro'),
-                "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
-            })
+            metrics_per_fold.append(
+                calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba))
 
     elif dataset_name == DatasetName.CYBERSECURITY.value or dataset_name == DatasetName.LUNG_DISEASE.value:
         X_train, X_test, y_train, y_test = train_test_split(raw_text_summaries, y, test_size=0.2, random_state=42)
@@ -396,22 +348,11 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, raw_text_summaries, 
         y_test_pred = search.predict(X_test)
         y_test_pred_proba = search.predict_proba(X_test)[:, 1]
 
-        # Calculate metrics
-        tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
-        specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
         best_param = f"Best params for this fold: {search.best_params_}"
         print(best_param)
 
-        metrics_per_fold.append({
-            "Fold": len(metrics_per_fold),
-            "AUC": roc_auc_score(y_test, y_test_pred_proba),
-            "AP": average_precision_score(y_test, y_test_pred_proba),
-            "Sensitivity": recall_score(y_test, y_test_pred, pos_label=1),
-            "Specificity": specificity,
-            "Precision": precision_score(y_test, y_test_pred, zero_division=0),
-            "F1": f1_score(y_test, y_test_pred, average='macro'),
-            "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
-        })
+        metrics_per_fold.append(
+            calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba))
 
     search.fit(
         raw_text_summaries,
@@ -422,16 +363,7 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, raw_text_summaries, 
     y_train_pred_proba = search.predict_proba(raw_text_summaries)[:, 1]
 
     # Training metrics
-    train_metrics = {
-        "AUC": roc_auc_score(y, y_train_pred_proba),
-        "AP": average_precision_score(y, y_train_pred_proba),
-        "Sensitivity": recall_score(y, y_train_pred, pos_label=1),
-        "Specificity": confusion_matrix(y, y_train_pred).ravel()[0] / (
-                confusion_matrix(y, y_train_pred).ravel()[0] + confusion_matrix(y, y_train_pred).ravel()[1]),
-        "Precision": precision_score(y, y_train_pred, zero_division=0),
-        "F1": f1_score(y, y_train_pred, average='macro'),
-        "Balanced Accuracy": balanced_accuracy_score(y, y_train_pred)
-    }
+    train_metrics = calc_metrics(y=y, y_pred=y_train_pred, y_pred_proba=y_train_pred_proba)
 
     best_params = f"{search.best_params_}"
 
@@ -443,7 +375,7 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, raw_text_summaries, 
     return dataset_name, ml_method, emb_method, concatenation, best_params, pca_components, train_metrics, metrics_per_fold
 
 
-def hgbc(dataset_name, X, y, nominal_features):
+def hgbc(dataset_name, X, y, nominal_features, pca):
     y = pd.Series(y)
 
     print(f"[INFO] Rows before NaN removal: X={len(X)}, y={len(y)}")
@@ -462,18 +394,19 @@ def hgbc(dataset_name, X, y, nominal_features):
         y = le.fit_transform(y)  # this returns a NumPy array
     else:
         y = y.to_numpy()
-    dataset = dataset_name
-    config = DATASET_CONFIGS[dataset]
-    n_splits = config.splits
-    n_repeats = config.n_repeats
 
-    ml_method = "HGBC"
-    emb_method = "none"
-    concatenation = "no"
+    config = DATASET_CONFIGS[dataset_name]
+    n_splits, n_repeats, n_components = config.splits, config.n_repeats, config.pca if pca else None
+
+    ml_method, emb_method, concatenation, pca_components =\
+        "HGBC", "none", "no", f"PCA ({n_components} components)" if pca else "none"
+
     metrics_per_fold = []
     skf = StratifiedKFold(n_splits=n_splits,
                           shuffle=True,
                           random_state=42)
+
+    pca_step = ("pca", PCA(n_components=n_components)) if n_components else None
 
     search = GridSearchCV(
         estimator=Pipeline([
@@ -489,48 +422,15 @@ def hgbc(dataset_name, X, y, nominal_features):
             X_train, X_test = X.iloc[train_index], X.iloc[test_index]
             y_train, y_test = y[train_index], y[test_index]
 
-            print(f"HGBC test fitting... ")
+            metrics = train(search=search, X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test)
 
-            search.fit(X_train, y_train)
-
-            y_test_pred = search.predict(X_test)
-            y_test_pred_proba = search.predict_proba(X_test)[:, 1]
-
-            tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
-            specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
-
-            metrics_per_fold.append({
-                "Fold": len(metrics_per_fold),
-                "AUC": roc_auc_score(y_test, y_test_pred_proba),
-                "AP": average_precision_score(y_test, y_test_pred_proba),
-                "Sensitivity": recall_score(y_test, y_test_pred, pos_label=1),
-                "Specificity": specificity,
-                "Precision": precision_score(y_test, y_test_pred, zero_division=0),
-                "F1": f1_score(y_test, y_test_pred, average='macro'),
-                "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
-            })
+            metrics_per_fold.append(metrics)
 
     elif dataset_name == DatasetName.CYBERSECURITY.value or dataset_name == DatasetName.LUNG_DISEASE.value:
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-        search.fit(X_train, y_train)
 
-        y_test_pred = search.predict(X_test)
-        y_test_pred_proba = search.predict_proba(X_test)[:, 1]
-
-        # Calculate metrics
-        tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
-        specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
-
-        metrics_per_fold.append({
-            "Fold": len(metrics_per_fold),
-            "AUC": roc_auc_score(y_test, y_test_pred_proba),
-            "AP": average_precision_score(y_test, y_test_pred_proba),
-            "Sensitivity": recall_score(y_test, y_test_pred, pos_label=1),
-            "Specificity": specificity,
-            "Precision": precision_score(y_test, y_test_pred, zero_division=0),
-            "F1": f1_score(y_test, y_test_pred, average='macro'),
-            "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
-        })
+        metrics = train(search=search, X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test)
+        metrics_per_fold.append(metrics)
 
     else:
         print(f"Unknown dataset {dataset_name}")
@@ -540,23 +440,14 @@ def hgbc(dataset_name, X, y, nominal_features):
     y_train_pred = search.predict(X)
     y_train_pred_proba = search.predict_proba(X)[:, 1]
 
-    train_metrics = {
-        "AUC": roc_auc_score(y, y_train_pred_proba),
-        "AP": average_precision_score(y, y_train_pred_proba),
-        "Sensitivity": recall_score(y, y_train_pred, pos_label=1),
-        "Specificity": confusion_matrix(y, y_train_pred).ravel()[0] / (
-                confusion_matrix(y, y_train_pred).ravel()[0] + confusion_matrix(y, y_train_pred).ravel()[1]),
-        "Precision": precision_score(y, y_train_pred, zero_division=0),
-        "F1": f1_score(y, y_train_pred, average='macro'),
-        "Balanced Accuracy": balanced_accuracy_score(y, y_train_pred)
-    }
+    train_metrics = calc_metrics(y=y, y_pred=y_train_pred, y_pred_proba=y_train_pred_proba)
     best_params = f"{search.best_params_}"
 
     print(f"Best hyperparameters: {best_params}")
     print(f"Train metrics: {train_metrics}")
     print(f"Test metrics per fold: {metrics_per_fold}")
 
-    return dataset, ml_method, emb_method, concatenation, best_params, train_metrics, metrics_per_fold
+    return dataset_name, ml_method, emb_method, concatenation, best_params, pca_components, train_metrics, metrics_per_fold
 
 
 def hgbc_rte(dataset_name, X, y, nominal_features):
@@ -628,19 +519,9 @@ def hgbc_rte(dataset_name, X, y, nominal_features):
             y_test_pred = search.predict(X_test)
             y_test_pred_proba = search.predict_proba(X_test)[:, 1]
 
-            tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
-            specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
+            metrics_per_fold.append(
+                calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba))
 
-            metrics_per_fold.append({
-                "Fold": len(metrics_per_fold),
-                "AUC": roc_auc_score(y_test, y_test_pred_proba),
-                "AP": average_precision_score(y_test, y_test_pred_proba),
-                "Sensitivity": recall_score(y_test, y_test_pred, pos_label=1),
-                "Specificity": specificity,
-                "Precision": precision_score(y_test, y_test_pred, zero_division=0),
-                "F1": f1_score(y_test, y_test_pred, average='macro'),
-                "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
-            })
     elif dataset_name == DatasetName.CYBERSECURITY.value or dataset_name == DatasetName.LUNG_DISEASE.value:
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
         search.fit(X_train, y_train)
@@ -648,20 +529,8 @@ def hgbc_rte(dataset_name, X, y, nominal_features):
         y_test_pred = search.predict(X_test)
         y_test_pred_proba = search.predict_proba(X_test)[:, 1]
 
-        # Calculate metrics
-        tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
-        specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
-
-        metrics_per_fold.append({
-            "Fold": len(metrics_per_fold),
-            "AUC": roc_auc_score(y_test, y_test_pred_proba),
-            "AP": average_precision_score(y_test, y_test_pred_proba),
-            "Sensitivity": recall_score(y_test, y_test_pred, pos_label=1),
-            "Specificity": specificity,
-            "Precision": precision_score(y_test, y_test_pred, zero_division=0),
-            "F1": f1_score(y_test, y_test_pred, average='macro'),
-            "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
-        })
+        metrics_per_fold.append(
+            calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba))
 
     else:
         print(f"Unknown dataset {dataset_name}")
@@ -670,16 +539,8 @@ def hgbc_rte(dataset_name, X, y, nominal_features):
     y_train_pred = search.predict(X)
     y_train_pred_proba = search.predict_proba(X)[:, 1]
 
-    train_metrics = {
-        "AUC": roc_auc_score(y, y_train_pred_proba),
-        "AP": average_precision_score(y, y_train_pred_proba),
-        "Sensitivity": recall_score(y, y_train_pred, pos_label=1),
-        "Specificity": confusion_matrix(y, y_train_pred).ravel()[0] / (
-                confusion_matrix(y, y_train_pred).ravel()[0] + confusion_matrix(y, y_train_pred).ravel()[1]),
-        "Precision": precision_score(y, y_train_pred, zero_division=0),
-        "F1": f1_score(y, y_train_pred, average='macro'),
-        "Balanced Accuracy": balanced_accuracy_score(y, y_train_pred)
-    }
+    train_metrics = calc_metrics(y=y, y_pred=y_train_pred, y_pred_proba=y_train_pred_proba)
+
     best_params = f"{search.best_params_}"
 
     hgbc_rt_emb_train_score = roc_auc_score(y, search.predict_proba(X)[:, 1])
@@ -743,27 +604,8 @@ def hgbc_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y, pca)
 
             X_train, X_test = np.array(X_train), np.array(X_test)
 
-            search.fit(
-                np.array(X_train),
-                y_train
-            )
-            y_test_pred = search.predict(X_test)
-            y_test_pred_proba = search.predict_proba(X_test)[:, 1]
-
-            # Calculate metrics
-            tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
-            specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
-
-            metrics_per_fold.append({
-                "Fold": len(metrics_per_fold),
-                "AUC": roc_auc_score(y_test, y_test_pred_proba),
-                "AP": average_precision_score(y_test, y_test_pred_proba),
-                "Sensitivity": recall_score(y_test, y_test_pred, pos_label=1),
-                "Specificity": specificity,
-                "Precision": precision_score(y_test, y_test_pred, zero_division=0),
-                "F1": f1_score(y_test, y_test_pred, average='macro'),
-                "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
-            })
+            metrics = train(search=search, X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test)
+            metrics_per_fold.append(metrics)
 
     elif dataset_name == DatasetName.CYBERSECURITY.value or dataset_name == DatasetName.LUNG_DISEASE.value:
         X_train, X_test, y_train, y_test = train_test_split(summaries, y, test_size=0.2, random_state=42)
@@ -776,22 +618,11 @@ def hgbc_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y, pca)
         y_test_pred = search.predict(X_test)
         y_test_pred_proba = search.predict_proba(X_test)[:, 1]
 
-        # Calculate metrics
-        tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
-        specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
         best_param = f"Best params for this fold: {search.best_params_}"
         print(best_param)
 
-        metrics_per_fold.append({
-            "Fold": len(metrics_per_fold),
-            "AUC": roc_auc_score(y_test, y_test_pred_proba),
-            "AP": average_precision_score(y_test, y_test_pred_proba),
-            "Sensitivity": recall_score(y_test, y_test_pred, pos_label=1),
-            "Specificity": specificity,
-            "Precision": precision_score(y_test, y_test_pred, zero_division=0),
-            "F1": f1_score(y_test, y_test_pred, average='macro'),
-            "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
-        })
+        metrics_per_fold.append(
+            calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba))
 
     # train on the full dataset
     search.fit(
@@ -803,16 +634,7 @@ def hgbc_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y, pca)
     y_train_pred_proba = search.predict_proba(np.array(summaries))[:, 1]
 
     # Training metrics
-    train_metrics = {
-        "AUC": roc_auc_score(y, y_train_pred_proba),
-        "AP": average_precision_score(y, y_train_pred_proba),
-        "Sensitivity": recall_score(y, y_train_pred, pos_label=1),
-        "Specificity": confusion_matrix(y, y_train_pred).ravel()[0] / (
-                confusion_matrix(y, y_train_pred).ravel()[0] + confusion_matrix(y, y_train_pred).ravel()[1]),
-        "Precision": precision_score(y, y_train_pred, zero_division=0),
-        "F1": f1_score(y, y_train_pred, average='macro'),
-        "Balanced Accuracy": balanced_accuracy_score(y, y_train_pred)
-    }
+    train_metrics = calc_metrics(y=y, y_pred=y_train_pred, y_pred_proba=y_train_pred_proba)
     aggregator = search.best_estimator_.named_steps['aggregator']
 
     try:
@@ -923,19 +745,9 @@ def concat_lr_txt_emb(dataset_name, emb_method,
             y_test_pred = search.predict(X_test)
             y_test_pred_proba = search.predict_proba(X_test)[:, 1]
 
-            tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
-            specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
+            metrics_per_fold.append(
+                calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba))
 
-            metrics_per_fold.append({
-                "Fold": len(metrics_per_fold),
-                "AUC": roc_auc_score(y_test, y_test_pred_proba),
-                "AP": average_precision_score(y_test, y_test_pred_proba),
-                "Sensitivity": recall_score(y_test, y_test_pred, pos_label=1),
-                "Specificity": specificity,
-                "Precision": precision_score(y_test, y_test_pred, zero_division=0),
-                "F1": f1_score(y_test, y_test_pred, average='macro'),
-                "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
-            })
     elif dataset_name == DatasetName.CYBERSECURITY.value or dataset_name == DatasetName.LUNG_DISEASE.value:
         X_train, X_test, y_train, y_test = train_test_split(raw_text_summaries, y, test_size=0.2, random_state=42)
 
@@ -947,22 +759,11 @@ def concat_lr_txt_emb(dataset_name, emb_method,
         y_test_pred = search.predict(X_test)
         y_test_pred_proba = search.predict_proba(X_test)[:, 1]
 
-        # Calculate metrics
-        tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
-        specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
         best_param = f"Best params for this fold: {search.best_params_}"
         print(best_param)
 
-        metrics_per_fold.append({
-            "Fold": len(metrics_per_fold),
-            "AUC": roc_auc_score(y_test, y_test_pred_proba),
-            "AP": average_precision_score(y_test, y_test_pred_proba),
-            "Sensitivity": recall_score(y_test, y_test_pred, pos_label=1),
-            "Specificity": specificity,
-            "Precision": precision_score(y_test, y_test_pred, zero_division=0),
-            "F1": f1_score(y_test, y_test_pred, average='macro'),
-            "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
-        })
+        metrics_per_fold.append(
+            calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba))
 
     search.fit(X_tabular, y)
 
@@ -973,16 +774,7 @@ def concat_lr_txt_emb(dataset_name, emb_method,
     print(f"y shape: {y.shape}")  # Should be (82,)
     print(f"y_train_pred shape: {y_train_pred.shape}")  # Should also be (82,)
 
-    train_metrics = {
-        "AUC": roc_auc_score(y, y_train_pred_proba),
-        "AP": average_precision_score(y, y_train_pred_proba),
-        "Sensitivity": recall_score(y, y_train_pred, pos_label=1),
-        "Specificity": confusion_matrix(y, y_train_pred).ravel()[0] / (
-                confusion_matrix(y, y_train_pred).ravel()[0] + confusion_matrix(y, y_train_pred).ravel()[1]),
-        "Precision": precision_score(y, y_train_pred, zero_division=0),
-        "F1": f1_score(y, y_train_pred, average='macro'),
-        "Balanced Accuracy": balanced_accuracy_score(y, y_train_pred)
-    }
+    train_metrics = calc_metrics(y=y, y_pred=y_train_pred, y_pred_proba=y_train_pred_proba)
 
     finish_time = time.time()
     readable_time = time.strftime("%H:%M:%S", time.localtime(finish_time))
@@ -1088,34 +880,14 @@ def concat_lr_rte(dataset_name, X_tabular,
         y_test_pred = search.predict(X_tab_test)
         y_test_pred_proba = search.predict_proba(X_tab_test)[:, 1]
 
-        tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
-        specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
-
-        metrics_per_fold.append({
-            "Fold": len(metrics_per_fold),
-            "AUC": roc_auc_score(y_test, y_test_pred_proba),
-            "AP": average_precision_score(y_test, y_test_pred_proba),
-            "Sensitivity": recall_score(y_test, y_test_pred, pos_label=1),
-            "Specificity": specificity,
-            "Precision": precision_score(y_test, y_test_pred, zero_division=0),
-            "F1": f1_score(y_test, y_test_pred, average='macro'),
-            "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
-        })
+        metrics_per_fold.append(
+            calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba))
 
     search.fit(X_tabular, y)
     y_train_pred = search.predict(X_tabular)
     y_train_pred_proba = search.predict_proba(X_tabular)[:, 1]
 
-    train_metrics = {
-        "AUC": roc_auc_score(y, y_train_pred_proba),
-        "AP": average_precision_score(y, y_train_pred_proba),
-        "Sensitivity": recall_score(y, y_train_pred, pos_label=1),
-        "Specificity": confusion_matrix(y, y_train_pred).ravel()[0] / (
-                confusion_matrix(y, y_train_pred).ravel()[0] + confusion_matrix(y, y_train_pred).ravel()[1]),
-        "Precision": precision_score(y, y_train_pred, zero_division=0),
-        "F1": f1_score(y, y_train_pred, average='macro'),
-        "Balanced Accuracy": balanced_accuracy_score(y, y_train_pred)
-    }
+    train_metrics = calc_metrics(y=y, y_pred=y_train_pred, y_pred_proba=y_train_pred_proba)
 
     best_params = f"{search.best_params_}"
 
@@ -1128,9 +900,9 @@ def concat_lr_rte(dataset_name, X_tabular,
 
 
 # läuft
-def concat_txt_hgbc(dataset_name, emb_method,
-                    X_tabular, y, text_feature_column_name, feature_extractor,
-                    raw_text_summaries, concatenation, pca):
+def concat_hgbc_txt_emb(dataset_name, emb_method,
+                        X_tabular, y, text_feature_column_name, feature_extractor,
+                        raw_text_summaries, concatenation, pca):
     dataset = dataset_name
     config = DATASET_CONFIGS[dataset]
     n_splits = config.splits
@@ -1210,19 +982,10 @@ def concat_txt_hgbc(dataset_name, emb_method,
             y_test_pred = search.predict(X_test)
             y_test_pred_proba = search.predict_proba(X_test)[:, 1]
 
-            tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
-            specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
+            metrics_per_fold.append(
+                calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba))
 
-            metrics_per_fold.append({
-                "Fold": len(metrics_per_fold),
-                "AUC": roc_auc_score(y_test, y_test_pred_proba),
-                "AP": average_precision_score(y_test, y_test_pred_proba),
-                "Sensitivity": recall_score(y_test, y_test_pred, pos_label=1),
-                "Specificity": specificity,
-                "Precision": precision_score(y_test, y_test_pred, zero_division=0),
-                "F1": f1_score(y_test, y_test_pred, average='macro'),
-                "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
-            })
+
     elif dataset_name == DatasetName.CYBERSECURITY.value or dataset_name == DatasetName.LUNG_DISEASE.value:
         X_train, X_test, y_train, y_test = train_test_split(raw_text_summaries, y, test_size=0.2, random_state=42)
 
@@ -1234,22 +997,11 @@ def concat_txt_hgbc(dataset_name, emb_method,
         y_test_pred = search.predict(X_test)
         y_test_pred_proba = search.predict_proba(X_test)[:, 1]
 
-        # Calculate metrics
-        tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
-        specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
         best_param = f"Best params for this fold: {search.best_params_}"
         print(best_param)
 
-        metrics_per_fold.append({
-            "Fold": len(metrics_per_fold),
-            "AUC": roc_auc_score(y_test, y_test_pred_proba),
-            "AP": average_precision_score(y_test, y_test_pred_proba),
-            "Sensitivity": recall_score(y_test, y_test_pred, pos_label=1),
-            "Specificity": specificity,
-            "Precision": precision_score(y_test, y_test_pred, zero_division=0),
-            "F1": f1_score(y_test, y_test_pred, average='macro'),
-            "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
-        })
+        metrics_per_fold.append(
+            calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba))
 
     print(f"X_tabular len: {len(X_tabular)}")
     print(f"Text_features len: {len(text_features)}")  # muss 82 sein
@@ -1264,17 +1016,7 @@ def concat_txt_hgbc(dataset_name, emb_method,
     print(f"y shape: {y.shape}")  # Should be (82,)
     print(f"y_train_pred shape: {y_train_pred.shape}")  # Should also be (82,)
 
-    train_metrics = {
-        "AUC": roc_auc_score(y, y_train_pred_proba),
-        "AP": average_precision_score(y, y_train_pred_proba),
-        "Sensitivity": recall_score(y, y_train_pred, pos_label=1),
-        "Specificity": confusion_matrix(y, y_train_pred).ravel()[0] / (
-                confusion_matrix(y, y_train_pred).ravel()[0] +
-                confusion_matrix(y, y_train_pred).ravel()[1]),
-        "Precision": precision_score(y, y_train_pred, zero_division=0),
-        "F1": f1_score(y, y_train_pred, average='macro'),
-        "Balanced Accuracy": balanced_accuracy_score(y, y_train_pred)
-    }
+    train_metrics = calc_metrics(y=y, y_pred=y_train_pred, y_pred_proba=y_train_pred_proba)
 
     best_params = f"{search.best_params_}"
     print(f"Best hyperparameters: {best_params}")
@@ -1355,35 +1097,14 @@ def concat_hgbc_rte(dataset_name, X_tabular, y, nominal_features, imp_max_iter, 
         y_test_pred = search.predict(X_test)
         y_test_pred_proba = search.predict_proba(X_test)[:, 1]
 
-        tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred).ravel()
-        specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
-
-        metrics_per_fold.append({
-            "Fold": len(metrics_per_fold),
-            "AUC": roc_auc_score(y_test, y_test_pred_proba),
-            "AP": average_precision_score(y_test, y_test_pred_proba),
-            "Sensitivity": recall_score(y_test, y_test_pred, pos_label=1),
-            "Specificity": specificity,
-            "Precision": precision_score(y_test, y_test_pred, zero_division=0),
-            "F1": f1_score(y_test, y_test_pred, average='macro'),
-            "Balanced Accuracy": balanced_accuracy_score(y_test, y_test_pred)
-        })
+        metrics_per_fold.append(
+            calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba))
 
     search.fit(X_tabular, y)
-    y_pred = search.predict(X_tabular)
+    y_train_pred = search.predict(X_tabular)
     y_train_pred_proba = search.predict_proba(X_tabular)[:, 1]
 
-    train_metrics = {
-        "AUC": roc_auc_score(y, y_train_pred_proba),
-        "AP": average_precision_score(y, y_train_pred_proba),
-        "Sensitivity": recall_score(y, y_pred, pos_label=1),
-        "Specificity": confusion_matrix(y, y_pred).ravel()[0] / (
-                confusion_matrix(y, y_pred).ravel()[0] +
-                confusion_matrix(y, y_pred).ravel()[1]),
-        "Precision": precision_score(y, y_pred, zero_division=0),
-        "F1": f1_score(y, y_pred, average='macro'),
-        "Balanced Accuracy": balanced_accuracy_score(y, y_pred)
-    }
+    train_metrics = calc_metrics(y=y, y_pred=y_train_pred, y_pred_proba=y_train_pred_proba)
 
     best_params = f"{search.best_params_}"
 

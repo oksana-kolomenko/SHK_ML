@@ -3,7 +3,7 @@ import pandas as pd
 
 from csv_saver import save_results_to_csv
 from helpers import (load_labels, load_features, load_summaries,
-                     concat_lr_rte, concat_hgbc_rte, concat_txt_hgbc,
+                     concat_lr_rte, concat_hgbc_rte, concat_hgbc_txt_emb,
                      concat_lr_txt_emb)
 from models import (feature_extractor_all_minilm_l6_v2, feature_extractor_ember_v1, feature_extractor_stella_en_400M_v5,
                     feature_extractor_sentence_t5_base, feature_extractor_gtr_t5_base)
@@ -162,7 +162,7 @@ def run_text_concatenated():
         # HGBC TXT Concatenation
         (hgbc_conc_dataset, hgbc_conc_ml_method, hgbc_conc_emb_method,
          hgbc_conc_yesno, hgbc_best_params, hgbc_pca_components, hgbc_conc_train_score,
-         hgbc_conc_test_scores) = concat_txt_hgbc(
+         hgbc_conc_test_scores) = concat_hgbc_txt_emb(
             dataset_name=posttrauma_dataset,
             emb_method=model_name,
             feature_extractor=feature_extractor,

@@ -90,22 +90,22 @@ def run_pca_txt_emb():
         # E5 Models
         #"E5-Small-V2": feature_extractor_e5_small_v2,
         #"E5-Base-V2": feature_extractor_e5_base_v2,
-        "E5-Large-V2": feature_extractor_e5_large_v2,
+        #"E5-Large-V2": feature_extractor_e5_large_v2,
 
         # BGE Models (done)
         #"BGE-Small-EN-v1.5": feature_extractor_bge_small_en_v1_5,
-        "BGE-Base-EN-v1.5": feature_extractor_bge_base_en_v1_5,
-        "BGE-Large-EN-v1.5": feature_extractor_bge_large_en_v1_5,
+        #"BGE-Base-EN-v1.5": feature_extractor_bge_base_en_v1_5,
+        #"BGE-Large-EN-v1.5": feature_extractor_bge_large_en_v1_5,
 
         # GIST Models
         #"GIST-Small-Embedding-v0": feature_extractor_gist_small_embedding_v0,
-        "GIST-Embedding-v0": feature_extractor_gist_embedding_v0,
+        #"GIST-Embedding-v0": feature_extractor_gist_embedding_v0,
         "GIST-Large-Embedding-v0": feature_extractor_gist_large_embedding_v0,
 
         # Potion Models
         #"Potion-Base-2M": feature_extractor_potion_base_2M,
         #"Potion-Base-4M": feature_extractor_potion_base_4M,
-        # "Potion-Base-8M": feature_extractor_potion_base_8M,
+        #"Potion-Base-8M": feature_extractor_potion_base_8M,
 
         # GTE Models
         #"GTE-Small": feature_extractor_gte_small,
