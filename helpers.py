@@ -49,7 +49,6 @@ def train(search, X_train, y_train, X_test, y_test):
     return metrics
 
 
-
 def logistic_regression(dataset_name, X, y, nominal_features, pca):
     y = pd.Series(y)
 
@@ -605,6 +604,7 @@ def hgbc_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y, pca)
             X_train, X_test = np.array(X_train), np.array(X_test)
 
             metrics = train(search=search, X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test)
+
             metrics_per_fold.append(metrics)
 
     elif dataset_name == DatasetName.CYBERSECURITY.value or dataset_name == DatasetName.LUNG_DISEASE.value:

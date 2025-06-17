@@ -65,7 +65,8 @@ def save_results_to_csv(output_file, dataset_name, ml_method, emb_method, concat
         ]
     else:
         column_order = [
-            "Fold", "Dataset", "ML Method", "Embedding Method", "Concatenation", "Best Parameters", "PCA n_components",
+            #"Fold",
+            "Dataset", "ML Method", "Embedding Method", "Concatenation", "Best Parameters", "PCA n_components",
             "AUC", "AP", "Sensitivity", "Specificity", "Precision", "F1", "Balanced Accuracy"
         ]
 
