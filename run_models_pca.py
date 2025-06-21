@@ -31,6 +31,20 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
     y = load_labels("y_posttrauma.csv")
     summaries = load_summaries("posttrauma_nominal_summaries.txt")"""
 
+    # === LUNGDISEASE ===
+    """dataset = DatasetName.LUNG_DISEASE.value
+    y = load_labels("y_lung_disease_data.csv")
+
+    # Conc 1
+    X = load_features("X_lung_disease_data.csv")
+    summaries = load_summaries("lung_disease_summaries.txt")
+    conc_art = "_conc_1_""""
+
+    """nominal_features = [
+        'encryption_used',
+        'browser_type',
+        'protocol_type'
+    ]"""
 
     # === CYBERSECURITY ===
     dataset = DatasetName.CYBERSECURITY.value
@@ -196,7 +210,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
 
         # Logistic Regression
         # concatenation 1
-        (lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,
+        """(lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,
          lr_conc_yesno, lr_best_params, lr_pca_components, lr_conc_train_score,
          lr_conc_test_scores) = concat_lr_txt_emb(
             dataset_name=dataset,
@@ -228,7 +242,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                             best_params=lr_best_params,
                             pca_n_comp=lr_pca_components,
                             metrics=lr_conc_test_scores,
-                            is_train=False)
+                            is_train=False)"""
 
         # HGBC conc pca
         (concat_hgbc_dataset, concat_hgbc_ml_method, concat_hgbc_emb_method,
