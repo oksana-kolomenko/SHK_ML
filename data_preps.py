@@ -89,7 +89,7 @@ def create_general_summaries(tab_data): #, text_style):
     summaries = []
 
     for line_number, (_, row) in enumerate(df_tab_data.iterrows(), 1):
-        summary = f"The following is the data for sample number {line_number}: "
+        summary = f"The following is the data for sample number {line_number}. "
         # summary = f"We want to predict whether patients will recover from their lung disease. The following is the data for patient number {line_number}: "
 
         details = []

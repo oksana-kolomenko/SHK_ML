@@ -1,18 +1,18 @@
 __pycache__/
 .idea/
 
-X.csv
-y.csv
-Summaries.txt
+X_posttrauma.csv
+y_posttrauma.csv
+posttrauma_summaries.txt
 X_excel.xls
 X_excel.xlsx
 __pycache__
 new.py
-Upgraded_summaries.txt
-Nominal_summaries.txt
+Upgraded_posttrauma_summaries.txt
+posttrauma_nominal_summaries.txt
 KV_all_summaries.txt
-X_metrics.csv
-X_nominal.csv
+X_metrics_posttrauma.csv
+X_nominal_posttrauma.csv
 cybersecurity_summaries.txt
 lung_disease_summaries.txt
 X_cybersecurity_intrusion_data.csv
