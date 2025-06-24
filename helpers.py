@@ -985,7 +985,6 @@ def concat_hgbc_txt_emb(dataset_name, emb_method,
             metrics_per_fold.append(
                 calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba))
 
-
     elif dataset_name == DatasetName.CYBERSECURITY.value or dataset_name == DatasetName.LUNG_DISEASE.value:
         X_train, X_test, y_train, y_test = train_test_split(X_tabular, y, test_size=0.2, random_state=42)
 
