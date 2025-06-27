@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 
-from csv_parser import patient_info
+from csv_parser import patient_info, number_to_word
 from values import DatasetName, Textstyle
 
 
@@ -55,7 +55,7 @@ def create_summary(dataset_name, table_file, summaries_file, text_style):
         raise ValueError(f"Unknown dataset name: {dataset_name}")
 
 
-def create_patient_summaries(csv_path, text_style):
+def create_patient_summaries(csv_path, text_style=Textstyle.ONE.value):
 
     df_tab_data = pd.read_csv(csv_path)
     summaries = []
@@ -101,5 +101,44 @@ def create_general_summaries(tab_data): #, text_style):
 
         summary += "; ".join(details) + "."
         summaries.append(summary)
+
+    return summaries
+
+
+def create_general_summaries_(tab_data, output_file=None):
+    df_tab_data = pd.read_csv(tab_data)
+    summaries = []
+
+    numeric_cols = df_tab_data.select_dtypes(include=['float64', 'int64']).columns
+    stats = {
+        col: {
+            "mean": df_tab_data[col].mean(),
+            "std": df_tab_data[col].std()
+        }
+        for col in numeric_cols
+    }
+
+    for line_number, (_, row) in enumerate(df_tab_data.iterrows(), 1):
+        summary = f"The following is the data for sample number {line_number}. "
+        details = []
+
+        for col in df_tab_data.columns:
+            value = row[col]
+            if pd.isna(value) or value == '':
+                continue
+
+            if col in numeric_cols:
+                classified = number_to_word(value, stats[col]['mean'], stats[col]['std'])
+                details.append(f"{col} is {classified}")
+            else:
+                details.append(f"{col} is {value}")
+
+        summary += "; ".join(details) + "."
+        summaries.append(summary)
+
+    if output_file:
+        with open(output_file, "w") as f:
+            for summary in summaries:
+                f.write(summary + "\n")
 
     return summaries

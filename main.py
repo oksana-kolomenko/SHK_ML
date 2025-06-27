@@ -3,9 +3,11 @@
 import time
 import numpy as np
 
-from data_preps import create_general_summaries, write_summary
+from data_preps import create_general_summaries, write_summary, create_patient_summaries, create_general_summaries_
 from dummy import print_special_tokens, print_sentence_embedding
 from run_models_pca import run_pca_txt_emb
+
+#from run_models_pca import run_pca_txt_emb
 #from dummy import test
 #from run_models_table_data import run_models_on_table_data
 #from run_models_concatenated import run_text_concatenated
@@ -13,8 +15,9 @@ from run_models_pca import run_pca_txt_emb
 
 if __name__ == '__main__':
     #run_models_on_table_data()
-    #summ = create_general_summaries(tab_data="X_cybersecurity_intrusion_data.csv")
-    #write_summary(file_name="cybersecurity_summaries.txt", summaries=summ)
+    #summ = create_general_summaries_(tab_data="X_lung_disease_data.csv",
+    #                                 output_file="_lung_disease_summaries.txt")
+    #write_summary(file_name="_cybersecurity_summaries.txt", summaries=summ)
     run_pca_txt_emb()
     #run_models_on_txt_emb()
     #run_text_concatenated()
