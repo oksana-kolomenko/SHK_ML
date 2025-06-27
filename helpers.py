@@ -571,8 +571,27 @@ def hgbc_rte(dataset_name, X, y, nominal_features):
 
 def hgbc_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y, pca):
     print(f"Started: hgbc_txt_emb with {feature_extractor}")
-    dataset = dataset_name
-    config = DATASET_CONFIGS[dataset]
+    y = pd.Series(y)
+
+    print(f"[INFO] Rows before NaN removal: X={len(summaries)}, y={len(y)}")
+    print(f"[INFO] NaNs in y before removal: {y.isna().sum()}")
+
+    summaries = pd.Series(summaries)
+
+    valid_indices = ~y.isna()
+    summaries = summaries.loc[valid_indices]
+    y = y.loc[valid_indices]
+
+    print(f"[INFO] Rows after NaN removal: X={len(summaries)}, y={len(y)}")
+    print(f"[INFO] NaNs in y after removal: {y.isna().sum()}")
+
+    if not np.issubdtype(y.dtype, np.number):
+        print(f"Label encoding: {y.unique()}")
+        le = LabelEncoder()
+        y = le.fit_transform(y)  # this returns a NumPy array
+    else:
+        y = y.to_numpy()
+    config = DATASET_CONFIGS[dataset_name]
     n_splits = config.splits
     n_components = config.pca
     n_repeats = config.n_repeats
@@ -673,7 +692,7 @@ def hgbc_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y, pca)
     print(f"Train metrics: {train_metrics}")
     print(f"Test metrics per fold: {metrics_per_fold}")
 
-    return dataset, ml_method, emb_method, concatenation, best_params, pca_components, train_metrics, metrics_per_fold
+    return dataset_name, ml_method, emb_method, concatenation, best_params, pca_components, train_metrics, metrics_per_fold
 
 
 # läuft
