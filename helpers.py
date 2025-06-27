@@ -259,6 +259,26 @@ def lr_rte(dataset_name, X, y, nominal_features, pca):
 
 # n_components aus dem Datensatz nehmen (40 für Posttrauma (shape[1])
 def lr_txt_emb(dataset_name, emb_method, feature_extractor, raw_text_summaries, y, max_iter, pca):
+    y = pd.Series(y)
+
+    print(f"[INFO] Rows before NaN removal: X={len(raw_text_summaries)}, y={len(y)}")
+    print(f"[INFO] NaNs in y before removal: {y.isna().sum()}")
+
+    raw_text_summaries = pd.Series(raw_text_summaries)
+
+    valid_indices = ~y.isna()
+    raw_text_summaries = raw_text_summaries.loc[valid_indices]
+    y = y.loc[valid_indices]
+
+    print(f"[INFO] Rows after NaN removal: X={len(raw_text_summaries)}, y={len(y)}")
+    print(f"[INFO] NaNs in y after removal: {y.isna().sum()}")
+
+    if not np.issubdtype(y.dtype, np.number):
+        print(f"Label encoding: {y.unique()}")
+        le = LabelEncoder()
+        y = le.fit_transform(y)  # this returns a NumPy array
+    else:
+        y = y.to_numpy()
 
     config = DATASET_CONFIGS[dataset_name]
     n_splits = config.splits
