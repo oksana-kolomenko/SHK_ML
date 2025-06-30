@@ -18,6 +18,8 @@ _cybersecurity_summaries.txt
 lung_disease_summaries.txt
 _lung_disease_summaries.txt
 X_cybersecurity_intrusion_data.csv
+X_cybersecurity_metrics.csv
+X_cybersecurity_nominal.csv
 y_cybersecurity_intrusion_data.csv
 lung_disease_summaries.txt
 X_lung_disease_data.csv

@@ -48,6 +48,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
     #conc_art = "_conc_1_"
 
     # === LUNGDISEASE ===
+    """
     dataset = DatasetName.LUNG_DISEASE.value
     y = load_labels("y_lung_disease_data.csv")
 
@@ -61,23 +62,36 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
         'Smoking Status',
         'Disease Type',
         'Treatment Type'
-    ]
+    ]"""
 
     # === CYBERSECURITY ===
-    """    
+
     dataset = DatasetName.CYBERSECURITY.value
     y = load_labels("y_cybersecurity_intrusion_data.csv")
 
     # Conc 1
+    """
     X = load_features("X_cybersecurity_intrusion_data.csv")
     summaries = load_summaries("cybersecurity_summaries.txt")
     conc_art = "_conc_1_"
+    """
+
+    # Conc 2
+    X = load_features("X_cybersecurity_metrics.csv")
+    summaries = load_summaries("cybersecurity_summaries.txt")
+    conc_art = "_conc_2_"
+
+    # Conc 3
+    """X = load_features()
+    summaries = load_summaries()
+    conc_art = "_conc_3_"
+    """
 
     nominal_features = [
         'encryption_used',
         'browser_type',
         'protocol_type'
-    ]"""
+    ]
 
     # Conc 2 Paket
     #all_summaries = "Summaries.txt"
@@ -171,7 +185,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
 
     for model_name, feature_extractor in feature_extractors.items():
         # Logistic Regression
-        (lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_concatenation, lr_txt_best_params,
+        """(lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_concatenation, lr_txt_best_params,
          lr_txt_pca_components, lr_txt_train_score, lr_txt_test_scores) = lr_txt_emb(
             dataset_name=dataset, emb_method=model_name,
             feature_extractor=feature_extractor, max_iter=10000,
@@ -213,11 +227,10 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                             best_params=hgbc_best_params,
                             pca_n_comp=hgbc_pca_comp,
                             metrics=hgbc_txt_test_scores,
-                            is_train=False)
+                            is_train=False)"""
 
         # Logistic Regression
-        # concatenation 1
-        """(lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,
+        (lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,
          lr_conc_yesno, lr_best_params, lr_pca_components, lr_conc_train_score,
          lr_conc_test_scores) = concat_lr_txt_emb(
             dataset_name=dataset,
@@ -231,7 +244,6 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
             imp_max_iter=30, class_max_iter=10000, pca=True)
             #imp_max_iter=10, class_max_iter=10, pca=True)
 
-        # todo:save train&test results as list and iterate
         save_results_to_csv(output_file=f"{dataset}_{model_name}_LR_{conc_art}_pca_train.csv",
                             dataset_name=lr_conc_dataset,
                             ml_method=lr_conc_ml_method,
@@ -282,7 +294,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                             best_params=hgbc_best_params,
                             pca_n_comp=hgbc_pca_components,
                             metrics=hgbc_conc_test_scores,
-                            is_train=False)"""
+                            is_train=False)
 
         # Logistic Regression
         # concatenation 2
