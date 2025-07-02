@@ -68,24 +68,40 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
 
     dataset = DatasetName.CYBERSECURITY.value
     y = load_labels("y_cybersecurity_intrusion_data.csv")
+    all_summaries = load_summaries("_cybersecurity_summaries.txt")
+    methods = {
+        # all summaries, all features
+        "pca_conc1": {"X": load_features("X_cybersecurity_intrusion_data.csv"),
+                      "summaries": load_summaries("_cybersecurity_summaries.txt"),
+                      "conc": "_conc1_",
+                      "pca": True},
+        # all summaries, metr features
+        "pca_conc2": {"X": load_features("X_cybersecurity_metrics.csv"),
+                      "summaries": load_summaries("_cybersecurity_summaries.txt"),
+                      "conc": "_conc2_",
+                      "pca": True},
+        # nom summaries, metr features
+        "pca_conc3": {"X": load_features("X_cybersecurity_metrics.csv"),
+                      "summaries": load_summaries("_cybersecurity_nom_summaries.txt"),
+                      "conc": "_conc3_",
+                      "pca": True},
 
-    # Conc 1
-    """
-    X = load_features("X_cybersecurity_intrusion_data.csv")
-    summaries = load_summaries("cybersecurity_summaries.txt")
-    conc_art = "_conc_1_"
-    """
-
-    # Conc 2
-    X = load_features("X_cybersecurity_metrics.csv")
-    summaries = load_summaries("cybersecurity_summaries.txt")
-    conc_art = "_conc_2_"
-
-    # Conc 3
-    """X = load_features()
-    summaries = load_summaries()
-    conc_art = "_conc_3_"
-    """
+        # all summaries, all features
+        "conc1": {"X": load_features("X_cybersecurity_intrusion_data.csv"),
+                  "summaries": load_summaries("_cybersecurity_summaries.txt"),
+                  "conc": "_conc1_",
+                  "pca": False},
+        # all summaries, metr features
+        "conc2": {"X": load_features("X_cybersecurity_metrics.csv"),
+                  "summaries": load_summaries("_cybersecurity_summaries.txt"),
+                  "conc": "_conc2_",
+                  "pca": False},
+        # nom summaries, metr features
+        "conc3": {"X": load_features("X_cybersecurity_metrics.csv"),
+                  "summaries": load_summaries("_cybersecurity_nom_summaries.txt"),
+                  "conc": "_conc3_",
+                  "pca": False}
+    }
 
     nominal_features = [
         'encryption_used',
@@ -105,9 +121,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
     #X_posttrauma_metrics = load_features(file_path="X_metrics.csv")
     #conc_art = "_conc_3_"
 
-
     #y_posttrauma = load_labels()
-
 
     text_feature = 'text'
 
@@ -185,11 +199,11 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
 
     for model_name, feature_extractor in feature_extractors.items():
         # Logistic Regression
-        """(lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_concatenation, lr_txt_best_params,
+        (lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_concatenation, lr_txt_best_params,
          lr_txt_pca_components, lr_txt_train_score, lr_txt_test_scores) = lr_txt_emb(
             dataset_name=dataset, emb_method=model_name,
             feature_extractor=feature_extractor, max_iter=10000,
-            raw_text_summaries=summaries, y=y, pca=True)
+            raw_text_summaries=all_summaries, y=y, pca=True)
 
         save_results_to_csv(output_file=f"{dataset}_{model_name}_LR_pca_train.csv", dataset_name=lr_txt_dataset,
                             ml_method=lr_txt_ml_method, emb_method=lr_txt_emb_method, concatenation=lr_txt_concatenation,
@@ -201,12 +215,13 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                             best_params=lr_txt_best_params, pca_n_comp=lr_txt_pca_components,
                             metrics=lr_txt_test_scores, is_train=False)
 
+        # HGBC
         (hgbc_txt_dataset, hgbc_txt_ml_method, hgbc_txt_emb_method, hgbc_txt_conc, hgbc_best_params, hgbc_pca_comp,
          hgbc_txt_train_score, hgbc_txt_test_scores) \
             = hgbc_txt_emb(dataset_name=dataset,
                            emb_method=model_name,
                            feature_extractor=feature_extractor,
-                           summaries=summaries,
+                           summaries=all_summaries,
                            y=y, pca=True)
 
         save_results_to_csv(output_file=f"{dataset}_{model_name}_HGBC_pca_train.csv",
@@ -227,212 +242,82 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                             best_params=hgbc_best_params,
                             pca_n_comp=hgbc_pca_comp,
                             metrics=hgbc_txt_test_scores,
-                            is_train=False)"""
-
-        # Logistic Regression
-        (lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,
-         lr_conc_yesno, lr_best_params, lr_pca_components, lr_conc_train_score,
-         lr_conc_test_scores) = concat_lr_txt_emb(
-            dataset_name=dataset,
-            emb_method=model_name,
-            feature_extractor=feature_extractor,
-            raw_text_summaries=summaries,
-            X_tabular=X, y=y,
-            nominal_features=nominal_features,
-            text_feature_column_name=text_feature,
-            concatenation=conc_art,
-            imp_max_iter=30, class_max_iter=10000, pca=True)
-            #imp_max_iter=10, class_max_iter=10, pca=True)
-
-        save_results_to_csv(output_file=f"{dataset}_{model_name}_LR_{conc_art}_pca_train.csv",
-                            dataset_name=lr_conc_dataset,
-                            ml_method=lr_conc_ml_method,
-                            emb_method=lr_conc_emb_method,
-                            concatenation=lr_conc_yesno,
-                            best_params=lr_best_params,
-                            pca_n_comp=lr_pca_components,
-                            metrics=lr_conc_train_score,
-                            is_train=True)
-
-        save_results_to_csv(output_file=f"{dataset}_{model_name}_LR_{conc_art}_pca_test.csv",
-                            dataset_name=lr_conc_dataset,
-                            ml_method=lr_conc_ml_method,
-                            emb_method=lr_conc_emb_method,
-                            concatenation=lr_conc_yesno,
-                            best_params=lr_best_params,
-                            pca_n_comp=lr_pca_components,
-                            metrics=lr_conc_test_scores,
                             is_train=False)
 
-        # HGBC conc pca
-        (concat_hgbc_dataset, concat_hgbc_ml_method, concat_hgbc_emb_method,
-         hgbc_conc_yesno, hgbc_best_params, hgbc_pca_components, hgbc_conc_train_score,
-         hgbc_conc_test_scores) = concat_hgbc_txt_emb(
-            dataset_name=dataset,
-            emb_method=model_name,
-            feature_extractor=feature_extractor,
-            raw_text_summaries=summaries,
-            X_tabular=X, y=y,
-            text_feature_column_name=text_feature,
-            concatenation=conc_art, pca=True)
+        for method_name, attributes in methods.items():
+            conc_art = attributes.get("conc")
+            X = attributes.get("X")
+            summaries = attributes.get("summaries")
+            pca = attributes.get("pca")
 
-        save_results_to_csv(output_file=f"{dataset}_{model_name}_HGBC_{conc_art}_pca_train.csv",
-                            dataset_name=concat_hgbc_dataset,
-                            ml_method=concat_hgbc_ml_method,
-                            emb_method=concat_hgbc_emb_method,
-                            concatenation=hgbc_conc_yesno,
-                            best_params=hgbc_best_params,
-                            pca_n_comp=hgbc_pca_components,
-                            metrics=hgbc_conc_train_score,
-                            is_train=True)
+            # Logistic Regression conc (pca)
+            (lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,
+             lr_conc_yesno, lr_best_params, lr_pca_components, lr_conc_train_score,
+             lr_conc_test_scores) = concat_lr_txt_emb(
+                dataset_name=dataset,
+                emb_method=model_name,
+                feature_extractor=feature_extractor,
+                raw_text_summaries=summaries,
+                X_tabular=X,
+                y=y,
+                nominal_features=nominal_features,
+                text_feature_column_name=text_feature,
+                concatenation=conc_art,
+                imp_max_iter=30, class_max_iter=10000, pca=pca)
+                #imp_max_iter=10, class_max_iter=10, pca=True)
 
-        save_results_to_csv(output_file=f"{dataset}_{model_name}_HGBC_{conc_art}_pca_test.csv",
-                            dataset_name=concat_hgbc_dataset,
-                            ml_method=concat_hgbc_ml_method,
-                            emb_method=concat_hgbc_emb_method,
-                            concatenation=hgbc_conc_yesno,
-                            best_params=hgbc_best_params,
-                            pca_n_comp=hgbc_pca_components,
-                            metrics=hgbc_conc_test_scores,
-                            is_train=False)
+            save_results_to_csv(output_file=f"{dataset}_{model_name}_LR_{conc_art}_pca_train.csv",
+                                dataset_name=lr_conc_dataset,
+                                ml_method=lr_conc_ml_method,
+                                emb_method=lr_conc_emb_method,
+                                concatenation=lr_conc_yesno,
+                                best_params=lr_best_params,
+                                pca_n_comp=lr_pca_components,
+                                metrics=lr_conc_train_score,
+                                is_train=True)
 
-        # Logistic Regression
-        # concatenation 2
-        """(lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,
-         lr_conc_yesno, lr_best_params, lr_pca_components, lr_conc_train_score,
-         lr_conc_test_scores) = concat_lr_txt_emb(
-            dataset_name=posttrauma_dataset,
-            emb_method=model_name,
-            feature_extractor=feature_extractor,
-            raw_text_summaries=all_summaries,
-            X_tabular=X_posttrauma_all, y=y_posttrauma,
-            nominal_features=nominal_features,
-            text_feature_column_name=text_feature,
-            imp_max_iter=30, class_max_iter=10000,
-            n_components=35, n_repeats=10)
+            save_results_to_csv(output_file=f"{dataset}_{model_name}_LR_{conc_art}_pca_test.csv",
+                                dataset_name=lr_conc_dataset,
+                                ml_method=lr_conc_ml_method,
+                                emb_method=lr_conc_emb_method,
+                                concatenation=lr_conc_yesno,
+                                best_params=lr_best_params,
+                                pca_n_comp=lr_pca_components,
+                                metrics=lr_conc_test_scores,
+                                is_train=False)
 
-        # todo:save train&test results as list and iterate
-        save_results_to_csv(output_file=f"{model_name}_LR_conc_pca_train_nom_sum_all_metrics.csv",
-                            dataset_name=lr_conc_dataset,
-                            ml_method=lr_conc_ml_method,
-                            emb_method=lr_conc_emb_method,
-                            concatenation=lr_conc_yesno,
-                            best_params=lr_best_params,
-                            pca_n_comp=lr_pca_components,
-                            metrics=lr_conc_train_score,
-                            is_train=True)
+            # HGBC conc (pca)
+            (concat_hgbc_dataset, concat_hgbc_ml_method, concat_hgbc_emb_method,
+             hgbc_conc_yesno, hgbc_best_params, hgbc_pca_components, hgbc_conc_train_score,
+             hgbc_conc_test_scores) = concat_hgbc_txt_emb(
+                dataset_name=dataset,
+                emb_method=model_name,
+                feature_extractor=feature_extractor,
+                raw_text_summaries=summaries,
+                X_tabular=X, y=y,
+                text_feature_column_name=text_feature,
+                concatenation=conc_art, pca=pca)
 
-        save_results_to_csv(output_file=f"{model_name}_LR_conc_pca_test_nom_sum_all_metrics.csv",
-                            dataset_name=lr_conc_dataset,
-                            ml_method=lr_conc_ml_method,
-                            emb_method=lr_conc_emb_method,
-                            concatenation=lr_conc_yesno,
-                            best_params=lr_best_params,
-                            pca_n_comp=lr_pca_components,
-                            metrics=lr_conc_test_scores,
-                            is_train=False)
+            save_results_to_csv(output_file=f"{dataset}_{model_name}_HGBC_{conc_art}_pca_train.csv",
+                                dataset_name=concat_hgbc_dataset,
+                                ml_method=concat_hgbc_ml_method,
+                                emb_method=concat_hgbc_emb_method,
+                                concatenation=hgbc_conc_yesno,
+                                best_params=hgbc_best_params,
+                                pca_n_comp=hgbc_pca_components,
+                                metrics=hgbc_conc_train_score,
+                                is_train=True)
 
-        # HGBC conc pca
-        (concat_hgbc_dataset, concat_hgbc_ml_method, concat_hgbc_emb_method,
-         hgbc_conc_yesno, hgbc_best_params, hgbc_pca_components, hgbc_conc_train_score,
-         hgbc_conc_test_scores) = concat_txt_hgbc(
-            dataset_name=posttrauma_dataset,
-            emb_method=model_name,
-            feature_extractor=feature_extractor,
-            raw_text_summaries=all_summaries,
-            X_tabular=X_posttrauma_all, y=y_posttrauma,
-            nominal_features=nominal_features,
-            text_feature_column_name=text_feature,
-            n_components=35, n_repeats=10)
+            save_results_to_csv(output_file=f"{dataset}_{model_name}_HGBC_{conc_art}_pca_test.csv",
+                                dataset_name=concat_hgbc_dataset,
+                                ml_method=concat_hgbc_ml_method,
+                                emb_method=concat_hgbc_emb_method,
+                                concatenation=hgbc_conc_yesno,
+                                best_params=hgbc_best_params,
+                                pca_n_comp=hgbc_pca_components,
+                                metrics=hgbc_conc_test_scores,
+                                is_train=False)
 
-        save_results_to_csv(output_file=f"{model_name}_HGBC_conc_pca_train_nom_sum_all_metrics.csv",
-                            dataset_name=concat_hgbc_dataset,
-                            ml_method=concat_hgbc_ml_method,
-                            emb_method=concat_hgbc_emb_method,
-                            concatenation=hgbc_conc_yesno,
-                            best_params=hgbc_best_params,
-                            pca_n_comp=hgbc_pca_components,
-                            metrics=hgbc_conc_train_score,
-                            is_train=True)
-
-        save_results_to_csv(output_file=f"{model_name}_HGBC_conc_pca_test_nom_sum_all_metrics.csv",
-                            dataset_name=concat_hgbc_dataset,
-                            ml_method=concat_hgbc_ml_method,
-                            emb_method=concat_hgbc_emb_method,
-                            concatenation=hgbc_conc_yesno,
-                            best_params=hgbc_best_params,
-                            pca_n_comp=hgbc_pca_components,
-                            metrics=hgbc_conc_test_scores,
-                            is_train=False)"""
-
-        # Logistic Regression
-        # concatenation 2
-        """(lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,
-         lr_conc_yesno, lr_best_params, lr_pca_components, lr_conc_train_score,
-         lr_conc_test_scores) = concat_lr_txt_emb(
-            dataset_name=posttrauma_dataset,
-            emb_method=model_name,
-            feature_extractor=feature_extractor,
-            raw_text_summaries=all_summaries,
-            X_tabular=X_posttrauma_all, y=y_posttrauma,
-            nominal_features=nominal_features,
-            text_feature_column_name=text_feature,
-            imp_max_iter=30, class_max_iter=10000,
-            n_components=35, n_repeats=10)
-
-        # todo:save train&test results as list and iterate
-        save_results_to_csv(output_file=f"{model_name}_LR_conc_pca_train_nom_sum_metr_metrics.csv",
-                            dataset_name=lr_conc_dataset,
-                            ml_method=lr_conc_ml_method,
-                            emb_method=lr_conc_emb_method,
-                            concatenation=lr_conc_yesno,
-                            best_params=lr_best_params,
-                            pca_n_comp=lr_pca_components,
-                            metrics=lr_conc_train_score,
-                            is_train=True)
-
-        save_results_to_csv(output_file=f"{model_name}_LR_conc_pca_test_nom_sum_metr_metrics.csv",
-                            dataset_name=lr_conc_dataset,
-                            ml_method=lr_conc_ml_method,
-                            emb_method=lr_conc_emb_method,
-                            concatenation=lr_conc_yesno,
-                            best_params=lr_best_params,
-                            pca_n_comp=lr_pca_components,
-                            metrics=lr_conc_test_scores,
-                            is_train=False)
-
-        # HGBC conc pca
-        (concat_hgbc_dataset, concat_hgbc_ml_method, concat_hgbc_emb_method,
-         hgbc_conc_yesno, hgbc_best_params, hgbc_pca_components, hgbc_conc_train_score,
-         hgbc_conc_test_scores) = concat_txt_hgbc(
-            dataset_name=posttrauma_dataset,
-            emb_method=model_name,
-            feature_extractor=feature_extractor,
-            raw_text_summaries=all_summaries,
-            X_tabular=X_posttrauma_all, y=y_posttrauma,
-            nominal_features=nominal_features,
-            text_feature_column_name=text_feature,
-            n_components=35, n_repeats=10)
-
-        save_results_to_csv(output_file=f"{model_name}_HGBC_conc_pca_train_nom_sum_metr_metrics.csv",
-                            dataset_name=concat_hgbc_dataset,
-                            ml_method=concat_hgbc_ml_method,
-                            emb_method=concat_hgbc_emb_method,
-                            concatenation=hgbc_conc_yesno,
-                            best_params=hgbc_best_params,
-                            pca_n_comp=hgbc_pca_components,
-                            metrics=hgbc_conc_train_score,
-                            is_train=True)
-
-        save_results_to_csv(output_file=f"{model_name}_HGBC_conc_pca_test_nom_sum_metr_metrics.csv",
-                            dataset_name=concat_hgbc_dataset,
-                            ml_method=concat_hgbc_ml_method,
-                            emb_method=concat_hgbc_emb_method,
-                            concatenation=hgbc_conc_yesno,
-                            best_params=hgbc_best_params,
-                            pca_n_comp=hgbc_pca_components,
-                            metrics=hgbc_conc_test_scores,
-                            is_train=False)"""
         """
         # Geht gerade nicht, da scores enthalten mehrere Metrics        
         labels_local = [
@@ -470,6 +355,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
             test_score_mins=test_score_mins_local,
             test_score_maxs=test_score_maxs_local
         )"""
+
 
 def run_pca_rte():
     posttrauma_dataset = DatasetName.POSTTRAUMA.value

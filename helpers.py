@@ -607,14 +607,14 @@ def hgbc_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y, pca)
     if "gtr_t5_base" in emb_method.lower() or "sentence_t5_base" in emb_method.lower() or "modernbert_embed" in emb_method.lower():
         is_sentence_transformer = True
 
-    pca_components = f"PCA ({n_components} components)" if n_components else "none"
+    pca_components = f"PCA ({n_components} components)" if pca else "none"
 
     pipeline_steps = [
         ("aggregator", EmbeddingAggregator(
             feature_extractor=feature_extractor,
             is_sentence_transformer=is_sentence_transformer))
     ]
-    if n_components:
+    if pca:
         pipeline_steps.append(("numerical_scaler", StandardScaler()))
         pipeline_steps.append(("pca", PCA(n_components=n_components)))
 
@@ -745,7 +745,7 @@ def concat_lr_txt_emb(dataset_name, emb_method,
             is_sentence_transformer=is_sentence_transformer
         )),
     ]
-    if n_components:
+    if pca:
         pipeline_text_steps.append(("numerical_scaler", StandardScaler()))
         pipeline_text_steps.append(("pca", PCA(n_components=n_components)))
     else:
@@ -980,7 +980,7 @@ def concat_hgbc_txt_emb(dataset_name, emb_method,
             is_sentence_transformer=is_sentence_transformer)),
         # ("debug_text", DebugTransformer(name="Text Debug"))
     ]
-    if n_components:
+    if pca:
         pipeline_text_steps.append(("numerical_scaler", StandardScaler()))
         pipeline_text_steps.append(("pca", PCA(n_components=n_components)))
     else:

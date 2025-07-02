@@ -105,7 +105,7 @@ def create_general_summaries(tab_data): #, text_style):
     return summaries
 
 
-def create_general_summaries_(tab_data, output_file=None):
+def create_general_summaries_(tab_data, categorial_values, column_name_map, output_file=None):
     df_tab_data = pd.read_csv(tab_data)
     summaries = []
 
@@ -124,14 +124,21 @@ def create_general_summaries_(tab_data, output_file=None):
 
         for col in df_tab_data.columns:
             value = row[col]
-            if pd.isna(value) or value == '':
+            if pd.isna(value):
+                continue
+            if isinstance(value, str) and value.strip() == '' and value.strip().lower() != 'none':
                 continue
 
-            if col in numeric_cols:
+            new_col = column_name_map.get(col)
+
+            if col in categorial_values:
+                value_str = categorial_values[col].get(int(value), str(value))
+                details.append(f"{new_col} is {value_str}")
+            elif col in numeric_cols:
                 classified = number_to_word(value, stats[col]['mean'], stats[col]['std'])
-                details.append(f"{col} is {classified}")
+                details.append(f"{new_col} is {classified}")
             else:
-                details.append(f"{col} is {value}")
+                details.append(f"{new_col} is {value}")
 
         summary += "; ".join(details) + "."
         summaries.append(summary)
