@@ -244,7 +244,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                             metrics=hgbc_txt_test_scores,
                             is_train=False)
 
-        for method_name, attributes in methods.items():
+        """for method_name, attributes in methods.items():
             conc_art = attributes.get("conc")
             X = attributes.get("X")
             summaries = attributes.get("summaries")
@@ -316,7 +316,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                                 best_params=hgbc_best_params,
                                 pca_n_comp=hgbc_pca_components,
                                 metrics=hgbc_conc_test_scores,
-                                is_train=False)
+                                is_train=False)"""
 
         """
         # Geht gerade nicht, da scores enthalten mehrere Metrics        

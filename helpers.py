@@ -941,7 +941,7 @@ def concat_lr_rte(dataset_name, X_tabular,
 # läuft
 def concat_hgbc_txt_emb(dataset_name, emb_method,
                         X_tabular, y, text_feature_column_name, feature_extractor,
-                        raw_text_summaries, concatenation, pca):
+                        nominal_features, raw_text_summaries, concatenation, pca):
     dataset = dataset_name
     config = DATASET_CONFIGS[dataset]
     n_splits = config.splits
@@ -991,7 +991,7 @@ def concat_hgbc_txt_emb(dataset_name, emb_method,
             ("transformer", ColumnTransformer([
                 ("text", Pipeline(pipeline_text_steps), text_features)
             ])),
-            ("classifier", HistGradientBoostingClassifier())
+            ("classifier", HistGradientBoostingClassifier(categorical_features=nominal_features))
         ]),
         param_grid={
             "classifier__min_samples_leaf": [5, 10, 15, 20],
