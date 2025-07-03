@@ -106,22 +106,9 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
     nominal_features = [
         'encryption_used',
         'browser_type',
-        'protocol_type'
+        'protocol_type',
+        'unusual_time_access'
     ]
-
-    # Conc 2 Paket
-    #all_summaries = "Summaries.txt"
-    #X_posttrauma_metrics = load_features(file_path="X_metrics.csv")
-    #conc_art = "_conc_2_"
-
-    # Conc 3 Paket
-    # summaries = load_summaries("cybersecurity_nom_summaries.txt")
-    # X = load_features(file_path="X_cybersecurity_metrics.csv")
-    #nominal_summaries = "Nominal_summaries.txt"
-    #X_posttrauma_metrics = load_features(file_path="X_metrics.csv")
-    #conc_art = "_conc_3_"
-
-    #y_posttrauma = load_labels()
 
     text_feature = 'text'
 
@@ -199,7 +186,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
 
     for model_name, feature_extractor in feature_extractors.items():
         # Logistic Regression
-        (lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_concatenation, lr_txt_best_params,
+        """(lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_concatenation, lr_txt_best_params,
          lr_txt_pca_components, lr_txt_train_score, lr_txt_test_scores) = lr_txt_emb(
             dataset_name=dataset, emb_method=model_name,
             feature_extractor=feature_extractor, max_iter=10000,
@@ -242,9 +229,9 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                             best_params=hgbc_best_params,
                             pca_n_comp=hgbc_pca_comp,
                             metrics=hgbc_txt_test_scores,
-                            is_train=False)
+                            is_train=False)"""
 
-        """for method_name, attributes in methods.items():
+        for method_name, attributes in methods.items():
             conc_art = attributes.get("conc")
             X = attributes.get("X")
             summaries = attributes.get("summaries")
@@ -316,7 +303,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                                 best_params=hgbc_best_params,
                                 pca_n_comp=hgbc_pca_components,
                                 metrics=hgbc_conc_test_scores,
-                                is_train=False)"""
+                                is_train=False)
 
         """
         # Geht gerade nicht, da scores enthalten mehrere Metrics        

@@ -88,7 +88,7 @@ def logistic_regression(dataset_name, X, y, nominal_features, pca):
             ("transformer", ColumnTransformer([
                 ("nominal", Pipeline([
                     ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
-                    ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
+                    ("nominal_encoder", OneHotEncoder(handle_unknown="ignore", drop="if_binary"))
                 ]), nominal_features),
                 ("numerical", Pipeline([
                     ("numerical_imputer", IterativeImputer(max_iter=50)),
@@ -187,7 +187,7 @@ def lr_rte(dataset_name, X, y, nominal_features, pca):
                 # Encode nominal features with OHE
                 ("nominal", Pipeline([
                     ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
-                    ("nominal_encoder", OneHotEncoder(handle_unknown="ignore")),
+                    ("nominal_encoder", OneHotEncoder(handle_unknown="ignore", drop="if_binary")),
                     ("debug_nominal", DebugTransformer(name="Nominal Debug"))
                 ]), nominal_features),
                 # Encode ordinal&numerical features with RTE
@@ -508,7 +508,7 @@ def hgbc_rte(dataset_name, X, y, nominal_features):
             ("transformer", ColumnTransformer([
                 ("nominal", Pipeline([
                     ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
-                    ("nominal_encoder", OneHotEncoder(handle_unknown="ignore"))
+                    ("nominal_encoder", OneHotEncoder(handle_unknown="ignore", drop="if_binary"))
                 ]), nominal_features),
                 ("numerical", Pipeline([
                     ("numerical_imputer", IterativeImputer(max_iter=30))
@@ -864,7 +864,7 @@ def concat_lr_rte(dataset_name, X_tabular,
                 ("nominal", Pipeline([
                     ("debug_nominal", DebugTransformer(name="Nominal Debug")),  # 5
                     ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
-                    ("nominal_encoder", OneHotEncoder(handle_unknown="ignore")),  # 14
+                    ("nominal_encoder", OneHotEncoder(handle_unknown="ignore", drop="if_binary")),  # 14
                     ("debug_nominal_after", DebugTransformer(name="Nominal Debug after"))
                 ]), nominal_features),
                 ("numerical", Pipeline([
@@ -1098,7 +1098,7 @@ def concat_hgbc_rte(dataset_name, X_tabular, y, nominal_features, imp_max_iter, 
                     ("nominal", Pipeline([
                         ("debug_nominal", DebugTransformer(name="Nominal Debug")),
                         ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
-                        ("nominal_encoder", OneHotEncoder(handle_unknown="ignore")),
+                        ("nominal_encoder", OneHotEncoder(handle_unknown="ignore", drop="if_binary")),
                         ("debug_nominal_after", DebugTransformer(name="Nominal Debug after"))
                     ]), nominal_features),
                     ("numerical", Pipeline(
