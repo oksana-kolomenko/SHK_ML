@@ -15,10 +15,10 @@ from run_models_pca import run_pca_txt_emb
 
 if __name__ == '__main__':
     #run_models_on_table_data()
-    #summ = create_general_summaries_(tab_data="X_lung_disease_data.csv",
-    #                                 output_file="_lung_disease_summaries.txt")
-    """
-    column_name_map = {
+    """create_general_summaries_(tab_data="X_lung_disease_data.csv",
+                              output_file="_lung_disease_summaries.txt")"""
+
+    """column_name_map = {
         "network_packet_size": "Network packet size",
         "protocol_type": "Protocol type",
         "login_attempts": "Login attempts",
@@ -29,20 +29,17 @@ if __name__ == '__main__':
         "browser_type": "Browser type",
         "unusual_time_access": "Unusual time access",
     }
-
-    categorial_values = {
+    """
+    """categorial_values = {
         "unusual_time_access": {0: "no", 1: "yes"}
     }
 
-    summ = create_general_summaries_(tab_data="X_cybersecurity_nominal.csv",
+    summ = create_general_summaries_(tab_data="X_cybersecurity_nom.csv",
                                      output_file="_cybersecurity_nom_summaries.txt",
                                      categorial_values=categorial_values,
-                                     column_name_map=column_name_map)
-    """
-    #write_summary(file_name="_cybersecurity_summaries.txt", summaries=summ)
+                                     column_name_map=column_name_map)"""
     run_pca_txt_emb()
     #run_models_on_txt_emb()
     #run_text_concatenated()
 
     #run_pca_rte()
-

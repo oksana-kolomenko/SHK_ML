@@ -105,10 +105,15 @@ def create_general_summaries(tab_data): #, text_style):
     return summaries
 
 
-def create_general_summaries_(tab_data, categorial_values, column_name_map, output_file=None):
+def create_general_summaries_(tab_data, categorial_values=None, column_name_map=None, output_file=None):
     df_tab_data = pd.read_csv(tab_data)
     summaries = []
 
+    # Fallbacks bei None
+    categorial_values = categorial_values or {}
+    column_name_map = column_name_map or {}
+
+    # Erkennung numerischer Spalten
     numeric_cols = df_tab_data.select_dtypes(include=['float64', 'int64']).columns
     stats = {
         col: {
@@ -119,20 +124,26 @@ def create_general_summaries_(tab_data, categorial_values, column_name_map, outp
     }
 
     for line_number, (_, row) in enumerate(df_tab_data.iterrows(), 1):
-        summary = f"The following is the data for sample number {line_number}. "
+        summary = f"The following is the data for patient number {line_number}. "
         details = []
 
         for col in df_tab_data.columns:
             value = row[col]
+
+            # Nur echte NaNs oder leere Werte überspringen, aber "None" als Text beibehalten
             if pd.isna(value):
                 continue
             if isinstance(value, str) and value.strip() == '' and value.strip().lower() != 'none':
                 continue
 
-            new_col = column_name_map.get(col)
+            # Freundlicher Spaltenname
+            new_col = column_name_map.get(col, col.replace("_", " ").capitalize())
 
             if col in categorial_values:
-                value_str = categorial_values[col].get(int(value), str(value))
+                try:
+                    value_str = categorial_values[col].get(int(value), str(value))
+                except (ValueError, TypeError):
+                    value_str = str(value)
                 details.append(f"{new_col} is {value_str}")
             elif col in numeric_cols:
                 classified = number_to_word(value, stats[col]['mean'], stats[col]['std'])

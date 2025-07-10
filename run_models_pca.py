@@ -283,7 +283,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                 raw_text_summaries=summaries,
                 X_tabular=X, y=y,
                 text_feature_column_name=text_feature,
-                concatenation=conc_art, pca=pca)
+                concatenation=conc_art, pca=pca, nominal_features=nominal_features)
 
             save_results_to_csv(output_file=f"{dataset}_{model_name}_HGBC_{conc_art}_pca_train.csv",
                                 dataset_name=concat_hgbc_dataset,
