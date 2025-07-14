@@ -72,33 +72,39 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
         "pca_conc1": {"X": load_features("X_cybersecurity_intrusion_data.csv"),
                       "summaries": load_summaries("_cybersecurity_summaries.txt"),
                       "conc": "_conc1_",
-                      "pca": True},
+                      "pca": True,
+                      "pca_str": "pca"},
         # all summaries, metr features
         "pca_conc2": {"X": load_features("X_cybersecurity_metrics.csv"),
                       "summaries": load_summaries("_cybersecurity_summaries.txt"),
                       "conc": "_conc2_",
-                      "pca": True},
+                      "pca": True,
+                      "pca_str": "pca"},
         # nom summaries, metr features
         "pca_conc3": {"X": load_features("X_cybersecurity_metrics.csv"),
                       "summaries": load_summaries("_cybersecurity_nom_summaries.txt"),
                       "conc": "_conc3_",
-                      "pca": True},
+                      "pca": True,
+                      "pca_str": "pca"},
 
         # all summaries, all features
         "conc1": {"X": load_features("X_cybersecurity_intrusion_data.csv"),
                   "summaries": load_summaries("_cybersecurity_summaries.txt"),
                   "conc": "_conc1_",
-                  "pca": False},
+                  "pca": False,
+                  "pca_str": ""},
         # all summaries, metr features
         "conc2": {"X": load_features("X_cybersecurity_metrics.csv"),
                   "summaries": load_summaries("_cybersecurity_summaries.txt"),
                   "conc": "_conc2_",
-                  "pca": False},
+                  "pca": False,
+                  "pca_str": ""},
         # nom summaries, metr features
         "conc3": {"X": load_features("X_cybersecurity_metrics.csv"),
                   "summaries": load_summaries("_cybersecurity_nom_summaries.txt"),
                   "conc": "_conc3_",
-                  "pca": False}
+                  "pca": False,
+                  "pca_str": ""}
     }
 
     nominal_features = [
@@ -112,7 +118,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
 
     feature_extractors = {
         # All MiniLM L6 v2
-        #"all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
+        "all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
 
         # Stella en 400m v5
         "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
@@ -183,6 +189,61 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
     }
 
     for model_name, feature_extractor in feature_extractors.items():
+
+        #######################
+        ### no PCA, no CONC ###
+        #######################
+
+        # Logistic Regression
+        (lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_concatenation, lr_txt_best_params,
+         lr_txt_pca_components, lr_txt_train_score, lr_txt_test_scores) = lr_txt_emb(
+            dataset_name=dataset, emb_method=model_name,
+            feature_extractor=feature_extractor, max_iter=10000,
+            raw_text_summaries=all_summaries, y=y, pca=False)
+
+        save_results_to_csv(output_file=f"{dataset}_{model_name}_LR_pca_train.csv", dataset_name=lr_txt_dataset,
+                            ml_method=lr_txt_ml_method, emb_method=lr_txt_emb_method, concatenation=lr_txt_concatenation,
+                            best_params=lr_txt_best_params, pca_n_comp=lr_txt_pca_components,
+                            metrics=lr_txt_train_score, is_train=True)
+
+        save_results_to_csv(output_file=f"{dataset}_{model_name}_LR_pca_test.csv", dataset_name=lr_txt_dataset,
+                            ml_method=lr_txt_ml_method, emb_method=lr_txt_emb_method, concatenation=lr_txt_concatenation,
+                            best_params=lr_txt_best_params, pca_n_comp=lr_txt_pca_components,
+                            metrics=lr_txt_test_scores, is_train=False)
+
+        # HGBC
+        (hgbc_txt_dataset, hgbc_txt_ml_method, hgbc_txt_emb_method, hgbc_txt_conc, hgbc_best_params, hgbc_pca_comp,
+         hgbc_txt_train_score, hgbc_txt_test_scores) \
+            = hgbc_txt_emb(dataset_name=dataset,
+                           emb_method=model_name,
+                           feature_extractor=feature_extractor,
+                           summaries=all_summaries,
+                           y=y, pca=False)
+
+        save_results_to_csv(output_file=f"{dataset}_{model_name}_HGBC_pca_train.csv",
+                            dataset_name=hgbc_txt_dataset,
+                            ml_method=hgbc_txt_ml_method,
+                            emb_method=hgbc_txt_emb_method,
+                            concatenation=hgbc_txt_conc,
+                            best_params=hgbc_best_params,
+                            pca_n_comp=hgbc_pca_comp,
+                            metrics=hgbc_txt_train_score,
+                            is_train=True)
+
+        save_results_to_csv(output_file=f"{dataset}_{model_name}_HGBC_pca_test.csv",
+                            dataset_name=hgbc_txt_dataset,
+                            ml_method=hgbc_txt_ml_method,
+                            emb_method=hgbc_txt_emb_method,
+                            concatenation=hgbc_txt_conc,
+                            best_params=hgbc_best_params,
+                            pca_n_comp=hgbc_pca_comp,
+                            metrics=hgbc_txt_test_scores,
+                            is_train=False)
+
+        ####################
+        ### PCA, no CONC ###
+        ####################
+
         # Logistic Regression
         """(lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_concatenation, lr_txt_best_params,
          lr_txt_pca_components, lr_txt_train_score, lr_txt_test_scores) = lr_txt_emb(
@@ -230,13 +291,18 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                             is_train=False)"""
 
         for method_name, attributes in methods.items():
+            #################
+            ### PCA, CONC ###
+            #################
+
             conc_art = attributes.get("conc")
             X = attributes.get("X")
             summaries = attributes.get("summaries")
             pca = attributes.get("pca")
+            pca_str = attributes.get("pca_str")
 
             # Logistic Regression conc (pca)
-            (lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,
+            """(lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,
              lr_conc_yesno, lr_best_params, lr_pca_components, lr_conc_train_score,
              lr_conc_test_scores) = concat_lr_txt_emb(
                 dataset_name=dataset,
@@ -251,7 +317,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                 imp_max_iter=30, class_max_iter=10000, pca=pca)
                 #imp_max_iter=10, class_max_iter=10, pca=True)
 
-            save_results_to_csv(output_file=f"{dataset}_{model_name}_LR_{conc_art}_pca_train.csv",
+            save_results_to_csv(output_file=f"{dataset}_{model_name}_LR_{conc_art}_{pca_str}_train.csv",
                                 dataset_name=lr_conc_dataset,
                                 ml_method=lr_conc_ml_method,
                                 emb_method=lr_conc_emb_method,
@@ -261,7 +327,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                                 metrics=lr_conc_train_score,
                                 is_train=True)
 
-            save_results_to_csv(output_file=f"{dataset}_{model_name}_LR_{conc_art}_pca_test.csv",
+            save_results_to_csv(output_file=f"{dataset}_{model_name}_LR_{conc_art}_{pca_str}_test.csv",
                                 dataset_name=lr_conc_dataset,
                                 ml_method=lr_conc_ml_method,
                                 emb_method=lr_conc_emb_method,
@@ -269,10 +335,10 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                                 best_params=lr_best_params,
                                 pca_n_comp=lr_pca_components,
                                 metrics=lr_conc_test_scores,
-                                is_train=False)
+                                is_train=False)"""
 
-            # HGBC conc (pca)
-            """(concat_hgbc_dataset, concat_hgbc_ml_method, concat_hgbc_emb_method,
+            """# HGBC conc (pca)
+            (concat_hgbc_dataset, concat_hgbc_ml_method, concat_hgbc_emb_method,
              hgbc_conc_yesno, hgbc_best_params, hgbc_pca_components, hgbc_conc_train_score,
              hgbc_conc_test_scores) = concat_hgbc_txt_emb(
                 dataset_name=dataset,
@@ -281,9 +347,9 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                 raw_text_summaries=summaries,
                 X_tabular=X, y=y,
                 text_feature_column_name=text_feature,
-                concatenation=conc_art, pca=pca, nominal_features=nominal_features  )
+                concatenation=conc_art, pca=pca, nominal_features=nominal_features)
 
-            save_results_to_csv(output_file=f"{dataset}_{model_name}_HGBC_{conc_art}_pca_train.csv",
+            save_results_to_csv(output_file=f"{dataset}_{model_name}_HGBC_{conc_art}_{pca_str}_train.csv",
                                 dataset_name=concat_hgbc_dataset,
                                 ml_method=concat_hgbc_ml_method,
                                 emb_method=concat_hgbc_emb_method,
@@ -293,7 +359,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                                 metrics=hgbc_conc_train_score,
                                 is_train=True)
 
-            save_results_to_csv(output_file=f"{dataset}_{model_name}_HGBC_{conc_art}_pca_test.csv",
+            save_results_to_csv(output_file=f"{dataset}_{model_name}_HGBC_{conc_art}_{pca_str}_test.csv",
                                 dataset_name=concat_hgbc_dataset,
                                 ml_method=concat_hgbc_ml_method,
                                 emb_method=concat_hgbc_emb_method,
@@ -302,44 +368,6 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                                 pca_n_comp=hgbc_pca_components,
                                 metrics=hgbc_conc_test_scores,
                                 is_train=False)"""
-
-        """
-        # Geht gerade nicht, da scores enthalten mehrere Metrics        
-        labels_local = [
-            f"{model_name} \n+ Log Reg + PCA",
-            f"{model_name} \n+ HGBC + PCA"
-        ]
-        train_scores_local = [
-            lr_txt_train_score,
-            hgbc_txt_train_score
-        ]
-        test_score_medians_local = [
-            np.median(lr_txt_test_scores),
-            np.median(hgbc_txt_test_scores)
-        ]
-        test_score_mins_local = [
-            np.min(lr_txt_test_scores),
-            np.min(hgbc_txt_test_scores)
-        ]
-        test_score_maxs_local = [
-            np.max(lr_txt_test_scores),
-            np.max(hgbc_txt_test_scores)
-        ]
-
-        # Convert to arrays
-        train_scores_local = np.array(train_scores_local)
-        test_score_medians_local = np.array(test_score_medians_local)
-        test_score_mins_local = np.array(test_score_mins_local)
-        test_score_maxs_local = np.array(test_score_maxs_local)
-
-        plot_bar_chart(
-            filename=f"{model_name}_pca",
-            labels=labels_local,
-            train_scores=train_scores_local,
-            test_score_medians=test_score_medians_local,
-            test_score_mins=test_score_mins_local,
-            test_score_maxs=test_score_maxs_local
-        )"""
 
 
 def run_pca_rte():
