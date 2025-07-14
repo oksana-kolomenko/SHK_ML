@@ -378,6 +378,7 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, raw_text_summaries, 
         y
     )
 
+    # change to X_train instead of all data for cybersec & lungdisease
     y_train_pred = search.predict(raw_text_summaries)
     y_train_pred_proba = search.predict_proba(raw_text_summaries)[:, 1]
 

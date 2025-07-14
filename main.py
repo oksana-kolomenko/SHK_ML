@@ -10,13 +10,12 @@ from dummy import print_special_tokens, print_sentence_embedding
 from run_models_pca import run_pca_txt_emb
 #from dummy import test
 #from run_models_table_data import run_models_on_table_data
-#from run_models_concatenated import run_text_concatenated
 #from run_models_text_emb import run_models_on_txt_emb
 
 if __name__ == '__main__':
     #run_models_on_table_data()
-    """create_general_summaries_(tab_data="X_lung_disease_data.csv",
-                              output_file="_lung_disease_summaries.txt")"""
+    #create_general_summaries_(tab_data="X_lung_disease_data.csv",
+    #                          output_file="_lung_disease_summaries.txt")
 
     """column_name_map = {
         "network_packet_size": "Network packet size",

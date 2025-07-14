@@ -44,8 +44,6 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
         'penetrating_injury'
     ]"""
 
-    # conc 1
-    #conc_art = "_conc_1_"
 
     # === LUNGDISEASE ===
     """
@@ -114,7 +112,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
 
     feature_extractors = {
         # All MiniLM L6 v2
-        "all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
+        #"all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
 
         # Stella en 400m v5
         "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
@@ -274,7 +272,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                                 is_train=False)
 
             # HGBC conc (pca)
-            (concat_hgbc_dataset, concat_hgbc_ml_method, concat_hgbc_emb_method,
+            """(concat_hgbc_dataset, concat_hgbc_ml_method, concat_hgbc_emb_method,
              hgbc_conc_yesno, hgbc_best_params, hgbc_pca_components, hgbc_conc_train_score,
              hgbc_conc_test_scores) = concat_hgbc_txt_emb(
                 dataset_name=dataset,
@@ -283,7 +281,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                 raw_text_summaries=summaries,
                 X_tabular=X, y=y,
                 text_feature_column_name=text_feature,
-                concatenation=conc_art, pca=pca, nominal_features=nominal_features)
+                concatenation=conc_art, pca=pca, nominal_features=nominal_features  )
 
             save_results_to_csv(output_file=f"{dataset}_{model_name}_HGBC_{conc_art}_pca_train.csv",
                                 dataset_name=concat_hgbc_dataset,
@@ -303,7 +301,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                                 best_params=hgbc_best_params,
                                 pca_n_comp=hgbc_pca_components,
                                 metrics=hgbc_conc_test_scores,
-                                is_train=False)
+                                is_train=False)"""
 
         """
         # Geht gerade nicht, da scores enthalten mehrere Metrics        
