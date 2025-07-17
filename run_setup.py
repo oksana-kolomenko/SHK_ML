@@ -87,7 +87,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                       "pca": True,
                       "pca_str": "pca"},
 
-        # all summaries, all features
+        """# all summaries, all features
         "conc1": {"X": load_features("X_cybersecurity_intrusion_data.csv"),
                   "summaries": load_summaries("_cybersecurity_summaries.txt"),
                   "conc": "_conc1_",
@@ -104,7 +104,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                   "summaries": load_summaries("_cybersecurity_nom_summaries.txt"),
                   "conc": "_conc3_",
                   "pca": False,
-                  "pca_str": ""}
+                  "pca_str": ""}"""
     }
 
     nominal_features = [
@@ -135,7 +135,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
         # E5 Models
         "E5-Small-V2": feature_extractor_e5_small_v2,
         "E5-Base-V2": feature_extractor_e5_base_v2,
-        "E5-Large-V2": feature_extractor_e5_large_v2,
+        #"E5-Large-V2": feature_extractor_e5_large_v2,
 
         # BGE Models (done)
         "BGE-Small-EN-v1.5": feature_extractor_bge_small_en_v1_5,
@@ -194,19 +194,19 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
         ### no PCA, no CONC ###
         #######################
 
-        # Logistic Regression
+        """# Logistic Regression
         (lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_concatenation, lr_txt_best_params,
          lr_txt_pca_components, lr_txt_train_score, lr_txt_test_scores) = lr_txt_emb(
             dataset_name=dataset, emb_method=model_name,
             feature_extractor=feature_extractor, max_iter=10000,
             raw_text_summaries=all_summaries, y=y, pca=False)
 
-        save_results_to_csv(output_file=f"{dataset}_{model_name}_LR_pca_train.csv", dataset_name=lr_txt_dataset,
+        save_results_to_csv(output_file=f"{dataset}_{model_name}_LR_train.csv", dataset_name=lr_txt_dataset,
                             ml_method=lr_txt_ml_method, emb_method=lr_txt_emb_method, concatenation=lr_txt_concatenation,
                             best_params=lr_txt_best_params, pca_n_comp=lr_txt_pca_components,
                             metrics=lr_txt_train_score, is_train=True)
 
-        save_results_to_csv(output_file=f"{dataset}_{model_name}_LR_pca_test.csv", dataset_name=lr_txt_dataset,
+        save_results_to_csv(output_file=f"{dataset}_{model_name}_LR_test.csv", dataset_name=lr_txt_dataset,
                             ml_method=lr_txt_ml_method, emb_method=lr_txt_emb_method, concatenation=lr_txt_concatenation,
                             best_params=lr_txt_best_params, pca_n_comp=lr_txt_pca_components,
                             metrics=lr_txt_test_scores, is_train=False)
@@ -220,7 +220,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                            summaries=all_summaries,
                            y=y, pca=False)
 
-        save_results_to_csv(output_file=f"{dataset}_{model_name}_HGBC_pca_train.csv",
+        save_results_to_csv(output_file=f"{dataset}_{model_name}_HGBC_train.csv",
                             dataset_name=hgbc_txt_dataset,
                             ml_method=hgbc_txt_ml_method,
                             emb_method=hgbc_txt_emb_method,
@@ -230,7 +230,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                             metrics=hgbc_txt_train_score,
                             is_train=True)
 
-        save_results_to_csv(output_file=f"{dataset}_{model_name}_HGBC_pca_test.csv",
+        save_results_to_csv(output_file=f"{dataset}_{model_name}_HGBC_test.csv",
                             dataset_name=hgbc_txt_dataset,
                             ml_method=hgbc_txt_ml_method,
                             emb_method=hgbc_txt_emb_method,
@@ -238,7 +238,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                             best_params=hgbc_best_params,
                             pca_n_comp=hgbc_pca_comp,
                             metrics=hgbc_txt_test_scores,
-                            is_train=False)
+                            is_train=False)"""
 
         ####################
         ### PCA, no CONC ###
@@ -302,7 +302,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
             pca_str = attributes.get("pca_str")
 
             # Logistic Regression conc (pca)
-            """(lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,
+            (lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,
              lr_conc_yesno, lr_best_params, lr_pca_components, lr_conc_train_score,
              lr_conc_test_scores) = concat_lr_txt_emb(
                 dataset_name=dataset,
@@ -335,7 +335,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                                 best_params=lr_best_params,
                                 pca_n_comp=lr_pca_components,
                                 metrics=lr_conc_test_scores,
-                                is_train=False)"""
+                                is_train=False)
 
             """# HGBC conc (pca)
             (concat_hgbc_dataset, concat_hgbc_ml_method, concat_hgbc_emb_method,
