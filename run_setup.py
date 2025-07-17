@@ -68,6 +68,26 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
     y = load_labels("y_cybersecurity_intrusion_data.csv")
     all_summaries = load_summaries("_cybersecurity_summaries.txt")
     methods = {
+        """
+        # all summaries, all features
+        "conc1": {"X": load_features("X_cybersecurity_intrusion_data.csv"),
+                  "summaries": load_summaries("_cybersecurity_summaries.txt"),
+                  "conc": "_conc1_",
+                  "pca": False,
+                  "pca_str": ""},
+        # all summaries, metr features
+        "conc2": {"X": load_features("X_cybersecurity_metrics.csv"),
+                  "summaries": load_summaries("_cybersecurity_summaries.txt"),
+                  "conc": "_conc2_",
+                  "pca": False,
+                  "pca_str": ""},
+        # nom summaries, metr features
+        "conc3": {"X": load_features("X_cybersecurity_metrics.csv"),
+                  "summaries": load_summaries("_cybersecurity_nom_summaries.txt"),
+                  "conc": "_conc3_",
+                  "pca": False,
+                  "pca_str": ""}
+        """
         # all summaries, all features
         "pca_conc1": {"X": load_features("X_cybersecurity_intrusion_data.csv"),
                       "summaries": load_summaries("_cybersecurity_summaries.txt"),
@@ -85,26 +105,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                       "summaries": load_summaries("_cybersecurity_nom_summaries.txt"),
                       "conc": "_conc3_",
                       "pca": True,
-                      "pca_str": "pca"},
-
-        """# all summaries, all features
-        "conc1": {"X": load_features("X_cybersecurity_intrusion_data.csv"),
-                  "summaries": load_summaries("_cybersecurity_summaries.txt"),
-                  "conc": "_conc1_",
-                  "pca": False,
-                  "pca_str": ""},
-        # all summaries, metr features
-        "conc2": {"X": load_features("X_cybersecurity_metrics.csv"),
-                  "summaries": load_summaries("_cybersecurity_summaries.txt"),
-                  "conc": "_conc2_",
-                  "pca": False,
-                  "pca_str": ""},
-        # nom summaries, metr features
-        "conc3": {"X": load_features("X_cybersecurity_metrics.csv"),
-                  "summaries": load_summaries("_cybersecurity_nom_summaries.txt"),
-                  "conc": "_conc3_",
-                  "pca": False,
-                  "pca_str": ""}"""
+                      "pca_str": "pca"}
     }
 
     nominal_features = [
