@@ -66,7 +66,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
     dataset = DatasetName.CYBERSECURITY.value
     y = load_labels("y_cybersecurity_intrusion_data.csv")
     X = load_features("X_cybersecurity_intrusion_data.csv")
-    X_metr = load_features("X_cybersecurity_intrusion_metr.csv")
+    X_metr = load_features("X_cybersecurity_metrics.csv")
     all_summaries = load_summaries("_cybersecurity_summaries.txt")
     nom_summaries = load_summaries("_cybersecurity_nom_summaries.txt")
 
