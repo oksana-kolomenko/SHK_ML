@@ -70,25 +70,6 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
     methods = {
         """
         # all summaries, all features
-        "conc1": {"X": load_features("X_cybersecurity_intrusion_data.csv"),
-                  "summaries": load_summaries("_cybersecurity_summaries.txt"),
-                  "conc": "_conc1_",
-                  "pca": False,
-                  "pca_str": ""},
-        # all summaries, metr features
-        "conc2": {"X": load_features("X_cybersecurity_metrics.csv"),
-                  "summaries": load_summaries("_cybersecurity_summaries.txt"),
-                  "conc": "_conc2_",
-                  "pca": False,
-                  "pca_str": ""},
-        # nom summaries, metr features
-        "conc3": {"X": load_features("X_cybersecurity_metrics.csv"),
-                  "summaries": load_summaries("_cybersecurity_nom_summaries.txt"),
-                  "conc": "_conc3_",
-                  "pca": False,
-                  "pca_str": ""}
-        """
-        # all summaries, all features
         "pca_conc1": {"X": load_features("X_cybersecurity_intrusion_data.csv"),
                       "summaries": load_summaries("_cybersecurity_summaries.txt"),
                       "conc": "_conc1_",
@@ -106,6 +87,25 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                       "conc": "_conc3_",
                       "pca": True,
                       "pca_str": "pca"}
+        """
+        # all summaries, all features
+        "conc1": {"X": load_features("X_cybersecurity_intrusion_data.csv"),
+                  "summaries": load_summaries("_cybersecurity_summaries.txt"),
+                  "conc": "_conc1_",
+                  "pca": False,
+                  "pca_str": ""},
+        # all summaries, metr features
+        "conc2": {"X": load_features("X_cybersecurity_metrics.csv"),
+                  "summaries": load_summaries("_cybersecurity_summaries.txt"),
+                  "conc": "_conc2_",
+                  "pca": False,
+                  "pca_str": ""},
+        # nom summaries, metr features
+        "conc3": {"X": load_features("X_cybersecurity_metrics.csv"),
+                  "summaries": load_summaries("_cybersecurity_nom_summaries.txt"),
+                  "conc": "_conc3_",
+                  "pca": False,
+                  "pca_str": ""}
     }
 
     nominal_features = [
@@ -119,10 +119,10 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
 
     feature_extractors = {
         # All MiniLM L6 v2
-        "all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
+       # "all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
 
         # Stella en 400m v5
-        "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
+        #"Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
 
         # GTR T5 Base
         # "GTR_T5_Base": feature_extractor_gtr_t5_base,
@@ -131,11 +131,11 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
         # "sentence_t5_base": feature_extractor_sentence_t5_base,
 
         # Ember v1
-        "ember_v1": feature_extractor_ember_v1,
+        #"ember_v1": feature_extractor_ember_v1,
 
         # E5 Models
-        "E5-Small-V2": feature_extractor_e5_small_v2,
-        "E5-Base-V2": feature_extractor_e5_base_v2,
+        #"E5-Small-V2": feature_extractor_e5_small_v2,
+        #"E5-Base-V2": feature_extractor_e5_base_v2,
         #"E5-Large-V2": feature_extractor_e5_large_v2,
 
         # BGE Models (done)
