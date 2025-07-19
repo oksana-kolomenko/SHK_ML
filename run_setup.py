@@ -47,7 +47,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
 
     # === LUNGDISEASE ===
 
-    dataset = DatasetName.LUNG_DISEASE.value
+    """dataset = DatasetName.LUNG_DISEASE.value
     y = load_labels("y_lung_disease_data.csv")
     X = load_features("X_lung_disease_data.csv")
     X_metr = load_features("X_lung_disease_metr.csv")
@@ -59,29 +59,28 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
         'Smoking Status',
         'Disease Type',
         'Treatment Type'
-    ]
+    ]"""
 
     # === CYBERSECURITY ===
 
-    #dataset = DatasetName.CYBERSECURITY.value
-    #y = load_labels("y_cybersecurity_intrusion_data.csv")
-    #X = load_features("X_cybersecurity_intrusion_data.csv")
-    #X_metr = load_features("X_cybersecurity_intrusion_metr.csv")
-    #all_summaries = load_summaries("_cybersecurity_summaries.txt"
-    #nom_summaries = load_summaries("_cybersecurity_nom_summaries.txt"
+    dataset = DatasetName.CYBERSECURITY.value
+    y = load_labels("y_cybersecurity_intrusion_data.csv")
+    X = load_features("X_cybersecurity_intrusion_data.csv")
+    X_metr = load_features("X_cybersecurity_intrusion_metr.csv")
+    all_summaries = load_summaries("_cybersecurity_summaries.txt")
+    nom_summaries = load_summaries("_cybersecurity_nom_summaries.txt")
 
-    """
+
     nominal_features = [
         'encryption_used',
         'browser_type',
         'protocol_type',
         'unusual_time_access'
     ]
-    """
+
 
 
     methods = {
-
         """# all summaries, all features
         "pca_conc1": {"X": X,
                       "summaries": all_summaries,
@@ -100,6 +99,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                       "conc": "_conc3_",
                       "pca": True,
                       "pca_str": "pca"},
+        """
 
         # all summaries, all features
         "conc1": {"X": X,
@@ -118,7 +118,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                   "summaries": nom_summaries,
                   "conc": "_conc3_",
                   "pca": False,
-                  "pca_str": ""}"""
+                  "pca_str": ""}
     }
 
 
@@ -126,10 +126,10 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
 
     feature_extractors = {
         # All MiniLM L6 v2
-       "all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
+        "all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
 
         # Stella en 400m v5
-        "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
+        #"Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
 
         # GTR T5 Base
         # "GTR_T5_Base": feature_extractor_gtr_t5_base,
@@ -138,12 +138,12 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
         # "sentence_t5_base": feature_extractor_sentence_t5_base,
 
         # Ember v1
-        "ember_v1": feature_extractor_ember_v1,
+        #"ember_v1": feature_extractor_ember_v1,
 
         # E5 Models
-        "E5-Small-V2": feature_extractor_e5_small_v2,
-        "E5-Base-V2": feature_extractor_e5_base_v2,
-        "E5-Large-V2": feature_extractor_e5_large_v2,
+        #"E5-Small-V2": feature_extractor_e5_small_v2,
+        #"E5-Base-V2": feature_extractor_e5_base_v2,
+        #"E5-Large-V2": feature_extractor_e5_large_v2,
 
         # BGE Models (done)
         "BGE-Small-EN-v1.5": feature_extractor_bge_small_en_v1_5,
@@ -202,7 +202,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
         ### no PCA, no CONC ###
         #######################
 
-        # Logistic Regression
+        """# Logistic Regression
         (lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_concatenation, lr_txt_best_params,
          lr_txt_pca_components, lr_txt_train_score, lr_txt_test_scores) = lr_txt_emb(
             dataset_name=dataset, emb_method=model_name,
@@ -246,7 +246,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                             best_params=hgbc_best_params,
                             pca_n_comp=hgbc_pca_comp,
                             metrics=hgbc_txt_test_scores,
-                            is_train=False)
+                            is_train=False)"""
 
         ####################
         ### PCA, no CONC ###
@@ -310,7 +310,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
             pca_str = attributes.get("pca_str")
 
             # Logistic Regression conc (pca)
-            """
+
             (lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,
              lr_conc_yesno, lr_best_params, lr_pca_components, lr_conc_train_score,
              lr_conc_test_scores) = concat_lr_txt_emb(
@@ -376,7 +376,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                                 best_params=hgbc_best_params,
                                 pca_n_comp=hgbc_pca_components,
                                 metrics=hgbc_conc_test_scores,
-                                is_train=False)"""
+                                is_train=False)
 
 
 def run_pca_rte():
