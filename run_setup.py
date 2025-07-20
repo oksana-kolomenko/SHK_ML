@@ -47,7 +47,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
 
     # === LUNGDISEASE ===
 
-    """dataset = DatasetName.LUNG_DISEASE.value
+    dataset = DatasetName.LUNG_DISEASE.value
     y = load_labels("y_lung_disease_data.csv")
     X = load_features("X_lung_disease_data.csv")
     X_metr = load_features("X_lung_disease_metr.csv")
@@ -59,10 +59,11 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
         'Smoking Status',
         'Disease Type',
         'Treatment Type'
-    ]"""
+    ]
 
     # === CYBERSECURITY ===
 
+    """
     dataset = DatasetName.CYBERSECURITY.value
     y = load_labels("y_cybersecurity_intrusion_data.csv")
     X = load_features("X_cybersecurity_intrusion_data.csv")
@@ -76,9 +77,11 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
         'protocol_type',
         'unusual_time_access'
     ]
+    """
 
     methods = {
         # all summaries, all features
+        """
         "pca_conc1": {"X": X,
                       "summaries": all_summaries,
                       "conc": "_conc1_",
@@ -115,6 +118,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                   "conc": "_conc3_",
                   "pca": False,
                   "pca_str": ""}
+        """
     }
 
 
@@ -198,7 +202,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
         ### no PCA, no CONC ###
         #######################
 
-        """# Logistic Regression
+        # Logistic Regression
         (lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_concatenation, lr_txt_best_params,
          lr_txt_pca_components, lr_txt_train_score, lr_txt_test_scores) = lr_txt_emb(
             dataset_name=dataset, emb_method=model_name,
@@ -242,7 +246,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                             best_params=hgbc_best_params,
                             pca_n_comp=hgbc_pca_comp,
                             metrics=hgbc_txt_test_scores,
-                            is_train=False)"""
+                            is_train=False)
 
         ####################
         ### PCA, no CONC ###
@@ -340,7 +344,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                                 best_params=lr_best_params,
                                 pca_n_comp=lr_pca_components,
                                 metrics=lr_conc_test_scores,
-                                is_train=False)"""
+                                is_train=False)
 
             # HGBC conc (pca)
             (concat_hgbc_dataset, concat_hgbc_ml_method, concat_hgbc_emb_method,
@@ -372,7 +376,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                                 best_params=hgbc_best_params,
                                 pca_n_comp=hgbc_pca_components,
                                 metrics=hgbc_conc_test_scores,
-                                is_train=False)
+                                is_train=False)"""
 
 
 def run_pca_rte():
