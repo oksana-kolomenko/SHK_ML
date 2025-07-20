@@ -70,15 +70,12 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
     all_summaries = load_summaries("_cybersecurity_summaries.txt")
     nom_summaries = load_summaries("_cybersecurity_nom_summaries.txt")
 
-
     nominal_features = [
         'encryption_used',
         'browser_type',
         'protocol_type',
         'unusual_time_access'
     ]
-
-
 
     methods = {
         """# all summaries, all features
@@ -100,7 +97,6 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                       "pca": True,
                       "pca_str": "pca"},
         """
-
         # all summaries, all features
         "conc1": {"X": X,
                   "summaries": all_summaries,
@@ -347,7 +343,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                                 is_train=False)
 
             # HGBC conc (pca)
-            (concat_hgbc_dataset, concat_hgbc_ml_method, concat_hgbc_emb_method,
+            """(concat_hgbc_dataset, concat_hgbc_ml_method, concat_hgbc_emb_method,
              hgbc_conc_yesno, hgbc_best_params, hgbc_pca_components, hgbc_conc_train_score,
              hgbc_conc_test_scores) = concat_hgbc_txt_emb(
                 dataset_name=dataset,
@@ -376,7 +372,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                                 best_params=hgbc_best_params,
                                 pca_n_comp=hgbc_pca_components,
                                 metrics=hgbc_conc_test_scores,
-                                is_train=False)
+                                is_train=False)"""
 
 
 def run_pca_rte():
