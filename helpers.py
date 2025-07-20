@@ -958,6 +958,9 @@ def concat_hgbc_txt_emb(dataset_name, emb_method,
 
     # add text as a new column
     text_features = [text_feature_column_name]
+
+    nominal_feature_indices = [X_tabular.columns.get_loc(col) for col in nominal_features]
+
     X_tabular[text_feature_column_name] = raw_text_summaries
 
     # separate non-text features
@@ -992,7 +995,7 @@ def concat_hgbc_txt_emb(dataset_name, emb_method,
             ("transformer", ColumnTransformer([
                 ("text", Pipeline(pipeline_text_steps), text_features)
             ])),
-            ("classifier", HistGradientBoostingClassifier(categorical_features=nominal_features))
+            ("classifier", HistGradientBoostingClassifier(categorical_features=nominal_feature_indices))
         ]),
         param_grid={
             "classifier__min_samples_leaf": [5, 10, 15, 20],
