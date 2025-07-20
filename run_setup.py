@@ -50,9 +50,9 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
     dataset = DatasetName.LUNG_DISEASE.value
     y = load_labels("y_lung_disease_data.csv")
     X = load_features("X_lung_disease_data.csv")
-    X_metr = load_features("X_lung_disease_metr.csv")
+    #X_metr = load_features("X_lung_disease_metr.csv")
     all_summaries = load_summaries("_lung_disease_summaries.txt")
-    nom_summaries = load_summaries("_lung_disease_nom_summaries.txt")
+    #nom_summaries = load_summaries("_lung_disease_nom_summaries.txt")
 
     nominal_features = [
         'Gender',
