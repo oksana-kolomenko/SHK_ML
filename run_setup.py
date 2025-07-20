@@ -298,6 +298,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                             metrics=hgbc_txt_test_scores,
                             is_train=False)"""
 
+        """
         for method_name, attributes in methods.items():
             #################
             ### PCA, CONC ###
@@ -311,7 +312,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
 
             # Logistic Regression conc (pca)
 
-            """(lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,
+            (lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,
              lr_conc_yesno, lr_best_params, lr_pca_components, lr_conc_train_score,
              lr_conc_test_scores) = concat_lr_txt_emb(
                 dataset_name=dataset,
