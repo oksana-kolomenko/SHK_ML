@@ -259,7 +259,6 @@ def lr_rte(dataset_name, X, y, nominal_features, pca):
 
 # n_components aus dem Datensatz nehmen (40 für Posttrauma (shape[1])
 def lr_txt_emb(dataset_name, emb_method, feature_extractor, raw_text_summaries, y, max_iter, pca):
-    y = pd.Series(y)
 
     print(f"[INFO] Rows before NaN removal: X={len(raw_text_summaries)}, y={len(y)}")
     print(f"[INFO] NaNs in y before removal: {y.isna().sum()}")
@@ -704,6 +703,7 @@ def concat_lr_txt_emb(dataset_name, emb_method,
     start_time = time.time()
     readable_time = time.strftime("%H:%M:%S", time.localtime(start_time))
     print(f"Starting the concat_lr_txt_emb method {readable_time}")
+    y = pd.Series(y)
 
     if not np.issubdtype(y.dtype, np.number):
         print(f"Label encoding: {y.unique()}")
@@ -955,6 +955,13 @@ def concat_hgbc_txt_emb(dataset_name, emb_method,
     n_splits = config.splits
     n_components = config.pca if pca else None
     n_repeats = config.n_repeats
+
+    if not np.issubdtype(y.dtype, np.number):
+        print(f"Label encoding: {y.unique()}")
+        le = LabelEncoder()
+        y = le.fit_transform(y)  # this returns a NumPy array
+    else:
+        y = y.to_numpy()
 
     ml_method = "HistGradientBoostingClassifier"
     emb_method = emb_method
