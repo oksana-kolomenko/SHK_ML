@@ -16,12 +16,15 @@ X_nominal_posttrauma.csv
 cybersecurity_summaries.txt
 _cybersecurity_summaries.txt
 _cybersecurity_nom_summaries.txt
-lung_disease_summaries.txt
-_lung_disease_summaries.txt
 X_cybersecurity_intrusion_data.csv
 X_cybersecurity_metrics.csv
 X_cybersecurity_nom.csv
 y_cybersecurity_intrusion_data.csv
 lung_disease_summaries.txt
 X_lung_disease_data.csv
+X_lungdisease_metrics.csv
+X_lungdisease_nom.csv
 y_lung_disease_data.csv
+lung_disease_summaries.txt
+lungdisease_nom_summaries.txt
+_lung_disease_summaries.txt

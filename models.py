@@ -132,7 +132,7 @@ feature_extractor_all_minilm_l6_v2 = create_gen_feature_extractor('sentence-tran
 #feature_extractor_gtr_t5_base = create_gen_feature_extractor('sentence-transformers/gtr-t5-base')
 
 # Sentence T5 Base
-#feature_extractor_sentence_t5_base = create_gen_feature_extractor('sentence-transformers/sentence-t5-base')
+feature_extractor_sentence_t5_base = create_gen_feature_extractor('sentence-transformers/sentence-t5-base')
 
 # Ember v1
 feature_extractor_ember_v1 = create_gen_feature_extractor('llmrails/ember-v1')
