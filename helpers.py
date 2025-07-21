@@ -705,6 +705,13 @@ def concat_lr_txt_emb(dataset_name, emb_method,
     readable_time = time.strftime("%H:%M:%S", time.localtime(start_time))
     print(f"Starting the concat_lr_txt_emb method {readable_time}")
 
+    if not np.issubdtype(y.dtype, np.number):
+        print(f"Label encoding: {y.unique()}")
+        le = LabelEncoder()
+        y = le.fit_transform(y)  # this returns a NumPy array
+    else:
+        y = y.to_numpy()
+
     dataset = dataset_name
     config = DATASET_CONFIGS[dataset]
     n_splits = config.splits
