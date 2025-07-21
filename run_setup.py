@@ -81,12 +81,13 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
 
     methods = {
         # all summaries, all features
-        """
+
         "pca_conc1": {"X": X,
                       "summaries": all_summaries,
                       "conc": "_conc1_",
                       "pca": True,
                       "pca_str": "pca"},
+        """
         # all summaries, metr features
         "pca_conc2": {"X": X_metr,
                       "summaries": all_summaries,
@@ -99,13 +100,9 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                       "conc": "_conc3_",
                       "pca": True,
                       "pca_str": "pca"},
-
-        # all summaries, all features
-        "conc1": {"X": X,
-                  "summaries": all_summaries,
-                  "conc": "_conc1_",
-                  "pca": False,
-                  "pca_str": ""},
+        """
+        
+        """
         # all summaries, metr features
         "conc2": {"X": X_metr,
                   "summaries": all_summaries,
@@ -119,14 +116,19 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                   "pca": False,
                   "pca_str": ""}
         """
+        # all summaries, all features
+        "conc1": {"X": X,
+                  "summaries": all_summaries,
+                  "conc": "_conc1_",
+                  "pca": False,
+                  "pca_str": ""},
     }
-
 
     text_feature = 'text'
 
     feature_extractors = {
         # All MiniLM L6 v2
-        #"all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
+        "all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
 
         # Stella en 400m v5
         "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
@@ -202,7 +204,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
         ### no PCA, no CONC ###
         #######################
 
-        # Logistic Regression
+        """# Logistic Regression
         (lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_concatenation, lr_txt_best_params,
          lr_txt_pca_components, lr_txt_train_score, lr_txt_test_scores) = lr_txt_emb(
             dataset_name=dataset, emb_method=model_name,
@@ -246,7 +248,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                             best_params=hgbc_best_params,
                             pca_n_comp=hgbc_pca_comp,
                             metrics=hgbc_txt_test_scores,
-                            is_train=False)
+                            is_train=False)"""
 
         ####################
         ### PCA, no CONC ###
@@ -298,7 +300,6 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                             metrics=hgbc_txt_test_scores,
                             is_train=False)"""
 
-        """
         for method_name, attributes in methods.items():
             #################
             ### PCA, CONC ###
@@ -346,7 +347,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                                 pca_n_comp=lr_pca_components,
                                 metrics=lr_conc_test_scores,
                                 is_train=False)
-
+            """
             # HGBC conc (pca)
             (concat_hgbc_dataset, concat_hgbc_ml_method, concat_hgbc_emb_method,
              hgbc_conc_yesno, hgbc_best_params, hgbc_pca_components, hgbc_conc_train_score,
