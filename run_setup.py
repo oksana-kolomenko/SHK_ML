@@ -84,38 +84,38 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
 
         "pca_conc1": {"X": X,
                       "summaries": all_summaries,
-                      "conc": "_conc1_",
+                      "conc": "conc1",
                       "pca": True,
-                      "pca_str": "pca"},
+                      "pca_str": "pca_"},
 
         # all summaries, metr features
         "pca_conc2": {"X": X_metr,
                       "summaries": all_summaries,
-                      "conc": "_conc2_",
+                      "conc": "conc2",
                       "pca": True,
-                      "pca_str": "pca"},
+                      "pca_str": "pca_"},
         # nom summaries, metr features
         "pca_conc3": {"X": X_metr,
                       "summaries": nom_summaries,
-                      "conc": "_conc3_",
+                      "conc": "conc3",
                       "pca": True,
-                      "pca_str": "pca"},
+                      "pca_str": "pca_"},
         # all summaries, all features
         "conc1": {"X": X,
                   "summaries": all_summaries,
-                  "conc": "_conc1_",
+                  "conc": "conc1",
                   "pca": False,
                   "pca_str": ""},
         # all summaries, metr features
         "conc2": {"X": X_metr,
                   "summaries": all_summaries,
-                  "conc": "_conc2_",
+                  "conc": "conc2",
                   "pca": False,
                   "pca_str": ""},
         # nom summaries, metr features
         "conc3": {"X": X_metr,
                   "summaries": nom_summaries,
-                  "conc": "_conc3_",
+                  "conc": "conc3",
                   "pca": False,
                   "pca_str": ""}
     }
@@ -324,7 +324,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                 imp_max_iter=30, class_max_iter=10000, pca=pca)
                 #imp_max_iter=10, class_max_iter=10, pca=True)
 
-            save_results_to_csv(output_file=f"{dataset}_{model_name}_LR_{conc_art}_{pca_str}_train.csv",
+            save_results_to_csv(output_file=f"{dataset}_{model_name}_LR_{conc_art}_{pca_str}train.csv",
                                 dataset_name=lr_conc_dataset,
                                 ml_method=lr_conc_ml_method,
                                 emb_method=lr_conc_emb_method,
@@ -334,7 +334,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                                 metrics=lr_conc_train_score,
                                 is_train=True)
 
-            save_results_to_csv(output_file=f"{dataset}_{model_name}_LR_{conc_art}_{pca_str}_test.csv",
+            save_results_to_csv(output_file=f"{dataset}_{model_name}_LR_{conc_art}_{pca_str}test.csv",
                                 dataset_name=lr_conc_dataset,
                                 ml_method=lr_conc_ml_method,
                                 emb_method=lr_conc_emb_method,
@@ -356,7 +356,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                 text_feature_column_name=text_feature,
                 concatenation=conc_art, pca=pca, nominal_features=nominal_features)
 
-            save_results_to_csv(output_file=f"{dataset}_{model_name}_HGBC_{conc_art}_{pca_str}_train.csv",
+            save_results_to_csv(output_file=f"{dataset}_{model_name}_HGBC_{conc_art}_{pca_str}train.csv",
                                 dataset_name=concat_hgbc_dataset,
                                 ml_method=concat_hgbc_ml_method,
                                 emb_method=concat_hgbc_emb_method,
@@ -366,7 +366,7 @@ def run_pca_txt_emb(feature_extractor_gtr_t5_base=None):
                                 metrics=hgbc_conc_train_score,
                                 is_train=True)
 
-            save_results_to_csv(output_file=f"{dataset}_{model_name}_HGBC_{conc_art}_{pca_str}_test.csv",
+            save_results_to_csv(output_file=f"{dataset}_{model_name}_HGBC_{conc_art}_{pca_str}test.csv",
                                 dataset_name=concat_hgbc_dataset,
                                 ml_method=concat_hgbc_ml_method,
                                 emb_method=concat_hgbc_emb_method,

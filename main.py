@@ -3,7 +3,7 @@
 import time
 import numpy as np
 
-from data_preps import create_general_summaries, write_summary, create_patient_summaries, create_general_summaries_
+#from data_preps import create_general_summaries, write_summary, create_patient_summaries, create_general_summaries_
 from dummy import print_special_tokens, print_sentence_embedding
 #from run_models_pca import run_pca_txt_emb
 
@@ -32,8 +32,8 @@ if __name__ == '__main__':
         "unusual_time_access": {0: "no", 1: "yes"}
     }
     """
-    summ = create_general_summaries_(tab_data="X_lungdisease_nom.csv",
-                                     output_file="lungdisease_nom_summaries.txt",)
+    #summ = create_general_summaries_(tab_data="X_lungdisease_nom.csv",
+    #                                 output_file="lungdisease_nom_summaries.txt",)
                                      #categorial_values=categorial_values,
                                      #column_name_map=column_name_map)
     #run_pca_txt_emb()
