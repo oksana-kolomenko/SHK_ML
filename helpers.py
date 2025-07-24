@@ -956,7 +956,7 @@ def concat_hgbc_txt_emb(dataset_name, emb_method,
     n_splits = config.splits
     n_components = config.pca if pca else None
     n_repeats = config.n_repeats
-
+    y = pd.Series(y)
     if not np.issubdtype(y.dtype, np.number):
         print(f"Label encoding: {y.unique()}")
         le = LabelEncoder()
