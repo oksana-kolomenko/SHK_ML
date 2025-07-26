@@ -129,7 +129,7 @@ feature_extractor_stella_en_400M_v5 = create_gen_feature_extractor("dunzhang/ste
 feature_extractor_all_minilm_l6_v2 = create_gen_feature_extractor('sentence-transformers/all-MiniLM-L6-v2')
 
 # GTR T5 Base
-#feature_extractor_gtr_t5_base = create_gen_feature_extractor('sentence-transformers/gtr-t5-base')
+feature_extractor_gtr_t5_base = create_gen_feature_extractor('sentence-transformers/gtr-t5-base')
 
 # Sentence T5 Base
 feature_extractor_sentence_t5_base = create_gen_feature_extractor('sentence-transformers/sentence-t5-base')
