@@ -5,6 +5,7 @@ import numpy as np
 
 #from data_preps import create_general_summaries, write_summary, create_patient_summaries, create_general_summaries_
 from dummy import print_special_tokens, print_sentence_embedding
+
 #from run_models_pca import run_pca_txt_emb
 
 from run_setup import run_txt_emb
@@ -37,6 +38,3 @@ if __name__ == '__main__':
                                      #categorial_values=categorial_values,
                                      #column_name_map=column_name_map)
     run_txt_emb()
-    #run_text_concatenated()
-
-    #run_pca_rte()
