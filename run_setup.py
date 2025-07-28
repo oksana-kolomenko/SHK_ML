@@ -48,6 +48,7 @@ def run_txt_emb():
 
     # === LUNGDISEASE ===
 
+    """
     dataset = DatasetName.LUNG_DISEASE.value
     y = load_labels("y_lung_disease_data.csv")
     X = load_features("X_lung_disease_data.csv")
@@ -61,11 +62,12 @@ def run_txt_emb():
         'Disease Type',
         'Treatment Type'
     ]
+    """
 
 
     # === CYBERSECURITY ===
 
-    """dataset = DatasetName.CYBERSECURITY.value
+    dataset = DatasetName.CYBERSECURITY.value
     y = load_labels("y_cybersecurity_intrusion_data.csv")
     X = load_features("X_cybersecurity_intrusion_data.csv")
     X_metr = load_features("X_cybersecurity_metrics.csv")
@@ -77,7 +79,7 @@ def run_txt_emb():
         'browser_type',
         'protocol_type',
         'unusual_time_access'
-    ]"""
+    ]
 
     methods = {
         # all summaries, all features
@@ -126,16 +128,16 @@ def run_txt_emb():
         #"all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
 
         # Stella en 400m v5
-        #"Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
+        "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
 
         # GTR T5 Base
-        "GTR_T5_Base": feature_extractor_gtr_t5_base,
+        #"GTR_T5_Base": feature_extractor_gtr_t5_base,
 
         # Sentence T5 Base
-        "sentence_t5_base": feature_extractor_sentence_t5_base,
+        #"sentence_t5_base": feature_extractor_sentence_t5_base,
 
         # Ember v1
-        #"ember_v1": feature_extractor_ember_v1,
+        "ember_v1": feature_extractor_ember_v1,
 
         # E5 Models
         #"E5-Small-V2": feature_extractor_e5_small_v2,
@@ -153,10 +155,10 @@ def run_txt_emb():
         #"GIST-Large-Embedding-v0": feature_extractor_gist_large_embedding_v0,
 
         # GTE Models
-        #"GTE-Small": feature_extractor_gte_small,
-        #"GTE-Base": feature_extractor_gte_base,
-        #"GTE-Base-EN-v1.5": feature_extractor_gte_base_en_v1_5,
-        #"GTE-Large": feature_extractor_gte_large,
+        "GTE-Small": feature_extractor_gte_small,
+        "GTE-Base": feature_extractor_gte_base,
+        "GTE-Base-EN-v1.5": feature_extractor_gte_base_en_v1_5,
+        "GTE-Large": feature_extractor_gte_large,
 
         # Potion Models
         # "Potion-Base-2M": feature_extractor_potion_base_2M,
