@@ -49,6 +49,7 @@ def run_txt_emb():
     # === LUNGDISEASE ===
 
 
+    """
     dataset = DatasetName.LUNG_DISEASE.value
     y = load_labels("y_lung_disease_data.csv")
     X = load_features("X_lung_disease_data.csv")
@@ -61,13 +62,13 @@ def run_txt_emb():
         'Smoking Status',
         'Disease Type',
         'Treatment Type'
-    ]
+    ]"""
 
 
 
     # === CYBERSECURITY ===
 
-    """
+
     dataset = DatasetName.CYBERSECURITY.value
     y = load_labels("y_cybersecurity_intrusion_data.csv")
     X = load_features("X_cybersecurity_intrusion_data.csv")
@@ -80,7 +81,7 @@ def run_txt_emb():
         'browser_type',
         'protocol_type',
         'unusual_time_access'
-    ]"""
+    ]
 
     methods = {
         # all summaries, all features
