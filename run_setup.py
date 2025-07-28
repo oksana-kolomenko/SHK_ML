@@ -123,10 +123,10 @@ def run_txt_emb():
 
     feature_extractors = {
         # All MiniLM L6 v2
-        "all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
+        #"all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
 
         # Stella en 400m v5
-        #"Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
+        "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
 
         # GTR T5 Base
         #"GTR_T5_Base": feature_extractor_gtr_t5_base,
@@ -135,28 +135,28 @@ def run_txt_emb():
         #"sentence_t5_base": feature_extractor_sentence_t5_base,
 
         # Ember v1
-        #"ember_v1": feature_extractor_ember_v1,
+        "ember_v1": feature_extractor_ember_v1,
 
         # E5 Models
-        "E5-Small-V2": feature_extractor_e5_small_v2,
-        "E5-Base-V2": feature_extractor_e5_base_v2,
-        "E5-Large-V2": feature_extractor_e5_large_v2,
+        #"E5-Small-V2": feature_extractor_e5_small_v2,
+        #"E5-Base-V2": feature_extractor_e5_base_v2,
+        #"E5-Large-V2": feature_extractor_e5_large_v2,
 
         # BGE Models (done)
-        "BGE-Small-EN-v1.5": feature_extractor_bge_small_en_v1_5,
-        "BGE-Base-EN-v1.5": feature_extractor_bge_base_en_v1_5,
-        "BGE-Large-EN-v1.5": feature_extractor_bge_large_en_v1_5,
+        #"BGE-Small-EN-v1.5": feature_extractor_bge_small_en_v1_5,
+        #"BGE-Base-EN-v1.5": feature_extractor_bge_base_en_v1_5,
+        #"BGE-Large-EN-v1.5": feature_extractor_bge_large_en_v1_5,
 
         # GIST Models
-        "GIST-Small-Embedding-v0": feature_extractor_gist_small_embedding_v0,
-        "GIST-Embedding-v0": feature_extractor_gist_embedding_v0,
-        "GIST-Large-Embedding-v0": feature_extractor_gist_large_embedding_v0,
+        #"GIST-Small-Embedding-v0": feature_extractor_gist_small_embedding_v0,
+        #"GIST-Embedding-v0": feature_extractor_gist_embedding_v0,
+        #"GIST-Large-Embedding-v0": feature_extractor_gist_large_embedding_v0,
 
         # GTE Models
-        #"GTE-Small": feature_extractor_gte_small,
-        #"GTE-Base": feature_extractor_gte_base,
-        #"GTE-Base-EN-v1.5": feature_extractor_gte_base_en_v1_5,
-        #"GTE-Large": feature_extractor_gte_large,
+        "GTE-Small": feature_extractor_gte_small,
+        "GTE-Base": feature_extractor_gte_base,
+        "GTE-Base-EN-v1.5": feature_extractor_gte_base_en_v1_5,
+        "GTE-Large": feature_extractor_gte_large,
 
         # Potion Models
         # "Potion-Base-2M": feature_extractor_potion_base_2M,
