@@ -259,20 +259,8 @@ def lr_rte(dataset_name, X, y, nominal_features, pca):
 
 # n_components aus dem Datensatz nehmen (40 für Posttrauma (shape[1])
 def lr_txt_emb(dataset_name, emb_method, feature_extractor, raw_text_summaries, y, max_iter, pca):
+    # Target encoding
     y = pd.Series(y)
-
-    print(f"[INFO] Rows before NaN removal: X={len(raw_text_summaries)}, y={len(y)}")
-    print(f"[INFO] NaNs in y before removal: {y.isna().sum()}")
-
-    raw_text_summaries = pd.Series(raw_text_summaries)
-
-    valid_indices = ~y.isna()
-    raw_text_summaries = raw_text_summaries.loc[valid_indices]
-    y = y.loc[valid_indices]
-
-    print(f"[INFO] Rows after NaN removal: X={len(raw_text_summaries)}, y={len(y)}")
-    print(f"[INFO] NaNs in y after removal: {y.isna().sum()}")
-
     if not np.issubdtype(y.dtype, np.number):
         print(f"Label encoding: {y.unique()}")
         le = LabelEncoder()
@@ -396,18 +384,8 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, raw_text_summaries, 
 
 
 def hgbc(dataset_name, X, y, nominal_features, pca):
+    # Target encoding
     y = pd.Series(y)
-
-    print(f"[INFO] Rows before NaN removal: X={len(X)}, y={len(y)}")
-    print(f"[INFO] NaNs in y before removal: {y.isna().sum()}")
-
-    valid_indices = ~y.isna()
-    X = X.loc[valid_indices]
-    y = y.loc[valid_indices]
-
-    print(f"[INFO] Rows after NaN removal: X={len(X)}, y={len(y)}")
-    print(f"[INFO] NaNs in y after removal: {y.isna().sum()}")
-
     if not np.issubdtype(y.dtype, np.number):
         print(f"Label encoding: {y.unique()}")
         le = LabelEncoder()
@@ -422,6 +400,7 @@ def hgbc(dataset_name, X, y, nominal_features, pca):
         "HGBC", "none", "no", f"PCA ({n_components} components)" if pca else "none"
 
     metrics_per_fold = []
+
     skf = StratifiedKFold(n_splits=n_splits,
                           shuffle=True,
                           random_state=42)
@@ -601,6 +580,7 @@ def hgbc_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y, pca)
     emb_method = emb_method
     concatenation = "no"
     metrics_per_fold = []
+
     skf = StratifiedKFold(n_splits=n_splits,
                           shuffle=True,
                           random_state=42)
@@ -959,6 +939,7 @@ def concat_hgbc_txt_emb(dataset_name, emb_method,
     n_components = config.pca if pca else None
     n_repeats = config.n_repeats
     y = pd.Series(y)
+
     if not np.issubdtype(y.dtype, np.number):
         print(f"Label encoding: {y.unique()}")
         le = LabelEncoder()
@@ -976,14 +957,15 @@ def concat_hgbc_txt_emb(dataset_name, emb_method,
     # add text as a new column
     text_features = [text_feature_column_name]
 
-    nominal_feature_indices = [X_tabular.columns.get_loc(col) for col in nominal_features]
-
     X_tabular[text_feature_column_name] = raw_text_summaries
 
     # separate non-text features
     non_text_columns = list(set(X_tabular.columns) -
                             set(text_features))
-
+    nominal_feature_indices = [
+        non_text_columns.index(col)
+        for col in nominal_features if col in non_text_columns
+    ]
     print(f"All columns length: {X_tabular.shape}")
     print(f"Non-text columns length: {len(X_tabular[non_text_columns])}")
     print(f"Non-text columns shape: {X_tabular[non_text_columns].shape}")
@@ -1011,6 +993,7 @@ def concat_hgbc_txt_emb(dataset_name, emb_method,
     search = GridSearchCV(
         estimator=Pipeline([
             ("transformer", ColumnTransformer([
+                ("numerical", "passthrough", non_text_columns),
                 ("text", Pipeline(pipeline_text_steps), text_features)
             ])),
             ("classifier", HistGradientBoostingClassifier(categorical_features=nominal_feature_indices))
