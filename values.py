@@ -90,33 +90,6 @@ class MLMethodConfig:
     # text_style: str  # or use Enum
     # use_feature_scaling: bool
 
-
-# Configuration map
-DATASET_CONFIGS = {
-    DatasetName.POSTTRAUMA.value: DatasetConfig(
-        pca=35,
-        n_repeats=10,
-        splits=3
-        #text_style="one",
-        #use_feature_scaling=True,
-    ),
-    DatasetName.CYBERSECURITY.value: DatasetConfig(
-        pca=50,
-        n_repeats=1,
-        splits=5
-        #text_style="two",
-        #use_feature_scaling=False,
-    ),
-    DatasetName.LUNG_DISEASE.value: DatasetConfig(
-        pca=50,
-        n_repeats=1,
-        splits=5
-        #text_style="three",
-        #use_feature_scaling=True,
-    )
-}
-
-
 class Textstyle(Enum):
     """
     0 = No explanation sentence, miss null values;
