@@ -7,6 +7,11 @@ class DatasetName(Enum):
     CYBERSECURITY = "cybersecurity"
     LUNG_DISEASE = "lung_disease"
 
+    MIMIC_0 = "mimic_0"
+    MIMIC_1 = "mimic_1"
+    MIMIC_2 = "mimic_2"
+    MIMIC_3 = "mimic_3"
+
 
 @dataclass
 class DatasetConfig:
@@ -39,8 +44,37 @@ DATASET_CONFIGS = {
         splits=5
         #text_style="three",
         #use_feature_scaling=True,
+    ),
+    DatasetName.MIMIC_0.value: DatasetConfig(
+        pca=50,
+        n_repeats=1,
+        splits=5
+        #text_style="three",
+        #use_feature_scaling=True,
+    ),
+    DatasetName.MIMIC_1.value: DatasetConfig(
+        pca=50,
+        n_repeats=1,
+        splits=5
+        #text_style="three",
+        #use_feature_scaling=True,
+    ),
+    DatasetName.MIMIC_2.value: DatasetConfig(
+        pca=50,
+        n_repeats=1,
+        splits=5
+        #text_style="three",
+        #use_feature_scaling=True,
+    ),
+    DatasetName.MIMIC_3.value: DatasetConfig(
+        pca=50,
+        n_repeats=1,
+        splits=5
+        #text_style="three",
+        #use_feature_scaling=True,
     )
 }
+
 
 
 class MLMethod(Enum):

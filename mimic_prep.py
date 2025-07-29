@@ -51,6 +51,47 @@ def get_data(task_name):
     return X_train, X_test, y_labels_train, y_labels_test
 
 
+import pandas as pd
+
+
+import pandas as pd
+
+def is_binary(series):
+    """Check if a pandas Series contains only 0 and 1 (ignores NaNs)."""
+    return set(series.dropna().unique()) <= {0, 1}
+
+
+def convert_and_save(train_path, test_path, out_train_path, out_test_path):
+    # Load data
+    X_train = pd.read_csv(train_path)
+    X_test = pd.read_csv(test_path)
+
+    # --- Process columns starting with 'chiefcom'
+    for col in X_train.columns[X_train.columns.str.startswith("chiefcom")]:
+        if col in X_test.columns:
+            if is_binary(X_train[col]) and is_binary(X_test[col]):
+                X_train[col] = X_train[col].astype(bool)
+                X_test[col] = X_test[col].astype(bool)
+            else:
+                X_train[col] = X_train[col].astype(int).astype("category")
+                X_test[col] = X_test[col].astype(int).astype("category")
+
+    # --- Process 'cci' and 'eci' columns
+    for category in ["cci", "eci"]:
+        for col in X_train.columns[X_train.columns.str.startswith(category)]:
+            if col in X_test.columns:
+                if is_binary(X_train[col]) and is_binary(X_test[col]):
+                    X_train[col] = X_train[col].astype(bool)
+                    X_test[col] = X_test[col].astype(bool)
+                else:
+                    X_train[col] = X_train[col].astype("category")
+                    X_test[col] = X_test[col].astype("category")
+
+    # Save back to CSV
+    X_train.to_csv(out_train_path, index=False)
+    X_test.to_csv(out_test_path, index=False)
+
+
 def get_cat_features(X_train, X_test):
     X_train["gender"] = X_train["gender"].astype("category")
     X_test["gender"] = X_test["gender"].astype("category")

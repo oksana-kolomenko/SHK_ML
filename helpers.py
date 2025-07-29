@@ -258,7 +258,8 @@ def lr_rte(dataset_name, X, y, nominal_features, pca):
 
 
 # n_components aus dem Datensatz nehmen (40 für Posttrauma (shape[1])
-def lr_txt_emb(dataset_name, emb_method, feature_extractor, raw_text_summaries, y, max_iter, pca):
+def lr_txt_emb(dataset_name, emb_method, feature_extractor, max_iter, pca, y=None, y_train=None, y_test=None,
+               raw_text_summaries=None, train_summaries=None, test_summaries=None):
     # Target encoding
     y = pd.Series(y)
     if not np.issubdtype(y.dtype, np.number):
@@ -276,6 +277,8 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, raw_text_summaries, 
     ml_method = "logistic regression"
     concatenation = "no"
     metrics_per_fold = []
+    train_metrics = ""
+    test_metrics = ""
 
     skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
 
@@ -361,26 +364,36 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, raw_text_summaries, 
         metrics_per_fold.append(
             calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba))
 
-    search.fit(
-        raw_text_summaries,
-        y
-    )
+    elif dataset_name == DatasetName.MIMIC_0.value or dataset_name == DatasetName.MIMIC_1.value:
+        X_train, y_train = train_summaries, y_train
+        X_test, y_test = test_summaries, y_test
 
-    # change to X_train instead of all data for cybersec & lungdisease
-    y_train_pred = search.predict(raw_text_summaries)
-    y_train_pred_proba = search.predict_proba(raw_text_summaries)[:, 1]
+        print(f"Train size: {len(X_train)}, Test size: {len(X_test)}")
 
-    # Training metrics
-    train_metrics = calc_metrics(y=y, y_pred=y_train_pred, y_pred_proba=y_train_pred_proba)
+        # Fit and evaluate
+        search.fit(X_train, y_train)
+
+        y_test_pred = search.predict(X_test)
+        y_test_pred_proba = search.predict_proba(X_test)[:, 1]
+
+        best_param = f"Best params for this fold: {search.best_params_}"
+        print(best_param)
+
+        test_metrics = calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba)
+
+        y_train_pred = search.predict(X_train)
+        y_train_pred_proba = search.predict_proba(X_train)[:, 1]
+
+        train_metrics = calc_metrics(y=y_train, y_pred=y_train_pred, y_pred_proba=y_train_pred_proba)
+
+        print(f"embedding size: {len(search.best_estimator_.named_steps['classifier'].coef_[0])}")
+        print(f"Best hyperparameters: {search.best_params_}")
+        print(f"Train metrics: {train_metrics}")
+        print(f"Test metrics per fold: {metrics_per_fold}")
 
     best_params = f"{search.best_params_}"
 
-    print(f"embedding size: {len(search.best_estimator_.named_steps['classifier'].coef_[0])}")
-    print(f"Best hyperparameters: {search.best_params_}")
-    print(f"Train metrics: {train_metrics}")
-    print(f"Test metrics per fold: {metrics_per_fold}")
-
-    return dataset_name, ml_method, emb_method, concatenation, best_params, pca_components, train_metrics, metrics_per_fold
+    return dataset_name, ml_method, emb_method, concatenation, best_params, pca_components, train_metrics, test_metrics
 
 
 def hgbc(dataset_name, X, y, nominal_features, pca):
