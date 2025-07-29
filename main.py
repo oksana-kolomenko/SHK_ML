@@ -8,16 +8,14 @@ from data_preps import create_general_summaries_
 from dummy import print_special_tokens, print_sentence_embedding
 from mimic_prep import convert_and_save
 
-#from run_models_pca import run_pca_txt_emb
-#
-#from run_setup import run_txt_emb
+from run_setup import run_txt_emb
 #from dummy import test
 #from run_models_table_data import run_models_on_table_data
 
 if __name__ == '__main__':
     #run_models_on_table_data()
-    create_general_summaries_(tab_data=r"..\mimic\task_0_X_test.csv",
-                              output_file=r"..\mimic\summaries_test_task_0.txt")
+    #create_general_summaries_(tab_data=r"..\mimic\task_0_X_test.csv",
+    #                          output_file=r"..\mimic\summaries_test_task_0.txt")
 
     """column_name_map = {
         "network_packet_size": "Network packet size",
@@ -46,4 +44,4 @@ if __name__ == '__main__':
     #                                 output_file="lungdisease_nom_summaries.txt",)
                                      #categorial_values=categorial_values,
                                      #column_name_map=column_name_map)
-    #run_txt_emb()
+    run_txt_emb()
