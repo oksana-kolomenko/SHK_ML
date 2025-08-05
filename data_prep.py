@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from imblearn.under_sampling import RandomUnderSampler
+# from imblearn.under_sampling import RandomUnderSampler
 
 from data_preps import create_general_summaries_
 
@@ -88,6 +88,7 @@ def mimic_get_cat_features(X_train, X_test):
             X_test[col] = X_test[col].astype("category")
 
 
+"""
 def mimic_subsample(X_train, y_labels_train, task_name):
     X_train = pd.read_csv(X_train)
     #X_test = pd.read_csv(X_test)
@@ -119,6 +120,7 @@ def mimic_subsample(X_train, y_labels_train, task_name):
     y_labels_train.to_csv(f"../mimic/subsampled/y_train_{task_name}.csv", index=False)
     #X_test.to_csv(f"../mimic/subsampled/X_test_{task_name}.csv", index=False)
     #y_labels_test.to_csv(f"../mimic/subsampled/y_test_{task_name}.csv", index=False)
+"""
 
 
 # Generate ML Tasks
@@ -193,11 +195,11 @@ def print_csv_file_lengths(folder_path):
 
 def do_subsample():
     task = "task_0"
-    mimic_subsample(X_train=fr"..\mimic\tasks\X_train_{task}.csv",
-                    X_test=fr"..\mimic\tasks\X_test_{task}.csv",
-                    y_labels_train=fr"..\mimic\tasks\y_train_{task}.csv",
-                    y_labels_test=fr"..\mimic\tasks\y_test_{task}.csv",
-                    task_name=task)
+    #mimic_subsample(X_train=fr"..\mimic\tasks\X_train_{task}.csv",
+    #                X_test=fr"..\mimic\tasks\X_test_{task}.csv",
+    #                y_labels_train=fr"..\mimic\tasks\y_train_{task}.csv",
+    #                y_labels_test=fr"..\mimic\tasks\y_test_{task}.csv",
+    #                task_name=task)
 
 
 def do_add_prep():
