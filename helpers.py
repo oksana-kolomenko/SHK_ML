@@ -364,7 +364,9 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, max_iter, pca, y=Non
         metrics_per_fold.append(
             calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba))
 
-    elif dataset_name == DatasetName.MIMIC_0.value or dataset_name == DatasetName.MIMIC_1.value:
+    elif (dataset_name == DatasetName.MIMIC_0.value or dataset_name == DatasetName.MIMIC_1.value
+          or dataset_name == DatasetName.MIMIC_2.value or dataset_name == DatasetName.MIMIC_3.value):
+
         X_train, y_train = train_summaries, y_train
         X_test, y_test = test_summaries, y_test
 
@@ -380,6 +382,7 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, max_iter, pca, y=Non
         print(best_param)
 
         test_metrics = calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba)
+        metrics_per_fold.append(test_metrics)
 
         y_train_pred = search.predict(X_train)
         y_train_pred_proba = search.predict_proba(X_train)[:, 1]
@@ -393,7 +396,7 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, max_iter, pca, y=Non
 
     best_params = f"{search.best_params_}"
 
-    return dataset_name, ml_method, emb_method, concatenation, best_params, pca_components, train_metrics, test_metrics
+    return dataset_name, ml_method, emb_method, concatenation, best_params, pca_components, train_metrics, metrics_per_fold
 
 
 def hgbc(dataset_name, X, y, nominal_features, pca):

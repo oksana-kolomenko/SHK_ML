@@ -137,19 +137,19 @@ def create_general_summaries_(tab_data, categorial_values=None, column_name_map=
                 continue
 
             # Freundlicher Spaltenname
-            new_col = column_name_map.get(col, col.replace("_", " ").capitalize())
+            # todo: only for mimic new_col = column_name_map.get(col, col.replace("_", " ").capitalize())
 
             if col in categorial_values:
                 try:
                     value_str = categorial_values[col].get(int(value), str(value))
                 except (ValueError, TypeError):
                     value_str = str(value)
-                details.append(f"{new_col} is {value_str}")
+                details.append(f"{col} is {value_str}")
             elif col in numeric_cols:
                 classified = number_to_word(value, stats[col]['mean'], stats[col]['std'])
-                details.append(f"{new_col} is {classified}")
+                details.append(f"{col} is {classified}")
             else:
-                details.append(f"{new_col} is {value}")
+                details.append(f"{col} is {value}")
 
         summary += "; ".join(details) + "."
         summaries.append(summary)

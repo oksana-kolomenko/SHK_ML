@@ -76,7 +76,6 @@ DATASET_CONFIGS = {
 }
 
 
-
 class MLMethod(Enum):
     LOGREG = "LogReg"
     HGBC = "HGBC"
@@ -89,6 +88,7 @@ class MLMethodConfig:
     splits: int
     # text_style: str  # or use Enum
     # use_feature_scaling: bool
+
 
 class Textstyle(Enum):
     """
