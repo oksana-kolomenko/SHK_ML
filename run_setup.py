@@ -66,8 +66,8 @@ def run_txt_emb():
     task = "task_1"
     dataset = DatasetName.MIMIC_1.value
 
-    y_train = load_labels(f"mimic_data/{task}_y_train.csv")
-    y_test = load_labels(f"mimic_data/{task}_y_test.csv")
+    y_train = load_labels(f"mimic_data/y_train_{task}.csv")
+    y_test = load_labels(f"mimic_data/y_test_{task}.csv")
     train_summaries = load_summaries(f"mimic_data/mimic_{task}_train_summaries.txt")
     test_summaries = load_summaries(f"mimic_data/mimic_{task}_test_summaries.txt")
 
