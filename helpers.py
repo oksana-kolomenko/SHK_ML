@@ -320,34 +320,7 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, max_iter, pca, y=Non
     )
 
     # === Evaluation ===
-    if dataset_name == DatasetName.POSTTRAUMA.value:
-        for train_index, test_index in skf.split(raw_text_summaries, y):
-            print(f"train, text index: {train_index}, {test_index}")
-            X_train, X_test = [raw_text_summaries[i] for i in train_index], [raw_text_summaries[i] for i in test_index]
-            y_train, y_test = y[train_index], y[test_index]
-
-            n_samples = len(X_train)
-            n_features = X_train[0].shape[0] if hasattr(X_train[0], 'shape') else len(X_train[0])
-
-            # Zeige die Dimensionen an
-            print(f"Number of samples (train) (n_samples): {n_samples}")  #
-            print(f"Number of samples (test) (n_samples): {len(X_test)}")  #
-            print(f"Number of features (n_features): {n_features}")
-            print(f"Minimum of samples and features: {min(n_samples, n_features)}")
-
-            # Fit and evaluate
-            search.fit(X_train, y_train)
-
-            y_test_pred = search.predict(X_test)
-            y_test_pred_proba = search.predict_proba(X_test)[:, 1]
-
-            best_param = f"Best params for this fold: {search.best_params_}"
-            print(best_param)
-
-            metrics_per_fold.append(
-                calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba))
-
-    elif dataset_name == DatasetName.CYBERSECURITY.value or dataset_name == DatasetName.LUNG_DISEASE.value:
+    if dataset_name == DatasetName.CYBERSECURITY.value or dataset_name == DatasetName.LUNG_DISEASE.value:
         X_train, X_test, y_train, y_test = train_test_split(raw_text_summaries, y, test_size=0.2, random_state=42)
 
         print(f"Train size: {len(X_train)}, Test size: {len(X_test)}")
@@ -396,7 +369,8 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, max_iter, pca, y=Non
 
     best_params = f"{search.best_params_}"
 
-    return dataset_name, ml_method, emb_method, concatenation, best_params, pca_components, train_metrics, metrics_per_fold
+    return (dataset_name, ml_method, emb_method, concatenation, best_params, pca_components, train_metrics,
+            metrics_per_fold)
 
 
 def hgbc(dataset_name, X, y, nominal_features, pca):
@@ -565,28 +539,17 @@ def hgbc_rte(dataset_name, X, y, nominal_features):
     return dataset_name, ml_method, emb_method, conc, best_params, train_metrics, metrics_per_fold
 
 
-def hgbc_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y, pca):
-    print(f"Started: hgbc_txt_emb with {feature_extractor}")
+def hgbc_txt_emb(dataset_name, emb_method, feature_extractor,  pca, summaries=None, train_summaries=None,
+                 test_summaries=None, y_train=None, y_test=None, y=None):
+    # Target encoding
     y = pd.Series(y)
-
-    print(f"[INFO] Rows before NaN removal: X={len(summaries)}, y={len(y)}")
-    print(f"[INFO] NaNs in y before removal: {y.isna().sum()}")
-
-    summaries = pd.Series(summaries)
-
-    valid_indices = ~y.isna()
-    summaries = summaries.loc[valid_indices]
-    y = y.loc[valid_indices]
-
-    print(f"[INFO] Rows after NaN removal: X={len(summaries)}, y={len(y)}")
-    print(f"[INFO] NaNs in y after removal: {y.isna().sum()}")
-
     if not np.issubdtype(y.dtype, np.number):
         print(f"Label encoding: {y.unique()}")
         le = LabelEncoder()
         y = le.fit_transform(y)  # this returns a NumPy array
     else:
         y = y.to_numpy()
+
     config = DATASET_CONFIGS[dataset_name]
     n_splits = config.splits
     n_components = config.pca
@@ -595,6 +558,7 @@ def hgbc_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y, pca)
     ml_method = "HistGradientBoosting"
     emb_method = emb_method
     concatenation = "no"
+    train_metrics = ""
     metrics_per_fold = []
 
     skf = StratifiedKFold(n_splits=n_splits,
@@ -602,8 +566,10 @@ def hgbc_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y, pca)
                           random_state=42)
     is_sentence_transformer = False
     # "gtr_t5_base" in emb_method.lower() or
-    if "sentence_t5_base" in emb_method.lower() or "modernbert_embed" in emb_method.lower():
-        is_sentence_transformer = True
+    is_sentence_transformer = any(
+        key in emb_method.lower()
+        for key in ["gtr-t5-base", "sentence-t5-base", "modernbert_embed"]
+    )
 
     pca_components = f"PCA ({n_components} components)" if pca else "none"
 
@@ -629,22 +595,10 @@ def hgbc_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y, pca)
         scoring="neg_log_loss",
         cv=RepeatedStratifiedKFold(n_splits=n_splits, n_repeats=n_repeats)
     )
-    print(f"len of summaries: {len(summaries)}")
-    print(f"len of y: {len(y)}")
+    #print(f"len of summaries: {len(summaries)}")
+    #print(f"len of y: {len(y)}")
 
-    # === Evaluation ===
-    if dataset_name == DatasetName.POSTTRAUMA.value:
-        for train_index, test_index in skf.split(summaries, y):
-            X_train, X_test = [summaries[i] for i in train_index], [summaries[i] for i in test_index]
-            y_train, y_test = y[train_index], y[test_index]
-
-            X_train, X_test = np.array(X_train), np.array(X_test)
-
-            metrics = train(search=search, X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test)
-
-            metrics_per_fold.append(metrics)
-
-    elif dataset_name == DatasetName.CYBERSECURITY.value or dataset_name == DatasetName.LUNG_DISEASE.value:
+    if dataset_name == DatasetName.CYBERSECURITY.value or dataset_name == DatasetName.LUNG_DISEASE.value:
         X_train, X_test, y_train, y_test = train_test_split(summaries, y, test_size=0.2, random_state=42)
 
         print(f"Train size: {len(X_train)}, Test size: {len(X_test)}")
@@ -661,36 +615,43 @@ def hgbc_txt_emb(dataset_name, emb_method, feature_extractor, summaries, y, pca)
         metrics_per_fold.append(
             calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba))
 
-    # train on the full dataset
-    search.fit(
-        np.array(summaries),
-        y
-    )
+    elif (dataset_name == DatasetName.MIMIC_0.value or dataset_name == DatasetName.MIMIC_1.value
+          or dataset_name == DatasetName.MIMIC_2.value or dataset_name == DatasetName.MIMIC_3.value):
 
-    y_train_pred = search.predict(np.array(summaries))
-    y_train_pred_proba = search.predict_proba(np.array(summaries))[:, 1]
+        X_train, y_train = train_summaries, y_train
+        X_test, y_test = test_summaries, y_test
 
-    # Training metrics
-    train_metrics = calc_metrics(y=y, y_pred=y_train_pred, y_pred_proba=y_train_pred_proba)
-    aggregator = search.best_estimator_.named_steps['aggregator']
+        print(f"Train size: {len(X_train)}, Test size: {len(X_test)}")
 
-    try:
-        # Print the selected method
-        print(f"best aggregator method: {search.best_params_['aggregator__method']}")
-        if hasattr(aggregator, 'aggregation_info'):
-            print(f"Aggregator info: {aggregator.aggregation_info}")
-        else:
-            print("Aggregator does not expose additional info.")
-    except Exception as e:
-        print(f"Could not retrieve aggregator details: {e}")
+        # Fit and evaluate
+        search.fit(X_train, y_train)
+
+        y_test_pred = search.predict(X_test)
+        y_test_pred_proba = search.predict_proba(X_test)[:, 1]
+
+        best_param = f"Best params for this fold: {search.best_params_}"
+        print(best_param)
+
+        test_metrics = calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba)
+        metrics_per_fold.append(test_metrics)
+
+        y_train_pred = search.predict(X_train)
+        y_train_pred_proba = search.predict_proba(X_train)[:, 1]
+
+        train_metrics = calc_metrics(y=y_train, y_pred=y_train_pred, y_pred_proba=y_train_pred_proba)
+
+        print(f"embedding size: {len(search.best_estimator_.named_steps['classifier'].coef_[0])}")
+        print(f"Best hyperparameters: {search.best_params_}")
+        print(f"Train metrics: {train_metrics}")
+        print(f"Test metrics per fold: {metrics_per_fold}")
 
     best_params = f"{search.best_params_}"
 
     print(f"Best hyperparameters: {best_params}")
-    print(f"Train metrics: {train_metrics}")
     print(f"Test metrics per fold: {metrics_per_fold}")
 
-    return dataset_name, ml_method, emb_method, concatenation, best_params, pca_components, train_metrics, metrics_per_fold
+    return (dataset_name, ml_method, emb_method, concatenation, best_params, pca_components, train_metrics,
+            metrics_per_fold)
 
 
 # läuft

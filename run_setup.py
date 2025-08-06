@@ -63,8 +63,8 @@ def run_txt_emb():
     ]"""
 
     # === MIMIC ===
-    task = "task_2"
-    dataset = DatasetName.MIMIC_2.value
+    task = "task_0"
+    dataset = DatasetName.MIMIC_0.value
 
     y_train = load_labels(f"mimic_data/y_train_{task}.csv")
     y_test = load_labels(f"mimic_data/y_test_{task}.csv")
@@ -118,7 +118,7 @@ def run_txt_emb():
 
     feature_extractors = {
         # All MiniLM L6 v2
-        # "all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
+        "all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
 
         # Stella en 400m v5
         "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
@@ -195,7 +195,7 @@ def run_txt_emb():
         #######################
 
         # Logistic Regression
-        (lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_concatenation, lr_txt_best_params,
+        """(lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_concatenation, lr_txt_best_params,
          lr_txt_pca_components, lr_txt_train_score, lr_txt_test_scores) = lr_txt_emb(
             dataset_name=dataset, emb_method=model_name,
             feature_extractor=feature_extractor, max_iter=10000,
@@ -210,17 +210,19 @@ def run_txt_emb():
         save_results_to_csv(output_file=f"{dataset}_{model_name}_LR_test.csv", dataset_name=lr_txt_dataset,
                             ml_method=lr_txt_ml_method, emb_method=lr_txt_emb_method, concatenation=lr_txt_concatenation,
                             best_params=lr_txt_best_params, pca_n_comp=lr_txt_pca_components,
-                            metrics=lr_txt_test_scores, is_train=False)
+                            metrics=lr_txt_test_scores, is_train=False)"""
 
         # HGBC
-        """
+
         (hgbc_txt_dataset, hgbc_txt_ml_method, hgbc_txt_emb_method, hgbc_txt_conc, hgbc_best_params, hgbc_pca_comp,
          hgbc_txt_train_score, hgbc_txt_test_scores) \
             = hgbc_txt_emb(dataset_name=dataset,
                            emb_method=model_name,
                            feature_extractor=feature_extractor,
-                           summaries=all_summaries,
-                           y=y, pca=False)
+                           train_summaries=train_summaries,
+                           test_summaries=test_summaries,
+                           y_train=y_train, y_test=y_test,
+                           pca=False)
 
         save_results_to_csv(output_file=f"{dataset}_{model_name}_HGBC_train.csv",
                             dataset_name=hgbc_txt_dataset,
@@ -240,14 +242,14 @@ def run_txt_emb():
                             best_params=hgbc_best_params,
                             pca_n_comp=hgbc_pca_comp,
                             metrics=hgbc_txt_test_scores,
-                            is_train=False)"""
+                            is_train=False)
 
         ####################
         ### PCA, no CONC ###
         ####################
 
         # Logistic Regression
-        (lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_concatenation, lr_txt_best_params,
+        """(lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_concatenation, lr_txt_best_params,
          lr_txt_pca_components, lr_txt_train_score, lr_txt_test_scores) = lr_txt_emb(
             dataset_name=dataset, emb_method=model_name,
             feature_extractor=feature_extractor, max_iter=10000,
@@ -262,17 +264,18 @@ def run_txt_emb():
         save_results_to_csv(output_file=f"{dataset}_{model_name}_LR_pca_test.csv", dataset_name=lr_txt_dataset,
                             ml_method=lr_txt_ml_method, emb_method=lr_txt_emb_method, concatenation=lr_txt_concatenation,
                             best_params=lr_txt_best_params, pca_n_comp=lr_txt_pca_components,
-                            metrics=lr_txt_test_scores, is_train=False)
+                            metrics=lr_txt_test_scores, is_train=False)"""
 
         # HGBC
-        """
         (hgbc_txt_dataset, hgbc_txt_ml_method, hgbc_txt_emb_method, hgbc_txt_conc, hgbc_best_params, hgbc_pca_comp,
          hgbc_txt_train_score, hgbc_txt_test_scores) \
             = hgbc_txt_emb(dataset_name=dataset,
                            emb_method=model_name,
                            feature_extractor=feature_extractor,
-                           summaries=all_summaries,
-                           y=y, pca=True)
+                           train_summaries=train_summaries,
+                           test_summaries=test_summaries,
+                           y_train=y_train, y_test=y_test,
+                           pca=True)
 
         save_results_to_csv(output_file=f"{dataset}_{model_name}_HGBC_pca_train.csv",
                             dataset_name=hgbc_txt_dataset,
@@ -292,7 +295,7 @@ def run_txt_emb():
                             best_params=hgbc_best_params,
                             pca_n_comp=hgbc_pca_comp,
                             metrics=hgbc_txt_test_scores,
-                            is_train=False)"""
+                            is_train=False)
         """
         for method_name, attributes in methods.items():
             #################
