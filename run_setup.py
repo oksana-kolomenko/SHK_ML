@@ -63,8 +63,8 @@ def run_txt_emb():
     ]"""
 
     # === MIMIC ===
-    task = "task_3"
-    dataset = DatasetName.MIMIC_3.value
+    task = "task_1"
+    dataset = DatasetName.MIMIC_1.value
 
     y_train = load_labels(f"mimic_data/y_train_{task}.csv")
     y_test = load_labels(f"mimic_data/y_test_{task}.csv")
@@ -118,7 +118,7 @@ def run_txt_emb():
 
     feature_extractors = {
         # All MiniLM L6 v2
-        "all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
+        # "all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
 
         # Stella en 400m v5
         "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
