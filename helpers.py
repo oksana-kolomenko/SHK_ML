@@ -640,7 +640,6 @@ def hgbc_txt_emb(dataset_name, emb_method, feature_extractor,  pca, summaries=No
 
         train_metrics = calc_metrics(y=y_train, y_pred=y_train_pred, y_pred_proba=y_train_pred_proba)
 
-        print(f"embedding size: {len(search.best_estimator_.named_steps['classifier'].coef_[0])}")
         print(f"Best hyperparameters: {search.best_params_}")
         print(f"Train metrics: {train_metrics}")
         print(f"Test metrics per fold: {metrics_per_fold}")
