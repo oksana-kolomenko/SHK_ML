@@ -655,9 +655,17 @@ def hgbc_txt_emb(dataset_name, emb_method, feature_extractor,  pca, summaries=No
 
 # läuft
 def concat_lr_txt_emb(dataset_name, emb_method,
-                      feature_extractor, raw_text_summaries,
-                      X_tabular, y, nominal_features, text_feature_column_name,
-                      imp_max_iter, class_max_iter, concatenation, pca):
+                      feature_extractor,
+                      nominal_features, text_feature_column_name,
+                      imp_max_iter, class_max_iter, concatenation, pca,
+
+                      y=None, y_train=None, y_test=None,
+                      X_tabular=None, X_tab_train=None, X_tab_test=None,
+                      raw_text_summaries=None, train_summaries=None,
+                      test_summaries=None
+
+
+                      ):
     start_time = time.time()
     readable_time = time.strftime("%H:%M:%S", time.localtime(start_time))
     print(f"Starting the concat_lr_txt_emb method {readable_time}")
