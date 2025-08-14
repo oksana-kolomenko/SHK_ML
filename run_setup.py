@@ -139,7 +139,7 @@ def run_txt_emb():
         # GIST Models
         #"GIST-Small-Embedding-v0": feature_extractor_gist_small_embedding_v0,
         #"GIST-Embedding-v0": feature_extractor_gist_embedding_v0,
-        "GIST-Large-Embedding-v0": feature_extractor_gist_large_embedding_v0,
+        #"GIST-Large-Embedding-v0": feature_extractor_gist_large_embedding_v0,
 
         # GTE Models
         "GTE-Small": feature_extractor_gte_small,
