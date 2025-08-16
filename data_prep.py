@@ -88,6 +88,21 @@ def mimic_get_cat_features(X_train, X_test):
             X_test[col] = X_test[col].astype("category")
 
 
+def mimic_nom_features(X):
+    nominal_features = []
+
+    # Gender
+    if "gender" in X.columns:
+        nominal_features.append("gender")
+
+    # Chief, CCI + ECI
+    for category in ["chiefcom", "cci", "eci"]:
+        for col in X.columns[X.columns.str.startswith(category)]:
+            nominal_features.append(col)
+
+    return nominal_features
+
+
 """
 def mimic_subsample(X_train, y_labels_train, task_name):
     X_train = pd.read_csv(X_train)

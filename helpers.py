@@ -278,9 +278,6 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, max_iter, pca, y=Non
     concatenation = "no"
     metrics_per_fold = []
     train_metrics = ""
-    test_metrics = ""
-
-    skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
 
     is_sentence_transformer = any(
         key in emb_method.lower()
@@ -299,7 +296,6 @@ def lr_txt_emb(dataset_name, emb_method, feature_extractor, max_iter, pca, y=Non
     if pca:
         pipeline_steps.append(("numerical_scaler", StandardScaler()))
         pipeline_steps.append(("pca", PCA(n_components=n_components)))
-        # pipeline_steps.append(("numerical_scaler", MinMaxScaler()))
     else:
         pipeline_steps.append(("numerical_scaler", MinMaxScaler()))
 
@@ -662,21 +658,12 @@ def concat_lr_txt_emb(dataset_name, emb_method,
                       y=None, y_train=None, y_test=None,
                       X_tabular=None, X_tab_train=None, X_tab_test=None,
                       raw_text_summaries=None, train_summaries=None,
-                      test_summaries=None
+                      test_summaries=None):
 
-
-                      ):
-    start_time = time.time()
-    readable_time = time.strftime("%H:%M:%S", time.localtime(start_time))
+    text_features = []
+    numerical_features = []
+    readable_time = time.strftime("%H:%M:%S", time.localtime(time.time()))
     print(f"Starting the concat_lr_txt_emb method {readable_time}")
-    y = pd.Series(y)
-
-    if not np.issubdtype(y.dtype, np.number):
-        print(f"Label encoding: {y.unique()}")
-        le = LabelEncoder()
-        y = le.fit_transform(y)  # this returns a NumPy array
-    else:
-        y = y.to_numpy()
 
     dataset = dataset_name
     config = DATASET_CONFIGS[dataset]
@@ -687,21 +674,62 @@ def concat_lr_txt_emb(dataset_name, emb_method,
     ml_method = "Logistic Regression"
     emb_method = emb_method
     metrics_per_fold = []
-    skf = StratifiedKFold(n_splits=n_splits,
-                          shuffle=True,
-                          random_state=42)
 
-    # add new column (text summaries)
     text_features = [text_feature_column_name]
-    X_tabular[text_feature_column_name] = raw_text_summaries
 
-    # define numerical features
-    numerical_features = list(set(X_tabular.columns) -
-                              set(nominal_features) -
-                              set(text_features))
+    X_train = ""
+    X_test = ""
+
+    if dataset_name == DatasetName.CYBERSECURITY.value or dataset_name == DatasetName.LUNG_DISEASE.value:
+        y = pd.Series(y)
+
+        if not np.issubdtype(y.dtype, np.number):
+            print(f"Label encoding: {y.unique()}")
+            le = LabelEncoder()
+            y = le.fit_transform(y)  # this returns a NumPy array
+        else:
+            y = y.to_numpy()
+        # add new column (text summaries)
+        X_tabular[text_feature_column_name] = raw_text_summaries
+
+        # define numerical features
+        numerical_features = list(set(X_tabular.columns) -
+                                  set(nominal_features) -
+                                  set(text_features))
+
+    elif (dataset_name == DatasetName.MIMIC_0.value or dataset_name == DatasetName.MIMIC_1.value
+          or dataset_name == DatasetName.MIMIC_2.value or dataset_name == DatasetName.MIMIC_3.value):
+        #######################
+        # prepare target data #
+        #######################
+        y_train = pd.Series(y_train)
+        y_test = pd.Series(y_test)
+
+        if not np.issubdtype(y_train.dtype, np.number):
+            print(f"Label encoding: {y_train.unique()}")
+            le = LabelEncoder()
+            y_train = le.fit_transform(y_train)  # this returns a NumPy array
+        else:
+            y_train = y_train.to_numpy()
+
+        if not np.issubdtype(y_test.dtype, np.number):
+            print(f"Label encoding: {y_test.unique()}")
+            le = LabelEncoder()
+            y_test = le.fit_transform(y_test)  # this returns a NumPy array
+        else:
+            y_test = y_test.to_numpy()
+
+        # add new column (text summaries)
+        X_tab_train[text_feature_column_name] = train_summaries
+        X_tab_test[text_feature_column_name] = test_summaries
+
+        # define numerical features
+        numerical_features = list(set(X_tab_train.columns) -
+                                  set(nominal_features) -
+                                  set(text_features))
+
     print(f"Len numerical features: {len(numerical_features)}")  # muss 41X82
     print(f"Numerical features identified: {numerical_features}")
-    print(f"Setting up the pipeline at {time.strftime('%H:%M:%S', time.localtime(time.time()))}")
     print(f"Tabelle Größe {X_tabular.shape}")  # muss 41X82
     print(f"All columns: {X_tabular.columns}")
 
@@ -749,58 +777,34 @@ def concat_lr_txt_emb(dataset_name, emb_method,
         cv=RepeatedStratifiedKFold(n_splits=n_splits, n_repeats=n_repeats)
     )
     # === Evaluation ===
-    if dataset_name == DatasetName.POSTTRAUMA.value:
-        for train_index, test_index in skf.split(X_tabular, y):
-            X_train, X_test = X_tabular.iloc[train_index], X_tabular.iloc[test_index]
-            y_train, y_test = y[train_index], y[test_index]
-
-            search.fit(X_train, y_train)
-
-            y_test_pred = search.predict(X_test)
-            y_test_pred_proba = search.predict_proba(X_test)[:, 1]
-
-            metrics_per_fold.append(
-                calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba))
-
-    elif dataset_name == DatasetName.CYBERSECURITY.value or dataset_name == DatasetName.LUNG_DISEASE.value:
+    if dataset_name == DatasetName.CYBERSECURITY.value or dataset_name == DatasetName.LUNG_DISEASE.value:
         X_train, X_test, y_train, y_test = train_test_split(X_tabular, y, test_size=0.2, random_state=42)
 
-        print(f"Train size: {len(X_train)}, Test size: {len(X_test)}")
+    elif (dataset_name == DatasetName.MIMIC_0.value or dataset_name == DatasetName.MIMIC_1.value
+          or dataset_name == DatasetName.MIMIC_2.value or dataset_name == DatasetName.MIMIC_3.value):
+        X_train, X_test = X_tab_train, X_tab_test
 
-        # Fit and evaluate
-        search.fit(X_train, y_train)
+    # Fit and evaluate
+    search.fit(X_train, y_train)
 
-        y_test_pred = search.predict(X_test)
-        y_test_pred_proba = search.predict_proba(X_test)[:, 1]
+    y_test_pred = search.predict(X_test)
+    y_test_pred_proba = search.predict_proba(X_test)[:, 1]
 
-        best_param = f"Best params for this fold: {search.best_params_}"
-        print(best_param)
+    print(f"embedding size: {len(search.best_estimator_.named_steps['classifier'].coef_[0])}")
+    print(f"Best hyperparameters: {search.best_params_}")
 
-        metrics_per_fold.append(
-            calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba))
-
-    search.fit(X_tabular, y)
-
-    y_train_pred = search.predict(X_tabular)
-    y_train_pred_proba = search.predict_proba(X_tabular)[:, 1]
-
-    print(f"Shape X_tabular: {X_tabular.shape}")
-    print(f"y shape: {y.shape}")  # Should be (82,)
-    print(f"y_train_pred shape: {y_train_pred.shape}")  # Should also be (82,)
-
-    train_metrics = calc_metrics(y=y, y_pred=y_train_pred, y_pred_proba=y_train_pred_proba)
-
-    finish_time = time.time()
-    readable_time = time.strftime("%H:%M:%S", time.localtime(finish_time))
-    print(f"Finished the concat_lr_txt_emb method {readable_time}")
-
-    best_params = f"{search.best_params_}"
-
+    metrics_per_fold.append(
+        calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba))
     print(f"Combined feature size: {len(search.best_estimator_.named_steps['classifier'].coef_[0])}")
-    print(f"Best hyperparameters: {best_params}")
-    print(f"Train metrics: {train_metrics}")
-    print(f"Test metrics per fold: {metrics_per_fold}")
+    # train metrics
+    y_train_pred = search.predict(X_train)
+    y_train_pred_proba = search.predict_proba(X_train)[:, 1]
+    train_metrics = calc_metrics(y=y_train, y_pred=y_train_pred, y_pred_proba=y_train_pred_proba)
 
+    readable_time = time.strftime("%H:%M:%S", time.localtime(time.time()))
+    print(f"Finished the concat_lr_txt_emb method {readable_time}")
+    best_params = f"{search.best_params_}"
+    print(f"Best hyperparameters: {best_params}")
     return dataset, ml_method, emb_method, concatenation, best_params, pca_components, train_metrics, metrics_per_fold
 
 

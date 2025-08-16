@@ -27,6 +27,7 @@ from values import DatasetName
 from models import (feature_extractor_gist_large_embedding_v0,
                     feature_extractor_bge_large_en_v1_5, feature_extractor_e5_large_v2)
 
+from data_prep import mimic_nom_features
 # from models import (feature_extractor_gte_large, feature_extractor_medembed_large_v0_1, feature_extractor_gte_large_en_v1_5)
 
 
@@ -63,24 +64,37 @@ def run_txt_emb():
     ]"""
 
     # === MIMIC ===
-    task = "task_1"
-    dataset = DatasetName.MIMIC_1.value
+    task = "task_0"
+    dataset = DatasetName.MIMIC_0.value
 
-    y_train = load_labels(f"mimic_data/y_train_{task}.csv")
-    y_test = load_labels(f"mimic_data/y_test_{task}.csv")
+    X_train = load_labels(f"mimic_data/X_train_{task}.csv")
+    X_test = load_labels(f"mimic_data/X_test_{task}.csv")
+
+    X_train_metr = load_labels(f"mimic_data/X_train_metr_{task}.csv")
+    X_test_metr = load_labels(f"mimic_data/X_test_metr_{task}.csv")
+
     train_summaries = load_summaries(f"mimic_data/mimic_{task}_train_summaries.txt")
     test_summaries = load_summaries(f"mimic_data/mimic_{task}_test_summaries.txt")
 
+    train_nom_summaries = load_summaries(f"mimic_data/mimic_{task}_train_nom_summaries.txt")
+    test_nom_summaries = load_summaries(f"mimic_data/mimic_{task}_test_nom_summaries.txt")
+
+    y_train = load_labels(f"mimic_data/y_train_{task}.csv")
+    y_test = load_labels(f"mimic_data/y_test_{task}.csv")
+
+    nominal_features = mimic_nom_features(X=X_train)
 
     methods = {
-    """
         # all summaries, all features
-        "pca_conc1": {"X": X,
-                      "summaries": all_summaries,
+        "pca_conc1": {"X_train": X_train,
+                      "X_test": X_test,
+                      "train_summaries": train_summaries,
+                      "test_summaries": test_summaries,
                       "conc": "conc1",
                       "pca": True,
                       "pca_str": "pca_"},
 
+        """
         # all summaries, metr features
         "pca_conc2": {"X": X_metr,
                       "summaries": all_summaries,
@@ -93,13 +107,8 @@ def run_txt_emb():
                       "conc": "conc3",
                       "pca": True,
                       "pca_str": "pca_"},
-        # all summaries, all features
-        "conc1": {"X": X,
-                  "summaries": all_summaries,
-                  "conc": "conc1",
-                  "pca": False,
-                  "pca_str": ""},
-        # all summaries, metr features
+        """
+                """
         "conc2": {"X": X_metr,
                   "summaries": all_summaries,
                   "conc": "conc2",
@@ -111,35 +120,43 @@ def run_txt_emb():
                   "conc": "conc3",
                   "pca": False,
                   "pca_str": ""}
-    """
+        """  
+        # all summaries, all features
+        "conc1": {"X_train": X_train,
+                  "X_test": X_test,
+                  "train_summaries": train_summaries,
+                  "test_summaries": test_summaries,
+                  "conc": "conc1",
+                  "pca": False,
+                  "pca_str": ""},
+        # all summaries, metr features
     }
-
     text_feature = 'text'
 
     feature_extractors = {
         # All MiniLM L6 v2
-        #"all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
+        "all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
 
         # Stella en 400m v5
-        #"Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
+        "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
 
         # Ember v1
-        #"ember_v1": feature_extractor_ember_v1,
+        "ember_v1": feature_extractor_ember_v1,
 
         # E5 Models
-        #"E5-Small-V2": feature_extractor_e5_small_v2,
-        #"E5-Base-V2": feature_extractor_e5_base_v2,
-        #"E5-Large-V2": feature_extractor_e5_large_v2,
+        "E5-Small-V2": feature_extractor_e5_small_v2,
+        "E5-Base-V2": feature_extractor_e5_base_v2,
+        "E5-Large-V2": feature_extractor_e5_large_v2,
 
         # BGE Models (done)
-        #"BGE-Small-EN-v1.5": feature_extractor_bge_small_en_v1_5,
-        #"BGE-Base-EN-v1.5": feature_extractor_bge_base_en_v1_5,
-        #"BGE-Large-EN-v1.5": feature_extractor_bge_large_en_v1_5,
+        "BGE-Small-EN-v1.5": feature_extractor_bge_small_en_v1_5,
+        "BGE-Base-EN-v1.5": feature_extractor_bge_base_en_v1_5,
+        "BGE-Large-EN-v1.5": feature_extractor_bge_large_en_v1_5,
 
         # GIST Models
-        #"GIST-Small-Embedding-v0": feature_extractor_gist_small_embedding_v0,
-        #"GIST-Embedding-v0": feature_extractor_gist_embedding_v0,
-        #"GIST-Large-Embedding-v0": feature_extractor_gist_large_embedding_v0,
+        "GIST-Small-Embedding-v0": feature_extractor_gist_small_embedding_v0,
+        "GIST-Embedding-v0": feature_extractor_gist_embedding_v0,
+        "GIST-Large-Embedding-v0": feature_extractor_gist_large_embedding_v0,
 
         # GTE Models
         "GTE-Small": feature_extractor_gte_small,
@@ -195,7 +212,8 @@ def run_txt_emb():
         #######################
 
         # Logistic Regression
-        """(lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_concatenation, lr_txt_best_params,
+        """
+        (lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_concatenation, lr_txt_best_params,
          lr_txt_pca_components, lr_txt_train_score, lr_txt_test_scores) = lr_txt_emb(
             dataset_name=dataset, emb_method=model_name,
             feature_extractor=feature_extractor, max_iter=10000,
@@ -210,9 +228,10 @@ def run_txt_emb():
         save_results_to_csv(output_file=f"{dataset}_{model_name}_LR_test.csv", dataset_name=lr_txt_dataset,
                             ml_method=lr_txt_ml_method, emb_method=lr_txt_emb_method, concatenation=lr_txt_concatenation,
                             best_params=lr_txt_best_params, pca_n_comp=lr_txt_pca_components,
-                            metrics=lr_txt_test_scores, is_train=False)"""
+                            metrics=lr_txt_test_scores, is_train=False)
 
         # HGBC
+        
         (hgbc_txt_dataset, hgbc_txt_ml_method, hgbc_txt_emb_method, hgbc_txt_conc, hgbc_best_params, hgbc_pca_comp,
          hgbc_txt_train_score, hgbc_txt_test_scores) \
             = hgbc_txt_emb(dataset_name=dataset,
@@ -242,6 +261,7 @@ def run_txt_emb():
                             pca_n_comp=hgbc_pca_comp,
                             metrics=hgbc_txt_test_scores,
                             is_train=False)
+        """
 
         ####################
         ### PCA, no CONC ###
@@ -263,7 +283,7 @@ def run_txt_emb():
         save_results_to_csv(output_file=f"{dataset}_{model_name}_LR_pca_test.csv", dataset_name=lr_txt_dataset,
                             ml_method=lr_txt_ml_method, emb_method=lr_txt_emb_method, concatenation=lr_txt_concatenation,
                             best_params=lr_txt_best_params, pca_n_comp=lr_txt_pca_components,
-                            metrics=lr_txt_test_scores, is_train=False)"""
+                            metrics=lr_txt_test_scores, is_train=False)
 
         # HGBC
         (hgbc_txt_dataset, hgbc_txt_ml_method, hgbc_txt_emb_method, hgbc_txt_conc, hgbc_best_params, hgbc_pca_comp,
@@ -302,28 +322,35 @@ def run_txt_emb():
             #################
 
             conc_art = attributes.get("conc")
-            X = attributes.get("X")
-            summaries = attributes.get("summaries")
+            X_train = attributes.get("X_train")
+            X_test = attributes.get("X_test")
+            train_summaries = attributes.get("train_summaries")
+            test_summaries = attributes.get("test_summaries")
             pca = attributes.get("pca")
             pca_str = attributes.get("pca_str")
 
             # Logistic Regression conc (pca)
-
-            
             (lr_conc_dataset, lr_conc_ml_method, lr_conc_emb_method,
              lr_conc_yesno, lr_best_params, lr_pca_components, lr_conc_train_score,
              lr_conc_test_scores) = concat_lr_txt_emb(
                 dataset_name=dataset,
                 emb_method=model_name,
                 feature_extractor=feature_extractor,
-                raw_text_summaries=summaries,
-                X_tabular=X,
-                y=y,
+
+                train_summaries=train_summaries,
+                test_summaries=test_summaries,
+
+                X_tab_train=X_train,
+                X_tab_test=X_test,
+                
+                y_train=y_train,
+                y_test=y_test,
+
                 nominal_features=nominal_features,
+
                 text_feature_column_name=text_feature,
                 concatenation=conc_art,
                 imp_max_iter=30, class_max_iter=10000, pca=pca)
-                #imp_max_iter=10, class_max_iter=10, pca=True)
 
             save_results_to_csv(output_file=f"{dataset}_{model_name}_LR_{conc_art}_{pca_str}train.csv",
                                 dataset_name=lr_conc_dataset,
@@ -346,6 +373,7 @@ def run_txt_emb():
                                 is_train=False)
 
             # HGBC conc (pca)
+            """
             (concat_hgbc_dataset, concat_hgbc_ml_method, concat_hgbc_emb_method,
              hgbc_conc_yesno, hgbc_best_params, hgbc_pca_components, hgbc_conc_train_score,
              hgbc_conc_test_scores) = concat_hgbc_txt_emb(
