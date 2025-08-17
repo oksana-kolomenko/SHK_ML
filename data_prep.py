@@ -218,32 +218,32 @@ def do_subsample():
 
 
 def do_add_prep():
-    task = "task_0"
-    path_in = fr'..\mimic\subsampled'
+    task = "task_3"
+    path_in = fr'..\mimic\subsampled\nominal'
     path_out = fr'..\mimic\summaries_prep'
 
     mimic_convert_binary_to_bool(
-        train_path=os.path.join(path_in, fr"X_train_{task}.csv"),
-        test_path=os.path.join(path_in, fr"X_test_{task}.csv"),
-        out_train_path=os.path.join(path_out, fr"X_train_{task}.csv"),
-        out_test_path=os.path.join(path_out, fr"X_test_{task}.csv"),
+        train_path=os.path.join(path_in, fr"X_nom_train_{task}.csv"),
+        test_path=os.path.join(path_in, fr"X_nom_test_{task}.csv"),
+        out_train_path=os.path.join(path_out, fr"X_nom_train_{task}.csv"),
+        out_test_path=os.path.join(path_out, fr"X_nom_test_{task}.csv"),
     )
 
-    #mimic_add_preprocessing(file=os.path.join(path_out, fr"X_train_{task}.csv"),
-    #                        output=os.path.join(path_out, fr"X_train_{task}.csv"))
+    mimic_add_preprocessing(file=os.path.join(path_out, fr"X_nom_train_{task}.csv"),
+                            output=os.path.join(path_out, fr"X_nom_train_{task}.csv"))
 
-    mimic_add_preprocessing(file=os.path.join(path_out, fr"X_test_{task}.csv"),
-                            output=os.path.join(path_out, fr"X_test_{task}.csv"))
+    mimic_add_preprocessing(file=os.path.join(path_out, fr"X_nom_test_{task}.csv"),
+                            output=os.path.join(path_out, fr"X_nom_test_{task}.csv"))
 
 
 def create_mimic_summaries():
-    task = "task_0"
+    task = "task_3"
     path_in = fr'..\mimic\summaries_prep'
     path_out = fr'..\mimic\summaries'
-    #create_general_summaries_(tab_data=os.path.join(path_in, fr"X_train_{task}.csv"),
-    #                          output_file=os.path.join(path_out, fr"mimic_{task}_train_summaries.txt")
-    #                          )
-    create_general_summaries_(tab_data=os.path.join(path_in, fr"X_test_{task}.csv"),
-                              output_file=os.path.join(path_out, fr"mimic_{task}_test_summaries.txt")
+    create_general_summaries_(tab_data=os.path.join(path_in, fr"X_nom_train_{task}.csv"),
+                              output_file=os.path.join(path_out, fr"mimic_{task}_train_nom_summaries.txt")
+                              )
+    create_general_summaries_(tab_data=os.path.join(path_in, fr"X_nom_test_{task}.csv"),
+                              output_file=os.path.join(path_out, fr"mimic_{task}_test_nom_summaries.txt")
                               )
 

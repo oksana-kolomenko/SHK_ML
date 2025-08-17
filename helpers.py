@@ -660,8 +660,6 @@ def concat_lr_txt_emb(dataset_name, emb_method,
                       raw_text_summaries=None, train_summaries=None,
                       test_summaries=None):
 
-    text_features = []
-    numerical_features = []
     readable_time = time.strftime("%H:%M:%S", time.localtime(time.time()))
     print(f"Starting the concat_lr_txt_emb method {readable_time}")
 
@@ -676,6 +674,7 @@ def concat_lr_txt_emb(dataset_name, emb_method,
     metrics_per_fold = []
 
     text_features = [text_feature_column_name]
+    numerical_features = []
 
     X_train = ""
     X_test = ""
@@ -919,37 +918,77 @@ def concat_lr_rte(dataset_name, X_tabular,
 
 # läuft
 def concat_hgbc_txt_emb(dataset_name, emb_method,
-                        X_tabular, y, text_feature_column_name, feature_extractor,
-                        nominal_features, raw_text_summaries, concatenation, pca):
+                        text_feature_column_name, feature_extractor,
+                        concatenation, pca, nominal_features,
+                        X_tabular=None, y=None,
+                        text_summaries=None,
+                        X_tab_train=None, X_tab_test=None,
+                        y_train=None, y_test=None,
+                        train_summaries=None, test_summaries=None
+                        ):
     dataset = dataset_name
     config = DATASET_CONFIGS[dataset]
     n_splits = config.splits
     n_components = config.pca if pca else None
     n_repeats = config.n_repeats
-    y = pd.Series(y)
-
-    if not np.issubdtype(y.dtype, np.number):
-        print(f"Label encoding: {y.unique()}")
-        le = LabelEncoder()
-        y = le.fit_transform(y)  # this returns a NumPy array
-    else:
-        y = y.to_numpy()
 
     ml_method = "HistGradientBoostingClassifier"
     emb_method = emb_method
     metrics_per_fold = []
-    skf = StratifiedKFold(n_splits=n_splits,
-                          shuffle=True,
-                          random_state=42)
 
     # add text as a new column
     text_features = [text_feature_column_name]
+    non_text_columns = []
 
-    X_tabular[text_feature_column_name] = raw_text_summaries
+    X_train = ""
+    X_test = ""
 
-    # separate non-text features
-    non_text_columns = list(set(X_tabular.columns) -
-                            set(text_features))
+    if dataset_name == DatasetName.CYBERSECURITY.value or dataset_name == DatasetName.LUNG_DISEASE.value:
+        y = pd.Series(y)
+
+        if not np.issubdtype(y.dtype, np.number):
+            print(f"Label encoding: {y.unique()}")
+            le = LabelEncoder()
+            y = le.fit_transform(y)  # this returns a NumPy array
+        else:
+            y = y.to_numpy()
+        # add new column (text summaries)
+        X_tabular[text_feature_column_name] = text_summaries
+
+        # separate non-text features
+        non_text_columns = list(set(X_tabular.columns) -
+                                set(text_features))
+
+    elif (dataset_name == DatasetName.MIMIC_0.value or dataset_name == DatasetName.MIMIC_1.value
+          or dataset_name == DatasetName.MIMIC_2.value or dataset_name == DatasetName.MIMIC_3.value):
+        #######################
+        # prepare target data #
+        #######################
+        y_train = pd.Series(y_train)
+        y_test = pd.Series(y_test)
+
+        if not np.issubdtype(y_train.dtype, np.number):
+            print(f"Label encoding: {y_train.unique()}")
+            le = LabelEncoder()
+            y_train = le.fit_transform(y_train)  # this returns a NumPy array
+        else:
+            y_train = y_train.to_numpy()
+
+        if not np.issubdtype(y_test.dtype, np.number):
+            print(f"Label encoding: {y_test.unique()}")
+            le = LabelEncoder()
+            y_test = le.fit_transform(y_test)  # this returns a NumPy array
+        else:
+            y_test = y_test.to_numpy()
+
+        # add new column (text summaries)
+        X_tab_train[text_feature_column_name] = train_summaries
+        X_tab_test[text_feature_column_name] = test_summaries
+
+        # separate non-text features
+        non_text_columns = list(set(X_tab_train.columns) -
+                                set(text_features))
+
     nominal_feature_indices = [
         non_text_columns.index(col)
         for col in nominal_features if col in non_text_columns
@@ -999,60 +1038,33 @@ def concat_hgbc_txt_emb(dataset_name, emb_method,
     )
 
     # === Evaluation ===
-    if dataset_name == DatasetName.POSTTRAUMA.value:
-        for train_index, test_index in skf.split(X_tabular, y):
-            X_train, X_test = X_tabular.iloc[train_index], X_tabular.iloc[test_index]
-            y_train, y_test = y[train_index], y[test_index]
-
-            print(f"Length of X_tab_train: {len(X_train)}")
-            print(f"Length of y_train: {len(y_train)}")
-
-            assert len(X_train) == len(y_train), "Mismatch in training data sizes"
-
-            search.fit(X_train, y_train)
-
-            y_test_pred = search.predict(X_test)
-            y_test_pred_proba = search.predict_proba(X_test)[:, 1]
-
-            metrics_per_fold.append(
-                calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba))
-
-    elif dataset_name == DatasetName.CYBERSECURITY.value or dataset_name == DatasetName.LUNG_DISEASE.value:
+    if dataset_name == DatasetName.CYBERSECURITY.value or dataset_name == DatasetName.LUNG_DISEASE.value:
         X_train, X_test, y_train, y_test = train_test_split(X_tabular, y, test_size=0.2, random_state=42)
 
-        print(f"Train size: {len(X_train)}, Test size: {len(X_test)}")
+    elif (dataset_name == DatasetName.MIMIC_0.value or dataset_name == DatasetName.MIMIC_1.value
+        or dataset_name == DatasetName.MIMIC_2.value or dataset_name == DatasetName.MIMIC_3.value):
+        X_train, X_test = X_tab_train, X_tab_test
 
-        # Fit and evaluate
-        search.fit(X_train, y_train)
+    # Fit and evaluate
+    search.fit(X_train, y_train)
 
-        y_test_pred = search.predict(X_test)
-        y_test_pred_proba = search.predict_proba(X_test)[:, 1]
+    y_test_pred = search.predict(X_test)
+    y_test_pred_proba = search.predict_proba(X_test)[:, 1]
 
-        best_param = f"Best params for this fold: {search.best_params_}"
-        print(best_param)
+    print(f"Best hyperparameters: {search.best_params_}")
 
-        metrics_per_fold.append(
-            calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba))
+    metrics_per_fold.append(
+        calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba))
+    print(f"Combined feature size: {len(search.best_estimator_.named_steps['classifier'].coef_[0])}")
+    # train metrics
+    y_train_pred = search.predict(X_train)
+    y_train_pred_proba = search.predict_proba(X_train)[:, 1]
+    train_metrics = calc_metrics(y=y_train, y_pred=y_train_pred, y_pred_proba=y_train_pred_proba)
 
-    print(f"X_tabular len: {len(X_tabular)}")
-    print(f"Text_features len: {len(text_features)}")  # muss 82 sein
-    print(f"y len: {len(y)}")
-    assert len(X_tabular) == len(y), "Mismatch in training data sizes"
-
-    search.fit(X_tabular, y)
-    y_train_pred = search.predict(X_tabular)
-    y_train_pred_proba = search.predict_proba(X_tabular)[:, 1]
-
-    print(f"X_tabular shape {X_tabular.shape}")
-    print(f"y shape: {y.shape}")  # Should be (82,)
-    print(f"y_train_pred shape: {y_train_pred.shape}")  # Should also be (82,)
-
-    train_metrics = calc_metrics(y=y, y_pred=y_train_pred, y_pred_proba=y_train_pred_proba)
-
+    readable_time = time.strftime("%H:%M:%S", time.localtime(time.time()))
+    print(f"Finished the concat_lr_txt_emb method {readable_time}")
     best_params = f"{search.best_params_}"
     print(f"Best hyperparameters: {best_params}")
-    print(f"Train metrics: {train_metrics}")
-    print(f"Test metrics per fold: {metrics_per_fold}")
 
     return (dataset, ml_method, emb_method, concatenation, best_params,
             pca_components, train_metrics, metrics_per_fold)

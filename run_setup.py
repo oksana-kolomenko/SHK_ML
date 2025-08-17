@@ -70,8 +70,8 @@ def run_txt_emb():
     X_train = load_labels(f"mimic_data/X_train_{task}.csv")
     X_test = load_labels(f"mimic_data/X_test_{task}.csv")
 
-    X_train_metr = load_labels(f"mimic_data/X_train_metr_{task}.csv")
-    X_test_metr = load_labels(f"mimic_data/X_test_metr_{task}.csv")
+    X_train_metr = load_labels(f"mimic_data/X_metr_train_{task}.csv")
+    X_test_metr = load_labels(f"mimic_data/X_metr_test_{task}.csv")
 
     train_summaries = load_summaries(f"mimic_data/mimic_{task}_train_summaries.txt")
     test_summaries = load_summaries(f"mimic_data/mimic_{task}_test_summaries.txt")
