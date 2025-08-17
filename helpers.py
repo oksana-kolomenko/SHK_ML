@@ -729,8 +729,6 @@ def concat_lr_txt_emb(dataset_name, emb_method,
 
     print(f"Len numerical features: {len(numerical_features)}")  # muss 41X82
     print(f"Numerical features identified: {numerical_features}")
-    print(f"Tabelle Größe {X_tabular.shape}")  # muss 41X82
-    print(f"All columns: {X_tabular.columns}")
 
     pca_components = f"PCA ({n_components} components)" \
         if pca else "none"
