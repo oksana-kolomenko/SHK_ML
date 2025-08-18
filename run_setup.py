@@ -76,8 +76,8 @@ def run_txt_emb():
     train_summaries = load_summaries(f"mimic_data/mimic_{task}_train_summaries.txt")
     test_summaries = load_summaries(f"mimic_data/mimic_{task}_test_summaries.txt")
 
-    #train_nom_summaries = load_summaries(f"mimic_data/mimic_{task}_train_nom_summaries.txt")
-    #test_nom_summaries = load_summaries(f"mimic_data/mimic_{task}_test_nom_summaries.txt")
+    train_nom_summaries = load_summaries(f"mimic_data/mimic_{task}_train_nom_summaries.txt")
+    test_nom_summaries = load_summaries(f"mimic_data/mimic_{task}_test_nom_summaries.txt")
 
     y_train = load_labels(f"mimic_data/y_train_{task}.csv")
     y_test = load_labels(f"mimic_data/y_test_{task}.csv")
@@ -86,50 +86,59 @@ def run_txt_emb():
 
     methods = {
         # all summaries, all features
-        "pca_conc1": {"X_train": X_train,
-                      "X_test": X_test,
+        #"pca_conc1": {"X_train": X_train,
+        #              "X_test": X_test,
+        #              "train_summaries": train_summaries,
+        #              "test_summaries": test_summaries,
+        #              "conc": "conc1",
+        #              "pca": True,
+        #              "pca_str": "pca_"},
+
+        # all summaries, metr features
+        "pca_conc2": {"X_train": X_train_metr,
+                      "X_test": X_test_metr,
                       "train_summaries": train_summaries,
                       "test_summaries": test_summaries,
-                      "conc": "conc1",
-                      "pca": True,
-                      "pca_str": "pca_"},
-
-        """
-        # all summaries, metr features
-        "pca_conc2": {"X": X_metr,
-                      "summaries": all_summaries,
                       "conc": "conc2",
                       "pca": True,
                       "pca_str": "pca_"},
+
         # nom summaries, metr features
-        "pca_conc3": {"X": X_metr,
-                      "summaries": nom_summaries,
+        "pca_conc3": {"X_train": X_train_metr,
+                      "X_test": X_test_metr,
+                      "train_summaries": train_nom_summaries,
+                      "test_summaries": test_nom_summaries,
                       "conc": "conc3",
                       "pca": True,
                       "pca_str": "pca_"},
-        """
-                """
-        "conc2": {"X": X_metr,
-                  "summaries": all_summaries,
+
+        # all summaries, all features
+        #"conc1": {"X_train": X_train,
+        #          "X_test": X_test,
+        #          "train_summaries": train_summaries,
+        #          "test_summaries": test_summaries,
+        #          "conc": "conc1",
+        #          "pca": False,
+        #          "pca_str": ""},
+
+        # all summaries, metr features
+        "conc2": {"X_train": X_train_metr,
+                  "X_test": X_test_metr,
+                  "train_summaries": train_summaries,
+                  "test_summaries": test_summaries,
                   "conc": "conc2",
                   "pca": False,
                   "pca_str": ""},
+
         # nom summaries, metr features
-        "conc3": {"X": X_metr,
-                  "summaries": nom_summaries,
+        "conc3": {"X_train": X_train_metr,
+                  "X_test": X_test_metr,
+                  "train_summaries": train_nom_summaries,
+                  "test_summaries": test_nom_summaries,
                   "conc": "conc3",
                   "pca": False,
                   "pca_str": ""}
-        """  
-        # all summaries, all features
-        "conc1": {"X_train": X_train,
-                  "X_test": X_test,
-                  "train_summaries": train_summaries,
-                  "test_summaries": test_summaries,
-                  "conc": "conc1",
-                  "pca": False,
-                  "pca_str": ""},
-        # all summaries, metr features
+
     }
     text_feature = 'text'
 
