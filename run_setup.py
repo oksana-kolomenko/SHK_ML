@@ -159,25 +159,25 @@ def run_txt_emb():
 
         # BGE Models (done)
         #"BGE-Small-EN-v1.5": feature_extractor_bge_small_en_v1_5,
-        "BGE-Base-EN-v1.5": feature_extractor_bge_base_en_v1_5,
-        "BGE-Large-EN-v1.5": feature_extractor_bge_large_en_v1_5,
+        #"BGE-Base-EN-v1.5": feature_extractor_bge_base_en_v1_5,
+        #"BGE-Large-EN-v1.5": feature_extractor_bge_large_en_v1_5,
 
         # GIST Models
-        "GIST-Small-Embedding-v0": feature_extractor_gist_small_embedding_v0,
-        "GIST-Embedding-v0": feature_extractor_gist_embedding_v0,
+        #"GIST-Small-Embedding-v0": feature_extractor_gist_small_embedding_v0,
+        #"GIST-Embedding-v0": feature_extractor_gist_embedding_v0,
         "GIST-Large-Embedding-v0": feature_extractor_gist_large_embedding_v0,
 
         # GTE Models
-        #"GTE-Small": feature_extractor_gte_small,
-        #"GTE-Base": feature_extractor_gte_base,
-        #"GTE-Base-EN-v1.5": feature_extractor_gte_base_en_v1_5,
-        #"GTE-Large": feature_extractor_gte_large,
+        "GTE-Small": feature_extractor_gte_small,
+        "GTE-Base": feature_extractor_gte_base,
+        "GTE-Base-EN-v1.5": feature_extractor_gte_base_en_v1_5,
+        "GTE-Large": feature_extractor_gte_large,
 
         # GTR T5 Base
-        #"GTR_T5_Base": feature_extractor_gtr_t5_base,
+        "GTR_T5_Base": feature_extractor_gtr_t5_base,
 
         # Sentence T5 Base
-        #"sentence_t5_base": feature_extractor_sentence_t5_base,
+        "sentence_t5_base": feature_extractor_sentence_t5_base,
 
         # Potion Models
         # "Potion-Base-2M": feature_extractor_potion_base_2M,
@@ -221,7 +221,7 @@ def run_txt_emb():
         #######################
 
         # Logistic Regression
-        """
+
         (lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_concatenation, lr_txt_best_params,
          lr_txt_pca_components, lr_txt_train_score, lr_txt_test_scores) = lr_txt_emb(
             dataset_name=dataset, emb_method=model_name,
@@ -269,7 +269,7 @@ def run_txt_emb():
                             best_params=hgbc_best_params,
                             pca_n_comp=hgbc_pca_comp,
                             metrics=hgbc_txt_test_scores,
-                            is_train=False)
+                            is_train=False)"""
 
 
         ####################
@@ -277,7 +277,7 @@ def run_txt_emb():
         ####################
 
         # Logistic Regression
-        """
+
         (lr_txt_dataset, lr_txt_ml_method, lr_txt_emb_method, lr_txt_concatenation, lr_txt_best_params,
          lr_txt_pca_components, lr_txt_train_score, lr_txt_test_scores) = lr_txt_emb(
             dataset_name=dataset, emb_method=model_name,
@@ -326,6 +326,7 @@ def run_txt_emb():
                             pca_n_comp=hgbc_pca_comp,
                             metrics=hgbc_txt_test_scores,
                             is_train=False)
+                            """
 
         """
         for method_name, attributes in methods.items():
