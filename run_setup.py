@@ -64,8 +64,8 @@ def run_txt_emb():
     ]"""
 
     # === MIMIC ===
-    task = "task_0"
-    dataset = DatasetName.MIMIC_0.value
+    task = "task_1"
+    dataset = DatasetName.MIMIC_1.value
 
     X_train = load_features(f"mimic_data/X_train_{task}.csv")
     X_test = load_features(f"mimic_data/X_test_{task}.csv")
@@ -159,8 +159,8 @@ def run_txt_emb():
 
         # BGE Models (done)
         #"BGE-Small-EN-v1.5": feature_extractor_bge_small_en_v1_5,
-        #"BGE-Base-EN-v1.5": feature_extractor_bge_base_en_v1_5,
-        #"BGE-Large-EN-v1.5": feature_extractor_bge_large_en_v1_5,
+        "BGE-Base-EN-v1.5": feature_extractor_bge_base_en_v1_5,
+        "BGE-Large-EN-v1.5": feature_extractor_bge_large_en_v1_5,
 
         # GIST Models
         "GIST-Small-Embedding-v0": feature_extractor_gist_small_embedding_v0,
@@ -168,16 +168,16 @@ def run_txt_emb():
         "GIST-Large-Embedding-v0": feature_extractor_gist_large_embedding_v0,
 
         # GTE Models
-        "GTE-Small": feature_extractor_gte_small,
-        "GTE-Base": feature_extractor_gte_base,
-        "GTE-Base-EN-v1.5": feature_extractor_gte_base_en_v1_5,
-        "GTE-Large": feature_extractor_gte_large,
+        #"GTE-Small": feature_extractor_gte_small,
+        #"GTE-Base": feature_extractor_gte_base,
+        #"GTE-Base-EN-v1.5": feature_extractor_gte_base_en_v1_5,
+        #"GTE-Large": feature_extractor_gte_large,
 
         # GTR T5 Base
-        "GTR_T5_Base": feature_extractor_gtr_t5_base,
+        #"GTR_T5_Base": feature_extractor_gtr_t5_base,
 
         # Sentence T5 Base
-        "sentence_t5_base": feature_extractor_sentence_t5_base,
+        #"sentence_t5_base": feature_extractor_sentence_t5_base,
 
         # Potion Models
         # "Potion-Base-2M": feature_extractor_potion_base_2M,
