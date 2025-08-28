@@ -95,13 +95,13 @@ def run_txt_emb():
         #              "pca_str": "pca_"},
 
         # all summaries, metr features
-        #"pca_conc2": {"X_train": X_train_metr,
-        #              "X_test": X_test_metr,
-        #              "train_summaries": train_summaries,
-        #              "test_summaries": test_summaries,
-        #              "conc": "conc2",
-        #              "pca": True,
-        #              "pca_str": "pca_"},
+        "pca_conc2": {"X_train": X_train_metr,
+                      "X_test": X_test_metr,
+                      "train_summaries": train_summaries,
+                      "test_summaries": test_summaries,
+                      "conc": "conc2",
+                      "pca": True,
+                      "pca_str": "pca_"},
 
         # nom summaries, metr features
         "pca_conc3": {"X_train": X_train_metr,
@@ -122,13 +122,13 @@ def run_txt_emb():
         #          "pca_str": ""},
 
         # all summaries, metr features
-        #"conc2": {"X_train": X_train_metr,
-        #          "X_test": X_test_metr,
-        #          "train_summaries": train_summaries,
-        #          "test_summaries": test_summaries,
-        #          "conc": "conc2",
-        #          "pca": False,
-        #          "pca_str": ""},
+        "conc2": {"X_train": X_train_metr,
+                  "X_test": X_test_metr,
+                  "train_summaries": train_summaries,
+                  "test_summaries": test_summaries,
+                  "conc": "conc2",
+                  "pca": False,
+                  "pca_str": ""},
 
         # nom summaries, metr features
         "conc3": {"X_train": X_train_metr,
@@ -169,7 +169,7 @@ def run_txt_emb():
 
         # GTE Models
         "GTE-Small": feature_extractor_gte_small,
-        #"GTE-Base": feature_extractor_gte_base,
+        "GTE-Base": feature_extractor_gte_base,
         #"GTE-Base-EN-v1.5": feature_extractor_gte_base_en_v1_5,
         #"GTE-Large": feature_extractor_gte_large,
 
