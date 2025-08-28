@@ -37,8 +37,8 @@ def run_models_on_table_data():
     """
 
     # === MIMIC ===
-    task = "task_1"
-    dataset = DatasetName.MIMIC_1.value
+    task = "task_0"
+    dataset = DatasetName.MIMIC_0.value
 
     X_train = load_features(f"mimic_data/X_train_{task}.csv")
     X_test = load_features(f"mimic_data/X_test_{task}.csv")
