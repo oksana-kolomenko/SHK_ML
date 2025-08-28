@@ -13,10 +13,11 @@ from dummy import print_special_tokens, print_sentence_embedding
 
 from run_setup import run_txt_emb
 #from dummy import test
-#from run_models_table_data import run_models_on_table_data
+from run_baseline import run_models_on_table_data
 
 if __name__ == '__main__':
-    run_txt_emb()
+    # run_txt_emb()
+    run_models_on_table_data()
     # MIMIC
     # 1. Create tasks
     # mimic_generate_tasks

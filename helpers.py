@@ -49,19 +49,11 @@ def train(search, X_train, y_train, X_test, y_test):
     return metrics
 
 
-def logistic_regression(dataset_name, X, y, nominal_features, pca):
+def logistic_regression(dataset_name, nominal_features,
+                        y=None, y_train=None, y_test=None,
+                        X=None, X_train=None, X_test=None):
+    # Target encoding
     y = pd.Series(y)
-
-    print(f"[INFO] Rows before NaN removal: X={len(X)}, y={len(y)}")
-    print(f"[INFO] NaNs in y before removal: {y.isna().sum()}")
-
-    valid_indices = ~y.isna()
-    X = X.loc[valid_indices]
-    y = y.loc[valid_indices]
-
-    print(f"[INFO] Rows after NaN removal: X={len(X)}, y={len(y)}")
-    print(f"[INFO] NaNs in y after removal: {y.isna().sum()}")
-
     if not np.issubdtype(y.dtype, np.number):
         print(f"Label encoding: {y.unique()}")
         le = LabelEncoder()
@@ -70,17 +62,15 @@ def logistic_regression(dataset_name, X, y, nominal_features, pca):
         y = y.to_numpy()
 
     config = DATASET_CONFIGS[dataset_name]
-    n_splits, n_repeats, n_components = config.splits, config.n_repeats, config.pca if pca else None
+    n_splits = config.splits
+    n_repeats = config.n_repeats
 
-    ml_method, emb_method, concatenation, pca_components =\
-        "logistic regression", "none", "no", f"PCA ({n_components} components)" if pca else "none"
+    ml_method, emb_method, concatenation = "logistic regression", "none", "no"
+    pca_components = "none"
 
     metrics_per_fold = []
-    skf = StratifiedKFold(n_splits=n_splits,
-                          shuffle=True,
-                          random_state=42)
+    train_metrics = ""
 
-    pca_step = ("pca", PCA(n_components=n_components)) if n_components else None
     numerical_features = list(set(X.columns.values) - set(nominal_features))
 
     search = GridSearchCV(
@@ -93,32 +83,23 @@ def logistic_regression(dataset_name, X, y, nominal_features, pca):
                 ("numerical", Pipeline([
                     ("numerical_imputer", IterativeImputer(max_iter=50)),
                     ("numerical_scaler", MinMaxScaler())
-                ] + ([pca_step] if pca_step else [])), numerical_features),
+                ]), numerical_features),
             ])),
             ("classifier", LogisticRegression(penalty="l2", solver="saga", max_iter=10000))
         ]),
         param_grid={"classifier__C": [2, 10]},
-        # param_grid={"classifier__C": [0.1, 2, 10, 100]},
         scoring="neg_log_loss",
         cv=RepeatedStratifiedKFold(n_splits=n_splits, n_repeats=n_repeats)
     )
 
-    if dataset_name == DatasetName.POSTTRAUMA.value:
-        for train_index, test_index in skf.split(X, y):
-            X_train, X_test = X.iloc[train_index], X.iloc[test_index]
-            y_train, y_test = y[train_index], y[test_index]
-
-            print(f"Log reg test fitting... ")
-            search.fit(X_train, y_train)
-
-            y_test_pred = search.predict(X_test)
-            y_test_pred_proba = search.predict_proba(X_test)[:, 1]
-
-            metrics_per_fold.append(
-                calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba))
-
-    elif dataset_name == DatasetName.CYBERSECURITY.value or dataset_name == DatasetName.LUNG_DISEASE.value:
+    # === Evaluation ===
+    if dataset_name == DatasetName.CYBERSECURITY.value or dataset_name == DatasetName.LUNG_DISEASE.value:
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    if (dataset_name == DatasetName.CYBERSECURITY.value or dataset_name == DatasetName.LUNG_DISEASE.value
+        or dataset_name == DatasetName.MIMIC_0.value or dataset_name == DatasetName.MIMIC_1.value
+        or dataset_name == DatasetName.MIMIC_2.value or dataset_name == DatasetName.MIMIC_3.value):
+
         search.fit(X_train, y_train)
 
         y_test_pred = search.predict(X_test)
@@ -127,40 +108,28 @@ def logistic_regression(dataset_name, X, y, nominal_features, pca):
         metrics_per_fold.append(
             calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba))
 
+        y_train_pred = search.predict(X_train)
+        y_train_pred_proba = search.predict_proba(X_train)[:, 1]
+
+        train_metrics = calc_metrics(y=y_train, y_pred=y_train_pred, y_pred_proba=y_train_pred_proba)
+
+        print(f"Feature set size: {len(search.best_estimator_.named_steps['classifier'].coef_[0])}")
+
     else:
         print(f"Unknown dataset {dataset_name}")
-
-    print(f"Log reg train fitting... ")
-    search.fit(X, y)
-    y_train_pred = search.predict(X)
-    y_train_pred_proba = search.predict_proba(X)[:, 1]
-
-    # Training metrics
-    train_metrics = calc_metrics(y=y, y_pred=y_train_pred, y_pred_proba=y_train_pred_proba)
+        return
 
     best_params = f"{search.best_params_}"
 
-    print(f"Feature set size: {len(search.best_estimator_.named_steps['classifier'].coef_[0])}")
-    print(f"Best hyperparameters: {best_params}")
-    print(f"Train metrics: {train_metrics}")
-    print(f"Test metrics per fold: {metrics_per_fold}")
-
-    return dataset_name, ml_method, emb_method, concatenation, best_params, pca_components, train_metrics, metrics_per_fold
+    return (dataset_name, ml_method, emb_method, concatenation, best_params, pca_components, train_metrics,
+            metrics_per_fold)
 
 
-def lr_rte(dataset_name, X, y, nominal_features, pca):
+def lr_rte(dataset_name, nominal_features, pca,
+           y=None, y_train=None, y_test=None,
+           X=None, X_train=None, X_test=None):
+
     y = pd.Series(y)
-
-    print(f"[INFO] Rows before NaN removal: X={len(X)}, y={len(y)}")
-    print(f"[INFO] NaNs in y before removal: {y.isna().sum()}")
-
-    valid_indices = ~y.isna()
-    X = X.loc[valid_indices]
-    y = y.loc[valid_indices]
-
-    print(f"[INFO] Rows after NaN removal: X={len(X)}, y={len(y)}")
-    print(f"[INFO] NaNs in y after removal: {y.isna().sum()}")
-
     if not np.issubdtype(y.dtype, np.number):
         print(f"Label encoding: {y.unique()}")
         le = LabelEncoder()
@@ -168,18 +137,19 @@ def lr_rte(dataset_name, X, y, nominal_features, pca):
     else:
         y = y.to_numpy()
 
-    dataset = dataset_name
-    config = DATASET_CONFIGS[dataset]
+    config = DATASET_CONFIGS[dataset_name]
     n_splits = config.splits
-    #n_components = config.pca if pca else None
+    n_components = config.pca if pca else None
     n_repeats = config.n_repeats
 
     ml_method = "logistic regression"
     emb_method = "RTE"
     concatenation = "no"
-    #pca_components = f"PCA ({n_components} components)" if n_components else "none"
+    pca_components = f"PCA ({n_components} components)" if n_components else "none"
     metrics_per_fold = []
-    skf = StratifiedKFold(n_splits=n_splits)
+    train_metrics = ""
+
+    numerical_features = list(set(X.columns.values) - set(nominal_features))
 
     search = GridSearchCV(
         estimator=Pipeline([
@@ -188,14 +158,14 @@ def lr_rte(dataset_name, X, y, nominal_features, pca):
                 ("nominal", Pipeline([
                     ("nominal_imputer", SimpleImputer(strategy="most_frequent")),
                     ("nominal_encoder", OneHotEncoder(handle_unknown="ignore", drop="if_binary")),
-                    ("debug_nominal", DebugTransformer(name="Nominal Debug"))
+                    #("debug_nominal", DebugTransformer(name="Nominal Debug"))
                 ]), nominal_features),
                 # Encode ordinal&numerical features with RTE
                 ("numerical", Pipeline([
                     ("numerical_imputer", IterativeImputer(max_iter=50)),
                     # ("debug_numerical", DebugTransformer(name="Numerical Debug"))
                     # ("embedding", RandomTreesEmbedding(random_state=42))
-                ]), list(set(X.columns.values) - set(nominal_features))),
+                ]), numerical_features),
             ])),
             # pca_step,
             ("embedding", RandomTreesEmbedding(random_state=42)),
@@ -210,24 +180,15 @@ def lr_rte(dataset_name, X, y, nominal_features, pca):
         scoring="neg_log_loss",
         cv=RepeatedStratifiedKFold(n_splits=n_splits, n_repeats=n_repeats, random_state=42)
     )
-    if dataset_name == DatasetName.POSTTRAUMA.value:
-        for train_index, test_index in skf.split(X, y):
-            X_train, X_test = X.iloc[train_index], X.iloc[test_index]
-            y_train, y_test = y[train_index], y[test_index]
 
-            print(f"Log Reg rte test fitting... ")
-
-            # Fit the model for each fold
-            search.fit(X_train, y_train)
-
-            y_test_pred = search.predict(X_test)
-            y_test_pred_proba = search.predict_proba(X_test)[:, 1]
-
-            metrics_per_fold.append(
-                calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba))
-
-    elif dataset_name == DatasetName.CYBERSECURITY.value or dataset_name == DatasetName.LUNG_DISEASE.value:
+    # === Evaluation ===
+    if dataset_name == DatasetName.CYBERSECURITY.value or dataset_name == DatasetName.LUNG_DISEASE.value:
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    if (dataset_name == DatasetName.CYBERSECURITY.value or dataset_name == DatasetName.LUNG_DISEASE.value
+        or dataset_name == DatasetName.MIMIC_0.value or dataset_name == DatasetName.MIMIC_1.value
+        or dataset_name == DatasetName.MIMIC_2.value or dataset_name == DatasetName.MIMIC_3.value):
+
         search.fit(X_train, y_train)
 
         y_test_pred = search.predict(X_test)
@@ -236,25 +197,21 @@ def lr_rte(dataset_name, X, y, nominal_features, pca):
         metrics_per_fold.append(
             calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba))
 
+        y_train_pred = search.predict(X_train)
+        y_train_pred_proba = search.predict_proba(X_train)[:, 1]
+
+        train_metrics = calc_metrics(y=y_train, y_pred=y_train_pred, y_pred_proba=y_train_pred_proba)
+
+        print(f"Feature set size: {len(search.best_estimator_.named_steps['classifier'].coef_[0])}")
+
     else:
         print(f"Unknown dataset {dataset_name}")
-
-    # Train the final model on the full dataset
-    print(f"Log reg rte train fitting... ")
-    search.fit(X, y)
-    y_train_pred = search.predict(X)
-    y_train_pred_proba = search.predict_proba(X)[:, 1]
-
-    # Training metrics
-    train_metrics = calc_metrics(y=y, y_pred=y_train_pred, y_pred_proba=y_train_pred_proba)
+        return
 
     best_params = f"{search.best_params_}"
-    print(f"Embedding size: {len(search.best_estimator_.named_steps['classifier'].coef_[0])}")
-    print(f"Best hyperparameters: {search.best_params_}")
-    print(f"Train metrics: {train_metrics}")
-    print(f"Test metrics per fold: {metrics_per_fold}")
 
-    return dataset, ml_method, emb_method, concatenation, best_params, train_metrics, metrics_per_fold
+    return (dataset_name, ml_method, emb_method, concatenation, best_params, pca_components, train_metrics,
+            metrics_per_fold)
 
 
 # n_components aus dem Datensatz nehmen (40 für Posttrauma (shape[1])
