@@ -22,7 +22,6 @@ def run_models_on_table_data():
     ]
     """
 
-
     # === LUNG DISEASE ===
     """
     dataset = DatasetName.LUNG_DISEASE.value
