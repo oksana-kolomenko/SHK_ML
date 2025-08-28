@@ -16,8 +16,8 @@ from run_setup import run_txt_emb
 from run_baseline import run_models_on_table_data
 
 if __name__ == '__main__':
-    # run_txt_emb()
-    run_models_on_table_data()
+    run_txt_emb()
+    # run_models_on_table_data()
     # MIMIC
     # 1. Create tasks
     # mimic_generate_tasks
