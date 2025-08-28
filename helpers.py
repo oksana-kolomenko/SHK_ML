@@ -52,14 +52,6 @@ def train(search, X_train, y_train, X_test, y_test):
 def logistic_regression(dataset_name, nominal_features,
                         y=None, y_train=None, y_test=None,
                         X=None, X_train=None, X_test=None):
-    # Target encoding
-    y = pd.Series(y)
-    if not np.issubdtype(y.dtype, np.number):
-        print(f"Label encoding: {y.unique()}")
-        le = LabelEncoder()
-        y = le.fit_transform(y)  # this returns a NumPy array
-    else:
-        y = y.to_numpy()
 
     config = DATASET_CONFIGS[dataset_name]
     n_splits = config.splits
@@ -68,10 +60,50 @@ def logistic_regression(dataset_name, nominal_features,
     ml_method, emb_method, concatenation = "logistic regression", "none", "no"
     pca_components = "none"
 
+    numerical_features = []
+
     metrics_per_fold = []
     train_metrics = ""
 
-    numerical_features = list(set(X.columns.values) - set(nominal_features))
+    if dataset_name == DatasetName.CYBERSECURITY.value or dataset_name == DatasetName.LUNG_DISEASE.value:
+        y = pd.Series(y)
+
+        if not np.issubdtype(y.dtype, np.number):
+            print(f"Label encoding: {y.unique()}")
+            le = LabelEncoder()
+            y = le.fit_transform(y)  # this returns a NumPy array
+        else:
+            y = y.to_numpy()
+
+        # define numerical features
+        numerical_features = list(set(X.columns.values) - set(nominal_features))
+        print(f"Numerical features: {numerical_features}")
+
+    elif (dataset_name == DatasetName.MIMIC_0.value or dataset_name == DatasetName.MIMIC_1.value
+          or dataset_name == DatasetName.MIMIC_2.value or dataset_name == DatasetName.MIMIC_3.value):
+        #######################
+        # prepare target data #
+        #######################
+        y_train = pd.Series(y_train)
+        y_test = pd.Series(y_test)
+
+        if not np.issubdtype(y_train.dtype, np.number):
+            print(f"Label encoding: {y_train.unique()}")
+            le = LabelEncoder()
+            y_train = le.fit_transform(y_train)  # this returns a NumPy array
+        else:
+            y_train = y_train.to_numpy()
+
+        if not np.issubdtype(y_test.dtype, np.number):
+            print(f"Label encoding: {y_test.unique()}")
+            le = LabelEncoder()
+            y_test = le.fit_transform(y_test)  # this returns a NumPy array
+        else:
+            y_test = y_test.to_numpy()
+
+        # define numerical features
+        numerical_features = list(set(X_train.columns.values) - set(nominal_features))
+        print(f"Numerical features: {numerical_features}")
 
     search = GridSearchCV(
         estimator=Pipeline([
