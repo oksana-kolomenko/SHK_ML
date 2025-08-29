@@ -1011,9 +1011,9 @@ def concat_hgbc_txt_emb(dataset_name, emb_method,
         non_text_columns.index(col)
         for col in nominal_features if col in non_text_columns
     ]
-    print(f"All columns length: {X_tabular.shape}")
-    print(f"Non-text columns length: {len(X_tabular[non_text_columns])}")
-    print(f"Non-text columns shape: {X_tabular[non_text_columns].shape}")
+    #print(f"All columns length: {X_tabular.shape}")
+    #print(f"Non-text columns length: {len(X_tabular[non_text_columns])}")
+    #print(f"Non-text columns shape: {X_tabular[non_text_columns].shape}")
 
     pca_components = f"PCA ({n_components} components)" \
         if pca else "none"
