@@ -64,8 +64,8 @@ def run_txt_emb():
     ]"""
 
     # === MIMIC ===
-    task = "task_1"
-    dataset = DatasetName.MIMIC_1.value
+    task = "task_2"
+    dataset = DatasetName.MIMIC_2.value
 
     X_train = load_features(f"mimic_data/X_train_{task}.csv")
     X_test = load_features(f"mimic_data/X_test_{task}.csv")
