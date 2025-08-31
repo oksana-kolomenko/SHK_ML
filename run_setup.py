@@ -169,9 +169,9 @@ def run_txt_emb():
 
         # GTE Models
         #"GTE-Small": feature_extractor_gte_small,
-        #"GTE-Base": feature_extractor_gte_base,
-        #"GTE-Base-EN-v1.5": feature_extractor_gte_base_en_v1_5,
-        "GTE-Large": feature_extractor_gte_large,
+        "GTE-Base": feature_extractor_gte_base,
+        "GTE-Base-EN-v1.5": feature_extractor_gte_base_en_v1_5,
+        #"GTE-Large": feature_extractor_gte_large,
 
         # GTR T5 Base
         #"GTR_T5_Base": feature_extractor_gtr_t5_base,
