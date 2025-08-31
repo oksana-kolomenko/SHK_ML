@@ -64,8 +64,8 @@ def run_txt_emb():
     ]"""
 
     # === MIMIC ===
-    task = "task_0"
-    dataset = DatasetName.MIMIC_0.value
+    task = "task_1"
+    dataset = DatasetName.MIMIC_1.value
 
     X_train = load_features(f"mimic_data/X_train_{task}.csv")
     X_test = load_features(f"mimic_data/X_test_{task}.csv")
@@ -147,19 +147,19 @@ def run_txt_emb():
         #"all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
 
         # Stella en 400m v5
-        #"Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
+        "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
 
         # Ember v1
         #"ember_v1": feature_extractor_ember_v1,
 
         # E5 Models
         #"E5-Small-V2": feature_extractor_e5_small_v2,
-        "E5-Base-V2": feature_extractor_e5_base_v2,
+        #"E5-Base-V2": feature_extractor_e5_base_v2,
         #"E5-Large-V2": feature_extractor_e5_large_v2,
 
         # BGE Models (done)
         #"BGE-Small-EN-v1.5": feature_extractor_bge_small_en_v1_5,
-        "BGE-Base-EN-v1.5": feature_extractor_bge_base_en_v1_5,
+        #"BGE-Base-EN-v1.5": feature_extractor_bge_base_en_v1_5,
         #"BGE-Large-EN-v1.5": feature_extractor_bge_large_en_v1_5,
 
         # GIST Models
