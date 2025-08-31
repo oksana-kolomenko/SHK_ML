@@ -1073,7 +1073,7 @@ def concat_hgbc_txt_emb(dataset_name, emb_method,
 
     metrics_per_fold.append(
         calc_metrics(y=y_test, y_pred=y_test_pred, y_pred_proba=y_test_pred_proba))
-    print(f"Combined feature size: {len(search.best_estimator_.named_steps['classifier'].coef_[0])}")
+
     # train metrics
     y_train_pred = search.predict(X_train)
     y_train_pred_proba = search.predict_proba(X_train)[:, 1]
