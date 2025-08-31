@@ -147,10 +147,10 @@ def run_txt_emb():
         #"all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
 
         # Stella en 400m v5
-        "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
+        #"Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
 
         # Ember v1
-        #"ember_v1": feature_extractor_ember_v1,
+        "ember_v1": feature_extractor_ember_v1,
 
         # E5 Models
         #"E5-Small-V2": feature_extractor_e5_small_v2,
