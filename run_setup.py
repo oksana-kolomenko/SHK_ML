@@ -147,10 +147,10 @@ def run_txt_emb():
         #"all_miniLM_L6_v2": feature_extractor_all_minilm_l6_v2,
 
         # Stella en 400m v5
-        "Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
+        #"Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
 
         # Ember v1
-        "ember_v1": feature_extractor_ember_v1,
+        #"ember_v1": feature_extractor_ember_v1,
 
         # E5 Models
         #"E5-Small-V2": feature_extractor_e5_small_v2,
@@ -165,13 +165,13 @@ def run_txt_emb():
         # GIST Models
         #"GIST-Small-Embedding-v0": feature_extractor_gist_small_embedding_v0,
         #"GIST-Embedding-v0": feature_extractor_gist_embedding_v0,
-        #"GIST-Large-Embedding-v0": feature_extractor_gist_large_embedding_v0,
+        "GIST-Large-Embedding-v0": feature_extractor_gist_large_embedding_v0,
 
         # GTE Models
         #"GTE-Small": feature_extractor_gte_small,
         #"GTE-Base": feature_extractor_gte_base,
         #"GTE-Base-EN-v1.5": feature_extractor_gte_base_en_v1_5,
-        #"GTE-Large": feature_extractor_gte_large,
+        "GTE-Large": feature_extractor_gte_large,
 
         # GTR T5 Base
         #"GTR_T5_Base": feature_extractor_gtr_t5_base,
