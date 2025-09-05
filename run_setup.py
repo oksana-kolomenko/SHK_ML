@@ -159,8 +159,8 @@ def run_txt_emb():
 
         # BGE Models (done)
         #"BGE-Small-EN-v1.5": feature_extractor_bge_small_en_v1_5,
-        "BGE-Base-EN-v1.5": feature_extractor_bge_base_en_v1_5,
-        #"BGE-Large-EN-v1.5": feature_extractor_bge_large_en_v1_5,
+        #"BGE-Base-EN-v1.5": feature_extractor_bge_base_en_v1_5,
+        "BGE-Large-EN-v1.5": feature_extractor_bge_large_en_v1_5,
 
         # GIST Models
         #"GIST-Small-Embedding-v0": feature_extractor_gist_small_embedding_v0,
