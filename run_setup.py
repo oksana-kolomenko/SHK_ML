@@ -115,13 +115,11 @@ def run_txt_emb():
 
         # all summaries, all features
         """
-
-        # all summaries, metr features
-        "conc2": {"X_train": X_train_metr,
-                  "X_test": X_test_metr,
+        "conc1": {"X_train": X_train,
+                  "X_test": X_test,
                   "train_summaries": train_summaries,
                   "test_summaries": test_summaries,
-                  "conc": "conc2",
+                  "conc": "conc1",
                   "pca": False,
                   "pca_str": ""},
 
@@ -134,11 +132,12 @@ def run_txt_emb():
                   "pca": False,
                   "pca_str": ""}
         """
-        "conc1": {"X_train": X_train,
-                  "X_test": X_test,
+        # all summaries, metr features
+        "conc2": {"X_train": X_train_metr,
+                  "X_test": X_test_metr,
                   "train_summaries": train_summaries,
                   "test_summaries": test_summaries,
-                  "conc": "conc1",
+                  "conc": "conc2",
                   "pca": False,
                   "pca_str": ""},
 
