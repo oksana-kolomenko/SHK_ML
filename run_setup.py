@@ -102,18 +102,19 @@ def run_txt_emb():
                       "test_summaries": test_summaries,
                       "conc": "conc2",
                       "pca": True,
-                      "pca_str": "pca_"},
+                      "pca_str": "pca_"},# nom summaries, metr features
+        "pca_conc3": {"X_train": X_train_metr,
+                      "X_test": X_test_metr,
+                      "train_summaries": train_nom_summaries,
+                      "test_summaries": test_nom_summaries,
+                      "conc": "conc3",
+                      "pca": True,
+                      "pca_str": "pca_"},                     
+                      
         """
 
         # all summaries, all features
         """
-        "conc1": {"X_train": X_train,
-                  "X_test": X_test,
-                  "train_summaries": train_summaries,
-                  "test_summaries": test_summaries,
-                  "conc": "conc1",
-                  "pca": False,
-                  "pca_str": ""},
 
         # all summaries, metr features
         "conc2": {"X_train": X_train_metr,
@@ -133,14 +134,13 @@ def run_txt_emb():
                   "pca": False,
                   "pca_str": ""}
         """
-        # nom summaries, metr features
-        "pca_conc3": {"X_train": X_train_metr,
-                      "X_test": X_test_metr,
-                      "train_summaries": train_nom_summaries,
-                      "test_summaries": test_nom_summaries,
-                      "conc": "conc3",
-                      "pca": True,
-                      "pca_str": "pca_"},
+        "conc1": {"X_train": X_train,
+                  "X_test": X_test,
+                  "train_summaries": train_summaries,
+                  "test_summaries": test_summaries,
+                  "conc": "conc1",
+                  "pca": False,
+                  "pca_str": ""},
 
     }
     text_feature = 'text'
