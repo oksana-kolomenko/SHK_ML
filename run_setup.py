@@ -64,8 +64,8 @@ def run_txt_emb():
     ]"""
 
     # === MIMIC ===
-    task = "task_0"
-    dataset = DatasetName.MIMIC_0.value
+    task = "task_1"
+    dataset = DatasetName.MIMIC_1.value
 
     X_train = load_features(f"mimic_data/X_train_{task}.csv")
     X_test = load_features(f"mimic_data/X_test_{task}.csv")
@@ -86,6 +86,7 @@ def run_txt_emb():
 
     methods = {
         # all summaries, all features
+        """
         "pca_conc1": {"X_train": X_train,
                       "X_test": X_test,
                       "train_summaries": train_summaries,
@@ -102,17 +103,10 @@ def run_txt_emb():
                       "conc": "conc2",
                       "pca": True,
                       "pca_str": "pca_"},
-
-        # nom summaries, metr features
-        "pca_conc3": {"X_train": X_train_metr,
-                      "X_test": X_test_metr,
-                      "train_summaries": train_nom_summaries,
-                      "test_summaries": test_nom_summaries,
-                      "conc": "conc3",
-                      "pca": True,
-                      "pca_str": "pca_"},
+        """
 
         # all summaries, all features
+        """
         "conc1": {"X_train": X_train,
                   "X_test": X_test,
                   "train_summaries": train_summaries,
@@ -138,6 +132,15 @@ def run_txt_emb():
                   "conc": "conc3",
                   "pca": False,
                   "pca_str": ""}
+        """
+        # nom summaries, metr features
+        "pca_conc3": {"X_train": X_train_metr,
+                      "X_test": X_test_metr,
+                      "train_summaries": train_nom_summaries,
+                      "test_summaries": test_nom_summaries,
+                      "conc": "conc3",
+                      "pca": True,
+                      "pca_str": "pca_"},
 
     }
     text_feature = 'text'
@@ -150,7 +153,7 @@ def run_txt_emb():
         #"Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
 
         # Ember v1
-        #"ember_v1": feature_extractor_ember_v1,
+        "ember_v1": feature_extractor_ember_v1,
 
         # E5 Models
         #"E5-Small-V2": feature_extractor_e5_small_v2,
@@ -160,7 +163,7 @@ def run_txt_emb():
         # BGE Models (done)
         #"BGE-Small-EN-v1.5": feature_extractor_bge_small_en_v1_5,
         #"BGE-Base-EN-v1.5": feature_extractor_bge_base_en_v1_5,
-        "BGE-Large-EN-v1.5": feature_extractor_bge_large_en_v1_5,
+        #"BGE-Large-EN-v1.5": feature_extractor_bge_large_en_v1_5,
 
         # GIST Models
         #"GIST-Small-Embedding-v0": feature_extractor_gist_small_embedding_v0,
