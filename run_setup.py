@@ -122,7 +122,16 @@ def run_txt_emb():
                   "conc": "conc1",
                   "pca": False,
                   "pca_str": ""},
-
+# all summaries, metr features
+        "conc2": {"X_train": X_train_metr,
+                  "X_test": X_test_metr,
+                  "train_summaries": train_summaries,
+                  "test_summaries": test_summaries,
+                  "conc": "conc2",
+                  "pca": False,
+                  "pca_str": ""},
+        
+        """
         # nom summaries, metr features
         "conc3": {"X_train": X_train_metr,
                   "X_test": X_test_metr,
@@ -131,15 +140,6 @@ def run_txt_emb():
                   "conc": "conc3",
                   "pca": False,
                   "pca_str": ""}
-        """
-        # all summaries, metr features
-        "conc2": {"X_train": X_train_metr,
-                  "X_test": X_test_metr,
-                  "train_summaries": train_summaries,
-                  "test_summaries": test_summaries,
-                  "conc": "conc2",
-                  "pca": False,
-                  "pca_str": ""},
 
     }
     text_feature = 'text'
