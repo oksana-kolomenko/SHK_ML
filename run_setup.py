@@ -64,8 +64,8 @@ def run_txt_emb():
     ]"""
 
     # === MIMIC ===
-    task = "task_1"
-    dataset = DatasetName.MIMIC_1.value
+    task = "task_0"
+    dataset = DatasetName.MIMIC_0.value
 
     X_train = load_features(f"mimic_data/X_train_{task}.csv")
     X_test = load_features(f"mimic_data/X_test_{task}.csv")
@@ -86,7 +86,6 @@ def run_txt_emb():
 
     methods = {
         # all summaries, all features
-        """
         "pca_conc1": {"X_train": X_train,
                       "X_test": X_test,
                       "train_summaries": train_summaries,
@@ -109,12 +108,9 @@ def run_txt_emb():
                       "test_summaries": test_nom_summaries,
                       "conc": "conc3",
                       "pca": True,
-                      "pca_str": "pca_"},                     
-                      
-        """
+                      "pca_str": "pca_"},
 
         # all summaries, all features
-        """
         "conc1": {"X_train": X_train,
                   "X_test": X_test,
                   "train_summaries": train_summaries,
@@ -122,7 +118,7 @@ def run_txt_emb():
                   "conc": "conc1",
                   "pca": False,
                   "pca_str": ""},
-# all summaries, metr features
+        # all summaries, metr features
         "conc2": {"X_train": X_train_metr,
                   "X_test": X_test_metr,
                   "train_summaries": train_summaries,
@@ -131,7 +127,7 @@ def run_txt_emb():
                   "pca": False,
                   "pca_str": ""},
         
-        """
+
         # nom summaries, metr features
         "conc3": {"X_train": X_train_metr,
                   "X_test": X_test_metr,
@@ -152,11 +148,11 @@ def run_txt_emb():
         #"Stella-EN-400M-v5": feature_extractor_stella_en_400M_v5,
 
         # Ember v1
-        "ember_v1": feature_extractor_ember_v1,
+        #"ember_v1": feature_extractor_ember_v1,
 
         # E5 Models
         #"E5-Small-V2": feature_extractor_e5_small_v2,
-        #"E5-Base-V2": feature_extractor_e5_base_v2,
+        "E5-Base-V2": feature_extractor_e5_base_v2,
         #"E5-Large-V2": feature_extractor_e5_large_v2,
 
         # BGE Models (done)
