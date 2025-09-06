@@ -64,8 +64,8 @@ def run_txt_emb():
     ]"""
 
     # === MIMIC ===
-    task = "task_0"
-    dataset = DatasetName.MIMIC_0.value
+    task = "task_1"
+    dataset = DatasetName.MIMIC_1.value
 
     X_train = load_features(f"mimic_data/X_train_{task}.csv")
     X_test = load_features(f"mimic_data/X_test_{task}.csv")
@@ -150,8 +150,8 @@ def run_txt_emb():
         #"ember_v1": feature_extractor_ember_v1,
 
         # E5 Models
-        #"E5-Small-V2": feature_extractor_e5_small_v2,
-        "E5-Base-V2": feature_extractor_e5_base_v2,
+        "E5-Small-V2": feature_extractor_e5_small_v2,
+        #"E5-Base-V2": feature_extractor_e5_base_v2,
         #"E5-Large-V2": feature_extractor_e5_large_v2,
 
         # BGE Models (done)
